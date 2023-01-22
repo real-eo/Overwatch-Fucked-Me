@@ -359,7 +359,6 @@ class ui:
                         self.placeholderMatrix[(a + b + max(a, 1)) - 1][i].configure(image=portrait)
                         counterPortraitList.append(portrait)
         else:
-            print(self.selectedCharacters)
             for c, character in enumerate(self.selectedCharacters):
                 characterPortrait = PhotoImage(file=f"sources/portraits/all/{self.characters[self.roleFrameDict[str(character.master)]][int(''.join([o for o in list(str(character)) if o.isnumeric()]))]}.png").subsample(3, 3)
                 self.characterPlaceholderList[c].configure(image=characterPortrait)
