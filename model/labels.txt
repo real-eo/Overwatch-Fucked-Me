@@ -1,0 +1,38 @@
+0 Ana
+1 Ashe
+2 Baptiste
+3 Bastion
+4 Brigitte
+5 Cassidy
+6 Doomfist
+7 Dva
+8 Echo
+9 Genji
+10 Hanzo
+11 Junker Queen
+12 Junkrat
+13 Kiriko
+14 Lucio
+15 Mei
+16 Mercy
+17 Moira
+18 Orisa
+19 Pharah
+20 Not selected
+21 Ramattra
+22 Reaper
+23 Reinhardt
+24 Roadhog
+25 Sigma
+26 Sojourn
+27 Soldier 76
+28 Sombra
+29 Symmetra
+30 Torbjorn
+31 Tracer
+32 Waiting
+33 Widowmaker
+34 Winston
+35 Wrecking Ball
+36 Zarya
+37 Zenyatta
