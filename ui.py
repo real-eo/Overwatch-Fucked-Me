@@ -305,10 +305,11 @@ class ui:
                 for i in returnedClasses:
                     if not i[0][i[0].find(' ') + 1:-1] == "Waiting" and not i[0][i[0].find(' ') + 1:-1] == "Not selected":
                         # print(f"Button: {self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][0]}", f"Role: {self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][1]}")
-                        self.selectedRoles[self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][1]].append(self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][0])
+                        # self.selectedRoles[self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][1]].append(self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][0])
+                        self.selectedCharacters.append(self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][0])
                     print(f"\"{i[0][i[0].find(' ') + 1:-1]}\"")
 
-                self.updateTeamComp()
+                self.updateTeamComp(aiRequest=True)
                 # threading.Thread(target=self.updateTeamComp, name="updateTeamComp-Thread").start()
 
                 self.ongoingKeybaordRequest = False
@@ -335,12 +336,13 @@ class ui:
         """
             
     # Processing
-    def updateTeamComp(self):
+    def updateTeamComp(self, aiRequest=False):
         global counterPortraitList, characterPortraitList
         
-        if not self.extendedLimits:
-            counterPortraitList = []
-            characterPortraitList = []
+        counterPortraitList = []
+        characterPortraitList = []
+        
+        if not self.extendedLimits and not aiRequest:
             for a, role in enumerate(self.selectedRoles):
                 for b, character in enumerate(role):
                     characterPortrait = PhotoImage(file=f"sources/portraits/{['tank', 'dps', 'support'][a]}/{self.characters[self.roleFrameDict[str(character.master)]][int(''.join([o for o in list(str(character)) if o.isnumeric()]))]}.png").subsample(3, 3)
@@ -356,6 +358,22 @@ class ui:
                         portrait = PhotoImage(file=f"sources/portraits/all/{counter}.png").subsample(6, 6)
                         self.placeholderMatrix[(a + b + max(a, 1)) - 1][i].configure(image=portrait)
                         counterPortraitList.append(portrait)
+        else:
+            print(self.selectedCharacters)
+            for c, character in enumerate(self.selectedCharacters):
+                characterPortrait = PhotoImage(file=f"sources/portraits/all/{self.characters[self.roleFrameDict[str(character.master)]][int(''.join([o for o in list(str(character)) if o.isnumeric()]))]}.png").subsample(3, 3)
+                self.characterPlaceholderList[c].configure(image=characterPortrait)
+                characterPortraitList.append(characterPortrait)
+
+                counterLists = []
+                
+                for counterRole in ["Tank", "DPS", "Support"]:
+                    counterLists.extend(jsonData.counters[self.characters[self.roleFrameDict[str(character.master)]][int("".join([o for o in list(str(character)) if o.isnumeric()]))]][counterRole].values())
+                
+                for i, counter in enumerate(counterLists):
+                    portrait = PhotoImage(file=f"sources/portraits/all/{counter}.png").subsample(6, 6)
+                    self.placeholderMatrix[c][i].configure(image=portrait)
+                    counterPortraitList.append(portrait)
         
     def animationFocus(self, event):
         if event.widget["state"] == NORMAL:
