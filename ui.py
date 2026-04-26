@@ -1,6 +1,7 @@
 from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, Button, PhotoImage, NORMAL, DISABLED, NE
 from resourceManager import prefer_local_resource, resource_path, ensure_configurable, IS_BUNDLED, IS_LOCAL 
 from configparser import ConfigParser
+from src.constants import DEBUG
 from src.parse import translate
 from pynput import keyboard
 from os import startfile
@@ -381,6 +382,8 @@ class ui:
             threading.Thread(target=captureImage, name="captureThread").start()
 
         def triggerDebug():
+            if not DEBUG:   return
+
             print("[¤] Keybinds:")
             for key, value in self.config.items("keybinds", raw=True):
                 print(f"[¤]     {key}: {value}")
