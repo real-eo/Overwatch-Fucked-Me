@@ -1,6 +1,9 @@
-from resourceManager import resource_path
+from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, Button, PhotoImage, NORMAL, DISABLED, NE
+from resourceManager import prefer_local_resource, resource_path, ensure_configurable, IS_BUNDLED, IS_LOCAL 
+from configparser import ConfigParser
+from src.parse import translate
 from pynput import keyboard
-from tkinter import *
+from os import startfile
 import recognize
 import threading
 import jsonData
@@ -42,6 +45,12 @@ class ui:
         self.characterHighlighted = ""
         self.characterHighlightedRectList = []
 
+        # Load config
+        self.configPath, self.configIsLocal = prefer_local_resource("config.ini")
+
+        self.config = ConfigParser()
+        self.config.read(self.configPath)
+
         # self.initateStop = False
 
         # self.root.bind("<Control-i>", captureImage)
@@ -52,27 +61,76 @@ class ui:
         self.root.mainloop()
 
 
-    # Initialize window
+    # Setup
     def initializeWindow(self):
-        self._frames_()
-        self._labels_()
-        self._buttons_()
+        self._menubar()
+        self._frames()
+        self._labels()
+        self._buttons()
         
         self.tank()
         self.dps()
         self.support()
 
 
-    # Closing
+    # Program control
     def onClose(self):
         print('[§] Stopping listener!')
         self.hk.stop()
         print("[$] Stopping root!")
         self.root.destroy()
 
+    # // def stopListener(self):
+    # //     # If the listener is running, stop it
+    # //     if hasattr(self, "hk"):
+    # //         self.hk.stop()
+
+    def popup(self, title: str = "Alert", geometry: str = "400x200") -> Toplevel:
+        # Create popup window
+        popup = Toplevel(self.root)
+
+        # Configure popup window
+        popup.resizable(False, False)                                                   # Prevent resizing to avoid layout issues
+        popup.transient(self.root)                                                      # Make always on top
+        popup.grab_set()                                                                # Make the popup modal
+
+        # Set passed parameters
+        popup.title(title)
+        popup.geometry(geometry)
+
+        return popup
 
     # UI elements
-    def _frames_(self):
+    def _menubar(self):
+        menubar = Menu(self.root)                                                       # Toolbar at the top of the window
+
+        # File 
+        fileMenu = Menu(menubar, tearoff=False)                                         # Dropdown menu when clicking on "File" in the toolbar
+
+        fileMenu.add_command(label="Exit", command=self.onClose)
+
+        # Edit 
+        editMenu = Menu(menubar, tearoff=False)                                         # Dropdown menu when clicking on "Edit" in the toolbar
+
+        editMenu.add_command(label="Edit counters.json", command=lambda: startfile(ensure_configurable("counters.json")))
+        
+        # Settings
+        settingsMenu = Menu(menubar, tearoff=False)                                     # Dropdown menu when clicking on "Settings" in the toolbar
+        
+        keybindsMenu = Menu(settingsMenu, tearoff=False)                                # Submenu for keybinds in the settings menu
+        keybindsMenu.add_command(label="Capture", command=lambda: self.promptNewKeybind("capture")) 
+        keybindsMenu.add_command(label="Stop Listener", command=lambda: self.promptNewKeybind("stop"))          # ? This is really just DEBUG button
+        keybindsMenu.add_command(label="Reset to default", command=lambda: self.resetKeybinds())
+        settingsMenu.add_cascade(label="Keybinds", menu=keybindsMenu)
+
+        # Add dropdowns to toolbar
+        menubar.add_cascade(label="File", menu=fileMenu)
+        menubar.add_cascade(label="Edit", menu=editMenu)
+        menubar.add_cascade(label="Settings", menu=settingsMenu)
+        
+        self.root.config(menu=menubar)
+
+    def _frames(self):
         # global recommendedCharacterFrameList, inputFrame, roleInfoFrame, tankFrame, dpsFrame, supportFrame
 
         self.recommendedCharacterFrameList = []
@@ -97,7 +155,7 @@ class ui:
         self.dpsFrame.place(x=225+10, y=250)
         self.supportFrame.place(x=600+5+10, y=250)    
 
-    def _labels_(self):
+    def _labels(self):
         # global self.roleIconList, self.placeholderMatrix, self.characterPlaceholderList, self.placeholderPortrait
         # global placeholderPortrait
 
@@ -132,7 +190,7 @@ class ui:
             iconLabel = Label(self.roleInfoFrame, image=self.roleIconList[x], bg="#3C3C3C", name=f"{i}IconLabel")
             iconLabel.place(x=([-5, -5+225+5, -5+600+10][x]), y=-7)
 
-    def _buttons_(self):
+    def _buttons(self):
         # global self.extendedLimitsButton
 
         self.extendedLimitsButton = Button(master=self.inputFrame, text="Extended Limits", name="extendedLimitsButton")
@@ -323,19 +381,41 @@ class ui:
             # self.hk.stop()
             print("[¤] Debug only!")
 
-
+        # Set up hotkeys
         self.hk = keyboard.GlobalHotKeys({
-                '<ctrl>+q': stopListener,
-                '<ctrl>+i': startRecognition})
+                self.config.get("keybinds", "stop"): stopListener,
+                self.config.get("keybinds", "capture"): startRecognition})
         
         self.hk.start()
-        """
-        with keyboard.GlobalHotKeys({
-                '<ctrl>+q': stopListener,
-                '<ctrl>+i': captureImage}) as self.hk:
-            self.hk.join()
-        """
-            
+
+    def updateKeybind(self, action: str, keybind: str):
+        # * Config file handling
+        # Check whether config is bundled or local
+        if not self.configIsLocal:
+            # Copy config to writable location
+            self.configPath = ensure_configurable("config.ini")
+
+            # And update local/bundled status
+            self.configIsLocal = IS_LOCAL
+
+            # Reload loaded config
+            # // self.config = ConfigParser()                                              # Unsure if needed
+            self.config.read(self.configPath)
+
+        
+        # * Update keybind
+        self.config.set("keybinds", action, keybind)
+
+
+        # * Cleanup
+        # Save config
+        with open(self.configPath, "w", encoding="utf-8") as configFile:
+            self.config.write(configFile)
+
+        # Restart listener
+        self.keyListener()
+
+
     # Processing
     def updateTeamComp(self, aiRequest=False):
         global counterPortraitList, characterPortraitList
@@ -392,6 +472,122 @@ class ui:
             except IndexError:
                 pass
 
+    def promptNewKeybind(self, action: str):
+        # Temporarily stop the listener to prevent triggering of keybinds during keybind editing
+        self.hk.stop()()
+
+        # Create popup window
+        popup = self.popup(title="Press new keybind", geometry="420x170")
+
+        # Variables
+        status = StringVar(value="Press your new keybind...")
+        recorded = {"value": None}
+        recorder = {"listener": None}
+        
+        # * UI elements
+        # Labels
+        Label(popup, text=f"Action: {action}").pack(pady=(12, 4))
+        Label(popup, textvariable=status).pack(pady=(0, 12))
+
+        # Buttons
+        confirmButton = Button(popup, text="Confirm", state=DISABLED)
+        resetButton = Button(popup, text="Reset")
+        cancelButton = Button(popup, text="Cancel")
+
+        confirmButton.pack(side="right", padx=(0, 12), pady=(0, 12))
+        resetButton.pack(side="right", padx=6, pady=(0, 12))
+        cancelButton.pack(side="right", padx=6, pady=(0, 12))
+
+        # * Process
+        # Variables
+        activeMods = set()
+
+        # Recording functions
+        def stopRecorder():
+            listener = recorder["listener"]
+            if listener is not None:
+                listener.stop()
+                recorder["listener"] = None
+
+        def startRecording():
+            # Just in case, clean up any existing data and listener from a previous run to ensure a clean state
+            stopRecorder()
+            activeMods.clear()
+            recorded["value"] = None
+            status.set("Press your new keybind...")
+            confirmButton.configure(state=DISABLED)
+
+            def onPress(key):
+                # Translate modifiers to a consistent format 
+                hotkey = translate.hotkey(key, activeMods)
+                if hotkey is None: return                                               # Don't record unsupported keys
+
+                # Update active modifiers set
+                recorded["value"] = hotkey
+                self.root.after(0, lambda: status.set(f"Recorded: {hotkey}"))           # Update status label with the recorded hotkey
+                self.root.after(0, lambda: confirmButton.configure(state=NORMAL))       # Enable confirm button once a valid hotkey is recorded
+
+                return False
+
+            def onRelease(key):
+                # Update active modifiers set on key release to ensure accurate recording of modifier combinations
+                if key in (keyboard.Key.ctrl_l, keyboard.Key.ctrl_r):       activeMods.discard("<ctrl>")
+                elif key in (keyboard.Key.alt_l, keyboard.Key.alt_r):       activeMods.discard("<alt>")
+                elif key in (keyboard.Key.shift_l, keyboard.Key.shift_r):   activeMods.discard("<shift>")
+
+            recorder["listener"] = keyboard.Listener(on_press=onPress, on_release=onRelease)
+            recorder["listener"].start()
+
+        # Button commands
+        def cancel():
+            stopRecorder()
+            popup.destroy()
+            self.keyListener()                                                          # Start listener again 
+
+        def confirm():
+            # Prevent confirming if no keybind was recorded
+            if not recorded["value"]:   return
+
+            # Stop recorder and update keybind
+            stopRecorder()
+            popup.destroy()
+            self.updateKeybind(action, recorded["value"])
+
+        def reset():
+            startRecording()
+
+        # Bindings
+        popup.protocol("WM_DELETE_WINDOW", cancel)                                      # On close, trigger cancel() to ensure proper listener handling
+        cancelButton.configure(command=cancel)                                          # Trigger cancel() when clicking the cancel button
+        confirmButton.configure(command=confirm)                                        # Trigger confirm() when clicking the confirm button
+        resetButton.configure(command=reset)                                            # Trigger reset() when clicking the reset button
+
+        # Start recording immediately
+        startRecording()
+
+    def resetKeybinds(self):
+        # No-Op if config is loaded from bundled resource
+        if not self.configIsLocal:  return
+
+        # Stop listener to prevent triggering of keybinds during reset process
+        self.hk.stop()
+
+        # Get default keybinds from bundled config
+        tempConfigPath = resource_path("config.ini")
+        tempConfig = ConfigParser()
+        tempConfig.read(tempConfigPath)
+
+        # Update keybinds
+        for action, keybind in tempConfig.items("keybinds", raw=True):
+            self.config.set("keybinds", action, keybind)
+        
+        # Save config
+        with open(self.configPath, "w", encoding="utf-8") as configFile: 
+            self.config.write(configFile)
+
+        # Restart listener
+        self.keyListener()
+        
 
 if __name__ == "__main__":
     print("[!] This file is not ment to be run!\n\n")

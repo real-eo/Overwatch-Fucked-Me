@@ -1,5 +1,5 @@
 from resourceManager import resource_path
-import json
+from json import loads
 
 
 if __name__ == "__main__":
@@ -11,4 +11,4 @@ else:
         jsonData = jsonFile.read()
 
     # Parse Json
-    counters = json.loads(jsonData)
+    counters = loads(jsonData)                                                          # json.loads()
