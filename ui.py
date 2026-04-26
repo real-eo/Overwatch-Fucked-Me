@@ -85,7 +85,7 @@ class ui:
     # //     if hasattr(self, "hk"):
     # //         self.hk.stop()
 
-    def popup(self, title: str = "Alert", geometry: str = "400x200") -> Toplevel:
+    def popup(self, title: str = "Alert", geometry: str = "300x200") -> Toplevel:
         # Create popup window
         popup = Toplevel(self.root)
 
@@ -119,9 +119,13 @@ class ui:
         
         keybindsMenu = Menu(settingsMenu, tearoff=False)                                # Submenu for keybinds in the settings menu
         keybindsMenu.add_command(label="Capture", command=lambda: self.promptNewKeybind("capture")) 
-        keybindsMenu.add_command(label="Stop Listener", command=lambda: self.promptNewKeybind("stop"))          # ? This is really just DEBUG button
+        keybindsMenu.add_command(label="Trigger debug", command=lambda: self.promptNewKeybind("debug"))          # ? This is really just DEBUG button
+        keybindsMenu.add_separator()
         keybindsMenu.add_command(label="Reset to default", command=lambda: self.resetKeybinds())
-        settingsMenu.add_cascade(label="Keybinds", menu=keybindsMenu)
+        
+        settingsMenu.add_cascade(label="Change keybinds...", menu=keybindsMenu)
+        settingsMenu.add_separator()
+        settingsMenu.add_command(label="Reset all settings", command=lambda: self.resetSettings())
 
         # Add dropdowns to toolbar
         menubar.add_cascade(label="File", menu=fileMenu)
@@ -376,16 +380,18 @@ class ui:
         def startRecognition():
             threading.Thread(target=captureImage, name="captureThread").start()
 
-        def stopListener():
-            # print('[§] Stopping listener!')
-            # self.hk.stop()
-            print("[¤] Debug only!")
+        def triggerDebug():
+            print("[¤] Keybinds:")
+            for key, value in self.config.items("keybinds", raw=True):
+                print(f"[¤]     {key}: {value}")
 
         # Set up hotkeys
         self.hk = keyboard.GlobalHotKeys({
-                self.config.get("keybinds", "stop"): stopListener,
-                self.config.get("keybinds", "capture"): startRecognition})
-        
+                self.config.get("keybinds", "capture"): startRecognition,
+                self.config.get("keybinds", "debug"): triggerDebug
+        })
+
+
         self.hk.start()
 
     def updateKeybind(self, action: str, keybind: str):
@@ -474,10 +480,10 @@ class ui:
 
     def promptNewKeybind(self, action: str):
         # Temporarily stop the listener to prevent triggering of keybinds during keybind editing
-        self.hk.stop()()
+        self.hk.stop()
 
         # Create popup window
-        popup = self.popup(title="Press new keybind", geometry="420x170")
+        popup = self.popup(title=f"Action: {action}", geometry="200x120")
 
         # Variables
         status = StringVar(value="Press your new keybind...")
@@ -486,8 +492,8 @@ class ui:
         
         # * UI elements
         # Labels
-        Label(popup, text=f"Action: {action}").pack(pady=(12, 4))
-        Label(popup, textvariable=status).pack(pady=(0, 12))
+        # // Label(popup, text=f"Action: {action}").pack(pady=(12, 4))
+        Label(popup, textvariable=status).pack(pady=(4, 12))
 
         # Buttons
         confirmButton = Button(popup, text="Confirm", state=DISABLED)
@@ -534,6 +540,7 @@ class ui:
                 if key in (keyboard.Key.ctrl_l, keyboard.Key.ctrl_r):       activeMods.discard("<ctrl>")
                 elif key in (keyboard.Key.alt_l, keyboard.Key.alt_r):       activeMods.discard("<alt>")
                 elif key in (keyboard.Key.shift_l, keyboard.Key.shift_r):   activeMods.discard("<shift>")
+                elif key in (keyboard.Key.tab):                             activeMods.discard("<tab>")
 
             recorder["listener"] = keyboard.Listener(on_press=onPress, on_release=onRelease)
             recorder["listener"].start()
@@ -566,7 +573,7 @@ class ui:
         startRecording()
 
     def resetKeybinds(self):
-        # No-Op if config is loaded from bundled resource
+        # No-op if config is loaded from bundled resource
         if not self.configIsLocal:  return
 
         # Stop listener to prevent triggering of keybinds during reset process
@@ -580,6 +587,30 @@ class ui:
         # Update keybinds
         for action, keybind in tempConfig.items("keybinds", raw=True):
             self.config.set("keybinds", action, keybind)
+        
+        # Save config
+        with open(self.configPath, "w", encoding="utf-8") as configFile: 
+            self.config.write(configFile)
+
+        # Restart listener
+        self.keyListener()
+
+    def resetSettings(self):
+        # No-op if config is loaded from bundled resource
+        if not self.configIsLocal:  return
+
+        # Stop listener to prevent triggering of keybinds during reset process
+        self.hk.stop()
+
+        # Get default settings from bundled config
+        tempConfigPath = resource_path("config.ini")
+        tempConfig = ConfigParser()
+        tempConfig.read(tempConfigPath)
+
+        # Update settings
+        for section in tempConfig.sections():
+            for setting, value in tempConfig.items(section, raw=True):
+                self.config.set(section, setting, value)
         
         # Save config
         with open(self.configPath, "w", encoding="utf-8") as configFile: 
