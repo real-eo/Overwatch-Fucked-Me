@@ -1,4 +1,4 @@
-> [!WARNING]
+> [!CAUTION]
 > ## OUTDATED!
 > The current release (v0.1.1) is outdated as of 2023!
 
