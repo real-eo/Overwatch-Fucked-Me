@@ -1,12 +1,15 @@
 from keras.models import load_model
 from PIL import Image, ImageGrab, ImageOps
+from resourceManager import resource_path, writable_path
 import numpy as np
+import os
+
 
 
 
 # * Private functions
-def _crop_image(img, dx, dy):
-    w, h = img.size
+def _crop_image(img: Image.Image, dx: int, dy: int):
+    _, h = img.size                                                                     # Ignore the width since it's currently unused during cropping 
 
     for i in range(1, int(h-h%dy+1), int(dy)):
         box = (
@@ -15,21 +18,21 @@ def _crop_image(img, dx, dy):
             dx, 
             i+dy + (2 * int((i-1)/dy))
         )
-        img.crop(box).save(f"out/state/e{int((i-1)/dy)}.png")
+        img.crop(box).save(writable_path("out", "state", f"e{int((i-1)/dy)}.png"))
 
 
 def _determine_leaderboard_x1() -> int:
     # * Constants
     # List of X coordinates where the white bar starts at the different upgrade levels  
     WHITE_BAR_STARTS_AT_X = (
-        320,                                                                            # ? X coordinate of the left edge at 0 upgrades
-        300,                                                                            # ? X coordinate of the left edge at 1 upgrade
-        270                                                                             # ? X coordinate of the left edge at 2 upgrades
+        320,                                                                            # X coordinate of the left edge at 0 upgrades
+        300,                                                                            # X coordinate of the left edge at 1 upgrade
+        270                                                                             # X coordinate of the left edge at 2 upgrades
     )
     
     # Region of the white bar at the top of your own team's leaderboard
     WHITE_BAR_REGION = (WHITE_BAR_STARTS_AT_X[2], 160, 665, 190)                        # ? We do max upgrades for x1 to be able to check all upgrade levels
-    WHITE_BAR_PIXEL_COLOR = (215, 219, 224)                                             # ? The color of the white bar pixels
+    WHITE_BAR_PIXEL_COLOR = (215, 219, 224)                                             # The color of the white bar pixels
 
 
     # * Process
@@ -88,20 +91,23 @@ def capture_image():
     # * 3) Grab screenshot based on the number of upgrades and team size
     # // region = (310, 610, 1160, 920)
     region = (leaderboardX1, 595, 1100, 925)
-    img = ImageGrab.grab(region)    
+    enemyLeaderboardImage = ImageGrab.grab(region)    
 
     print("[§] Image captured")
+
+    # Create output directory if it doesn't exist
+    os.makedirs(writable_path("out", "state"), exist_ok=True)                           # ! NO STORED IMAGE READING CAN HAPPEN BEFORE THIS
     
 
     # * 4) Split image into one image per enemy and save them
     # Character image size is: 64x64
     # Role icon image size is: 27x64
     # Border size is: 2x2
-    _crop_image(img, 93, 64)
+    _crop_image(enemyLeaderboardImage, 93, 64)
 
 
     # * 5) Save full leaderboard
-    img.save("out/state/enemyLeaderboard.png")
+    enemyLeaderboardImage.save(writable_path("out", "state", "enemyLeaderboard.png"))
     
     return 0
  
@@ -109,8 +115,8 @@ def capture_image():
 def recognize():
     np.set_printoptions(suppress=True)
 
-    model = load_model('model/keras_model.h5', compile=False)
-    class_names = open('model/labels.txt', 'r').readlines()
+    model = load_model(resource_path("model", "keras_model.h5"), compile=False)
+    class_names = open(resource_path("model", "labels.txt"), 'r').readlines()
 
     data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
     size = (224, 224)
@@ -118,7 +124,7 @@ def recognize():
     classesReturned = []
 
     for i in range(5):
-        image = Image.open(f'out/state/e{i}.png').convert('RGB')
+        image = Image.open(writable_path("out", "state", f"e{i}.png")).convert('RGB')
 
         image = ImageOps.fit(image, size, Image.Resampling.LANCZOS)
 
