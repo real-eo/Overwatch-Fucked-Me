@@ -1,7 +1,6 @@
 from keras.models import load_model
 from PIL import Image, ImageGrab, ImageOps
 import numpy as np
-from torch import ge
 
 
 
@@ -16,7 +15,7 @@ def _crop_image(img, dx, dy):
             dx, 
             i+dy + (2 * int((i-1)/dy))
         )
-        img.crop(box).save(f"out/ai/e{int((i-1)/dy)}.png")
+        img.crop(box).save(f"out/state/e{int((i-1)/dy)}.png")
 
 
 def _determine_leaderboard_x1() -> int:
@@ -102,7 +101,7 @@ def capture_image():
 
 
     # * 5) Save full leaderboard
-    img.save("out/ai/enemyLeaderboard.png")
+    img.save("out/state/enemyLeaderboard.png")
     
     return 0
  
@@ -119,7 +118,7 @@ def recognize():
     classesReturned = []
 
     for i in range(5):
-        image = Image.open(f'out/ai/e{i}.png').convert('RGB')
+        image = Image.open(f'out/state/e{i}.png').convert('RGB')
 
         image = ImageOps.fit(image, size, Image.Resampling.LANCZOS)
 
