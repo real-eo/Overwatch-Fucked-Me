@@ -540,7 +540,7 @@ class ui:
                 if key in (keyboard.Key.ctrl_l, keyboard.Key.ctrl_r):       activeMods.discard("<ctrl>")
                 elif key in (keyboard.Key.alt_l, keyboard.Key.alt_r):       activeMods.discard("<alt>")
                 elif key in (keyboard.Key.shift_l, keyboard.Key.shift_r):   activeMods.discard("<shift>")
-                elif key in (keyboard.Key.tab):                             activeMods.discard("<tab>")
+                # elif key in (keyboard.Key.tab):                             activeMods.discard("<tab>")
 
             recorder["listener"] = keyboard.Listener(on_press=onPress, on_release=onRelease)
             recorder["listener"].start()
