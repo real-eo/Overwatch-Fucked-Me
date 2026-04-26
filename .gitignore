@@ -1,0 +1,15 @@
+# Build
+build/
+dist/
+main.spec
+
+# VS Code
+.vscode/
+__pycache__/
+
+# Development
+.other/
+.saves/
+
+# Runtime
+out/ai/*
