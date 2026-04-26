@@ -9,7 +9,7 @@ def hotkey(key: keyboard.Key, activeMods: set):
         keyboard.Key.alt_r: "<alt>",
         keyboard.Key.shift_l: "<shift>",
         keyboard.Key.shift_r: "<shift>",
-        keyboard.Key.tab: "<tab>",
+        # ! keyboard.Key.tab: "<tab>",
     }
 
     # Check if the key is a modifier key and update activeMods accordingly
@@ -30,7 +30,7 @@ def hotkey(key: keyboard.Key, activeMods: set):
         elif vk is not None and 48 <= vk <= 57:                 base = chr(vk)
         elif key.char:
             ch = key.char
-            
+
             # Ctrl+letter sometimes arrives as ASCII control char
             if ord(ch) < 32 and "<ctrl>" in activeMods:         base = chr(ord(ch) + 96)
             else:                                               base = ch.lower()
@@ -41,6 +41,6 @@ def hotkey(key: keyboard.Key, activeMods: set):
 
 
     # Order modifiers in a consistent way
-    orderedMods = [mod for mod in ("<ctrl>", "<alt>", "<shift>", "<tab>") if mod in activeMods]
+    orderedMods = [mod for mod in ("<ctrl>", "<alt>", "<shift>") if mod in activeMods]  # ! "<tab>"
 
     return "+".join(orderedMods + [base]) if orderedMods else base
