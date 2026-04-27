@@ -1,6 +1,6 @@
 output = "{{"
 
-with open("src/importCounters/importCounters.txt", "r") as countersFile:
+with open("src/import counters/import counters.txt", "r") as countersFile:
     counters = countersFile.read()
 
 characters = {"Ana": 2, "Ashe": 1, "Baptiste": 2, "Bastion": 1, "Brigitte": 2, "Cassidy": 1, "D.Va": 0, "Doomfist": 0, "Echo": 1, "Genji": 1, "Hanzo": 1, "Kiriko": 0, "Junker Queen": 0, "Junkrat": 1, "Lucio": 2, "Mei": 1, "Mercy": 2, "Moira": 2, "Orisa": 0, "Pharah": 1, "Ramattra": 0, "Reaper": 1, "Reinhardt": 0, "Roadhog": 0, "Sigma": 0, "Sojourn": 1, "Soldier: 76": 1, "Sombra": 1, "Symmetra": 1, "Torbjorn": 1, "Tracer": 1, "Widowmaker": 1, "Winston": 0, "Wrecking Ball": 0, "Zarya": 0, "Zenyatta": 2}

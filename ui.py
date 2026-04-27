@@ -113,7 +113,9 @@ class ui:
         # Edit 
         editMenu = Menu(menubar, tearoff=False)                                         # Dropdown menu when clicking on "Edit" in the toolbar
 
-        editMenu.add_command(label="Edit counters.json", command=lambda: startfile(ensure_configurable("counters.json")))
+        editMenu.add_command(label="Edit counters.json", command=self.updateCounters)
+        editMenu.add_separator()
+        editMenu.add_command(label="Reload counters", command=self.reloadCounters)
         
         # Settings
         settingsMenu = Menu(menubar, tearoff=False)                                     # Dropdown menu when clicking on "Settings" in the toolbar
@@ -408,7 +410,6 @@ class ui:
             self.configIsLocal = IS_LOCAL
 
             # Reload loaded config
-            # // self.config = ConfigParser()                                              # Unsure if needed
             self.config.read(self.configPath)
 
         
@@ -423,6 +424,17 @@ class ui:
 
         # Restart listener
         self.keyListener()
+
+    def updateCounters(self):
+        # Open counters.json in default editor
+        startfile(ensure_configurable("counters.json"))
+
+        # Prompt a popup to know when the user is done editing 
+        popup = self.popup(title="Editing counters.json", geometry="200x110")
+
+        Label(popup, text="After you are done editing, click \nthe button below to refresh \nthe counters in the app.").pack(pady=(8, 6))
+        Button(popup, text="Update counters", command=lambda: [popup.destroy(), self.reloadCounters()]).pack(pady=(0, 8))
+
 
 
     # Processing
@@ -496,16 +508,16 @@ class ui:
         # * UI elements
         # Labels
         # // Label(popup, text=f"Action: {action}").pack(pady=(12, 4))
-        Label(popup, textvariable=status).pack(pady=(4, 12))
+        Label(popup, textvariable=status).pack(pady=(8, 4))
 
         # Buttons
         confirmButton = Button(popup, text="Confirm", state=DISABLED)
         resetButton = Button(popup, text="Reset")
         cancelButton = Button(popup, text="Cancel")
 
-        confirmButton.pack(side="right", padx=(0, 12), pady=(0, 12))
-        resetButton.pack(side="right", padx=6, pady=(0, 12))
-        cancelButton.pack(side="right", padx=6, pady=(0, 12))
+        confirmButton.pack(side="right", padx=(0, 8), pady=(0, 8))
+        resetButton.pack(side="right", padx=6, pady=(0, 8))
+        cancelButton.pack(side="right", padx=6, pady=(0, 8))
 
         # * Process
         # Variables
@@ -622,6 +634,13 @@ class ui:
         # Restart listener
         self.keyListener()
         
+    def reloadCounters(self):
+        # Reload jsonData to update counters with the new data
+        jsonData.load()
+
+        # Update the team comp display to reflect any changes in counters
+        self.updateTeamComp()
+
 
 if __name__ == "__main__":
     print("[!] This file is not ment to be run!\n\n")

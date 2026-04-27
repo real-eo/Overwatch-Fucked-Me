@@ -10,8 +10,12 @@ __pycache__/
 # Development
 .other/
 .saves/
+
+# Externals
 Overwatch DataTool.lnk
+Overwatch DataTool commands.txt
 Overwatch leaderboard-portrait dataset.lnk
 
-# Runtime
+# Generated
 out/state/*
+out/imported/*

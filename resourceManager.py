@@ -8,6 +8,8 @@ import os
 # prefer_local_resource() 
 IS_LOCAL    = True
 IS_BUNDLED  = False
+PATH        = 0
+STATE       = 1
 
 
 # * Functions
