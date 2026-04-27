@@ -1,5 +1,5 @@
 try:                from resolve                    import Path, shortcut
-except ImportError: from src.extract_heros.resolve  import Path, shortcut
+except ImportError: from src.extractHeros.resolve  import Path, shortcut
 from PIL import Image
 import os
 
