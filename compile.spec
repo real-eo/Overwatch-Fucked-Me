@@ -50,7 +50,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='Overwatch Fucked Me',
+    name='Overwatch-Fucked-Me',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
