@@ -537,9 +537,8 @@
 	},
 	"Zenyatta": {
 		"Tank": {
-			"0": "Kiriko",
-			"1": "Sigma",
-			"2": "Dva"
+			"0": "Sigma",
+			"1": "Dva"
 		},
 		"DPS": {
 			"0": "Widowmaker",
@@ -553,7 +552,7 @@
 			"8": "Reaper"
 		},
 		"Support": {
-			
+			"0": "Kiriko"
 		}
 	},
 	"Brigitte": {

@@ -1,6 +1,6 @@
-from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, Button, PhotoImage, NORMAL, DISABLED, NE
 from resourceManager import prefer_local_resource, resource_path, ensure_configurable, IS_BUNDLED, IS_LOCAL 
-from src.constants import DEBUG, CHARACTERS
+from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, Button, PhotoImage, NORMAL, DISABLED, NE
+from src.constants import DEBUG, CHARACTERS, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT
 from configparser import ConfigParser
 from src.parse import translate
 from pynput import keyboard
@@ -11,10 +11,82 @@ import jsonData
 
 
 class ui:
+    class Layout:
+        # * Consts
+        # Padding
+        ROLE_FRAME_SEPERATOR_PADDING: int = 5
+        WINDOW_PADDING: int = 10
+        
+        # Sizes
+        CHARACTER_BUTTON_SIZE: int = 75
+
+        # Character grid
+        GRID: dict[str, dict[int, int]] = {                                             # Number of buttons in each row
+            # Tank
+            ROLE_TANK: {                                                               
+                0: 3,                                                                       
+                1: 3,
+                2: 3,
+                3: 3,
+                4: 2
+            },
+
+            # DPS
+            ROLE_DPS: {                                                                  
+                0: 5,                                                                       
+                1: 5,
+                2: 5,
+                3: 5,
+                4: 3
+            },
+
+            # Support
+            ROLE_SUPPORT: {
+                0: 3,                                                                       
+                1: 3,
+                2: 3,
+                3: 3,
+                4: 2
+            }
+        }
+
+        # * Constexprs
+        # Role button rows
+        TANK_BUTTON_ROWS: int = len(GRID[ROLE_TANK])
+        DPS_BUTTON_ROWS: int = len(GRID[ROLE_DPS])
+        SUPPORT_BUTTON_ROWS: int = len(GRID[ROLE_SUPPORT])
+
+        # Role button columns
+        TANK_BUTTON_COLUMNS: int = max(GRID[ROLE_TANK].values())
+        DPS_BUTTON_COLUMNS: int = max(GRID[ROLE_DPS].values())
+        SUPPORT_BUTTON_COLUMNS: int = max(GRID[ROLE_SUPPORT].values())
+
+        # Max button rows
+        CHARACTER_BUTTON_ROWS: int = max((
+            TANK_BUTTON_ROWS,
+            DPS_BUTTON_ROWS,
+            SUPPORT_BUTTON_ROWS
+        ))
+
+        # Frame dimensions
+        TANK_FRAME_WIDTH: int = TANK_BUTTON_COLUMNS * CHARACTER_BUTTON_SIZE             # ? Amount of columns * size of one button
+        DPS_FRAME_WIDTH: int = DPS_BUTTON_COLUMNS * CHARACTER_BUTTON_SIZE               # ? Amount of columns * size of one button
+        SUPPORT_FRAME_WIDTH: int = SUPPORT_BUTTON_COLUMNS * CHARACTER_BUTTON_SIZE       # ? Amount of columns * size of one button
+
+        ROLE_FRAMES_HEIGHT: int = CHARACTER_BUTTON_ROWS * CHARACTER_BUTTON_SIZE         # ? Amount of rows * size of one button
+
+        # Frame positions
+        TANK_FRAME_X: int = 0 + WINDOW_PADDING                                                      # 0                     + window_padding
+        DPS_FRAME_X: int = (TANK_FRAME_X + TANK_FRAME_WIDTH) + ROLE_FRAME_SEPERATOR_PADDING         # 255 +   role_padding  + window_padding
+        SUPPORT_FRAME_X: int = (DPS_FRAME_X + DPS_FRAME_WIDTH) + ROLE_FRAME_SEPERATOR_PADDING       # 600 + 2*role_padding  + window_padding
+
+        ROLE_FRAMES_Y: int = 250                                                        # Kinda arbitrary, but it works
+
+
     def __init__(self):
         self.root = Tk()
 
-        self.root.geometry("850x550")
+        self.root.geometry("850x625")
         self.root.title("Overwatch Fucked Me")
         self.root.configure(background="#3C3C3C")
         
@@ -23,8 +95,8 @@ class ui:
         self.buttonList = []
 
         self.selectedCharacters = []
-        self.selectedRoles = [[], [], []]
-        self.roleFrameDict = {".tankFrame": 0, ".dpsFrame": 1, ".supportFrame": 2}
+        self.selectedRoles = {ROLE_TANK: [], ROLE_DPS: [], ROLE_SUPPORT: []}
+        self.roleFrameDict = {".tankFrame": ROLE_TANK, ".dpsFrame": ROLE_DPS, ".supportFrame": ROLE_SUPPORT}
         
         self.activeCounters = {}
 
@@ -64,9 +136,6 @@ class ui:
         self._labels()
         self._buttons()
         
-        # Character selection 
-        self.BUTTON_SPACING = 75
-
         self.tank()
         self.dps()
         self.support()
@@ -79,10 +148,6 @@ class ui:
         print("[$] Stopping root!")
         self.root.destroy()
 
-    # // def stopListener(self):
-    # //     # If the listener is running, stop it
-    # //     if hasattr(self, "hk"):
-    # //         self.hk.stop()
 
     def popup(self, title: str = "Alert", geometry: str = "300x200") -> Toplevel:
         # Create popup window
@@ -136,34 +201,30 @@ class ui:
         self.root.config(menu=menubar)
 
     def _frames(self):
-        # global recommendedCharacterFrameList, inputFrame, roleInfoFrame, tankFrame, dpsFrame, supportFrame
-
         self.recommendedCharacterFrameList = []
 
+        # Character portraits
         for i in range(5):
             characterFrame = Frame(master=self.root, height=125+50, width=(830/5), background="#3C3C3C", name=f"characterFrame{i}")
             characterFrame.place(x=((830/5)*i + (5*i)), y=0)
             self.recommendedCharacterFrameList.append(characterFrame)
 
-
+        # Character buttons
         self.inputFrame = Frame(master=self.root, height=35, width=850, background="#3C3C3C", name="inputFrame")
         self.roleInfoFrame = Frame(master=self.root, height=35, width=850, background="#3C3C3C", name="roleInfoFrame")
 
-        self.tankFrame = Frame(master=self.root, height=300, width=225, background="#3C3C3C", name="tankFrame")
-        self.dpsFrame = Frame(master=self.root, height=300, width=375 + 5, background="#3C3C3C", name="dpsFrame")
-        self.supportFrame = Frame(master=self.root, height=300, width=225, background="#3C3C3C", name="supportFrame")
+        self.tankFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.TANK_FRAME_WIDTH, background="#3C3C3C", name="tankFrame")
+        self.dpsFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.DPS_FRAME_WIDTH, background="#3C3C3C", name="dpsFrame")
+        self.supportFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.SUPPORT_FRAME_WIDTH, background="#3C3C3C", name="supportFrame")
 
         self.inputFrame.place(x=0, y=178)
-        self.roleInfoFrame.place(x=0+10, y=215)
+        self.roleInfoFrame.place(x=0 + self.Layout.WINDOW_PADDING, y=215)
 
-        self.tankFrame.place(x=0+10, y=250)
-        self.dpsFrame.place(x=225+10, y=250)
-        self.supportFrame.place(x=600+5+10, y=250)    
+        self.tankFrame.place(   x=self.Layout.TANK_FRAME_X,     y=self.Layout.ROLE_FRAMES_Y)
+        self.dpsFrame.place(    x=self.Layout.DPS_FRAME_X,      y=self.Layout.ROLE_FRAMES_Y)
+        self.supportFrame.place(x=self.Layout.SUPPORT_FRAME_X,  y=self.Layout.ROLE_FRAMES_Y)    
 
     def _labels(self):
-        # global self.roleIconList, self.placeholderMatrix, self.characterPlaceholderList, self.placeholderPortrait
-        # global placeholderPortrait
-
         self.placeholderMatrix = []
         self.characterPlaceholderList = []
 
@@ -179,15 +240,10 @@ class ui:
 
             for y in range(2):
                 for x in range(7):
-                    # f"#{str(hex(int('101010', 16) * max(x+y+a, 1)))[2:]}"
-                    # f"#{str(hex(int('24', 16) * (x + 1)))[2:]}{str(hex(int('7F', 16) * (y + 1)))[2:]}{str(hex(int('33', 16) * (a + 1)))[2:]}"
                     counterPlaceholder = Label(b, height=(125/3), width=(830/5/7), image=placeholderPortrait, bg="#444444", name=f"placeholder@{a}-{x}-{y}Label")
                     counterPlaceholder.place(x=(((830/5/7) * x)), y=((125 / 3) * (y + 1) + 50))
                     placeholderList.append(counterPlaceholder)
             self.placeholderMatrix.append(placeholderList)
-
-        # selectedCharacterPlaceholder = Label(b, height=(125/3) + 50, width=(830/10), image=self.placeholderPortrait, bg=f'#3C3C3C', name=f"placeholderLabel{a}")
-        # selectedCharacterPlaceholder.place(x=(0), y=(0))
 
         self.roleIconList = [PhotoImage(file=resource_path("res", "icons", "role", f"{i}Icon.png")).subsample(4, 4) for i in ['tank', 'dps', 'support']]
 
@@ -209,112 +265,78 @@ class ui:
 
     # Select characters
     def tank(self):
-        # Constants
-        GRID = {                                                                        # Number of buttons in each row
-            0: 3,                                                                       
-            1: 3,
-            2: 3,
-            3: 3,
-            4: 2
-        }
-
-        MAX_IN_ROW = max(GRID.values())
-        
         tankButtonList = []
-        self.tankPortraitList = [PhotoImage(file=resource_path("res", "portraits", "tank", f"{self.characters[0][x]}.png")).subsample(4, 4) for x, i in enumerate(self.characters[0])]
+        self.tankPortraitList = [PhotoImage(file=resource_path("res", "portraits", "tank", f"{CHARACTERS[ROLE_TANK][i]}.png")).subsample(4, 4) for i, _ in enumerate(CHARACTERS[ROLE_TANK])]
 
         i = 0
-        for y in GRID:
-            for x in range(GRID[y]):
+        for y in self.Layout.GRID[ROLE_TANK]:
+            for x in range(self.Layout.GRID[ROLE_TANK][y]):
                 tankButton = Button(self.tankFrame, image=self.tankPortraitList[i], name=f"tankButton{i}")
                 tankButton.place(
                     x=(
-                        (x * self.BUTTON_SPACING) 
-                        + ((self.BUTTON_SPACING/2) * (MAX_IN_ROW - GRID[y]))
+                        (x * self.Layout.CHARACTER_BUTTON_SIZE) 
+                        + ((self.Layout.CHARACTER_BUTTON_SIZE/2) * (self.Layout.TANK_BUTTON_COLUMNS - self.Layout.GRID[ROLE_TANK][y]))
                     ), 
-                    y=(y * self.BUTTON_SPACING)
+                    y=(y * self.Layout.CHARACTER_BUTTON_SIZE)
                 )
 
                 tankButton.bind("<Button>", self.mouseButtonCharacters)
                 tankButton.bind("<Enter>", self.animationFocus)
                 tankButton.bind("<Leave>", self.animationDefocus)
 
-                self.characterButtonsDictionary[self.characters[0][i]] = [tankButton, 0]
+                self.characterButtonsDictionary[CHARACTERS[ROLE_TANK][i]] = [tankButton, 0]
                 tankButtonList.append(tankButton)
                 i += 1
 
         self.buttonList.append(tankButtonList)
 
     def dps(self):
-        # Constants
-        GRID = {                                                                        # Number of buttons in each row
-            0: 5,                                                                       
-            1: 5,
-            2: 5,
-            3: 5,
-            4: 3
-        }
-
-        MAX_IN_ROW = max(GRID.values())
-
-
         dpsButtonList = []
-        self.dpsPortraitList = [PhotoImage(file=resource_path("res", "portraits", "dps", f"{self.characters[1][x]}.png")).subsample(4, 4) for x, i in enumerate(self.characters[1])]
+        self.dpsPortraitList = [PhotoImage(file=resource_path("res", "portraits", "dps", f"{CHARACTERS[ROLE_DPS][i]}.png")).subsample(4, 4) for i, _ in enumerate(CHARACTERS[ROLE_DPS])]
 
         i = 0
-        for y in GRID:
-            for x in range(GRID[y]):
+        for y in self.Layout.GRID[ROLE_DPS]:
+            for x in range(self.Layout.GRID[ROLE_DPS][y]):
                 dpsButton = Button(self.dpsFrame, image=self.dpsPortraitList[i], name=f"dpsButton{i}")
                 dpsButton.place(
                     x=(
-                        (x * self.BUTTON_SPACING) 
-                        + ((self.BUTTON_SPACING/2) * (MAX_IN_ROW - GRID[y]))
+                        (x * self.Layout.CHARACTER_BUTTON_SIZE) 
+                        + ((self.Layout.CHARACTER_BUTTON_SIZE/2) * (self.Layout.DPS_BUTTON_COLUMNS - self.Layout.GRID[ROLE_DPS][y]))
                     ), 
-                    y=(y * self.BUTTON_SPACING)
+                    y=(y * self.Layout.CHARACTER_BUTTON_SIZE)
                 )
 
                 dpsButton.bind("<Button>", self.mouseButtonCharacters)
                 dpsButton.bind("<Enter>", self.animationFocus)
                 dpsButton.bind("<Leave>", self.animationDefocus)
 
-                self.characterButtonsDictionary[self.characters[1][i]] = [dpsButton, 1]
+                self.characterButtonsDictionary[CHARACTERS[ROLE_DPS][i]] = [dpsButton, 1]
                 dpsButtonList.append(dpsButton)
                 i += 1
         
         self.buttonList.append(dpsButtonList)
 
     def support(self):
-        # Constants
-        GRID = {                                                                        # Number of buttons in each row
-            0: 3,                                                                       
-            1: 3,
-            2: 3,
-            3: 3,
-            4: 2
-        }
-
-        MAX_IN_ROW = max(GRID.values())
-
         supportButtonList = []
-        self.supportPortraitList = [PhotoImage(file=resource_path("res", "portraits", "support", f"{self.characters[2][x]}.png")).subsample(4, 4) for x, i in enumerate(self.characters[2])]
+        self.supportPortraitList = [PhotoImage(file=resource_path("res", "portraits", "support", f"{CHARACTERS[ROLE_SUPPORT][i]}.png")).subsample(4, 4) for i, _ in enumerate(CHARACTERS[ROLE_SUPPORT])]
 
         i = 0
-        for y in GRID:
-            for x in range(GRID[y]):
+        for y in self.Layout.GRID[ROLE_SUPPORT]:
+            for x in range(self.Layout.GRID[ROLE_SUPPORT][y]):
                 supportButton = Button(self.supportFrame, image=self.supportPortraitList[i], name=f"supportButton{i}")
                 supportButton.place(
                     x=(
-                        (x * self.BUTTON_SPACING) 
-                        + ((self.BUTTON_SPACING/2) * (MAX_IN_ROW - GRID[y]))
+                        (x * self.Layout.CHARACTER_BUTTON_SIZE) 
+                        + ((self.Layout.CHARACTER_BUTTON_SIZE/2) * (self.Layout.SUPPORT_BUTTON_COLUMNS - self.Layout.GRID[ROLE_SUPPORT][y]))
                     ), 
-                    y=(y * self.BUTTON_SPACING)
+                    y=(y * self.Layout.CHARACTER_BUTTON_SIZE)
                 )
                 
                 supportButton.bind("<Button>", self.mouseButtonCharacters)
                 supportButton.bind("<Enter>", self.animationFocus)
                 supportButton.bind("<Leave>", self.animationDefocus)
 
-                self.characterButtonsDictionary[self.characters[2][i]] = [supportButton, 2]
+                self.characterButtonsDictionary[CHARACTERS[ROLE_SUPPORT][i]] = [supportButton, 2]
                 supportButtonList.append(supportButton)
                 
                 i += 1
@@ -325,7 +347,12 @@ class ui:
     # Event handlers
     def mouseButtonCharacters(self, event):
         if event.num == 1:
-            if event.widget["state"] == NORMAL and not self.extendedLimits and len(self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]) < min(2, (self.roleFrameDict[str(event.widget.master)] + 0.5) * 2) and event.widget not in self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]:
+            if (event.widget["state"] == NORMAL 
+                and not self.extendedLimits 
+                and len(self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]) < min(2, (self.roleFrameDict[str(event.widget.master)] + 0.5) * 2) 
+                and event.widget not in self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]):
+                
+
                 event.widget.configure(bg="SystemHighlight")
                 self.selectedRoles[self.roleFrameDict[str(event.widget.master)]].append(event.widget)
                 
@@ -349,9 +376,11 @@ class ui:
 
             threading.Thread(target=self.updateTeamComp, name="updateTeamComp-Thread").start()
             return "break"
+        
         elif event.num == 2:
             print(str(event.widget.master))
             # event.widget.configure(height=event.widget.winfo_height()-6, width=event.widget.winfo_width()-6)
+
         elif event.num == 3:
             if not self.extendedLimits and event.widget in self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]:
                 event.widget.configure(bg="SystemButtonFace")
@@ -413,14 +442,11 @@ class ui:
 
                 for i in returnedClasses:
                     if not i[0][i[0].find(' ') + 1:-1] == "Waiting" and not i[0][i[0].find(' ') + 1:-1] == "Not selected":
-                        # print(f"Button: {self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][0]}", f"Role: {self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][1]}")
-                        # self.selectedRoles[self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][1]].append(self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][0])
                         self.selectedCharacters.append(self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][0])
                     print(f"\"{i[0][i[0].find(' ') + 1:-1]}\"")
 
                 self.updateTeamComp(aiRequest=True)
-                # threading.Thread(target=self.updateTeamComp, name="updateTeamComp-Thread").start()
-
+                
                 self.ongoingKeybaordRequest = False
 
         def startRecognition():
@@ -490,14 +516,15 @@ class ui:
         if not self.extendedLimits and not aiRequest:
             for a, role in enumerate(self.selectedRoles):
                 for b, character in enumerate(role):
-                    characterPortrait = PhotoImage(file=resource_path("res", "portraits", ['tank', 'dps', 'support'][a], f"{self.characters[self.roleFrameDict[str(character.master)]][int(''.join([o for o in list(str(character)) if o.isnumeric()]))]}.png")).subsample(3, 3)
+                    print(character.master)
+                    characterPortrait = PhotoImage(file=resource_path("res", "portraits", ['tank', 'dps', 'support'][a], f"{CHARACTERS[self.roleFrameDict[str(character.master)]][int(''.join([o for o in list(str(character)) if o.isnumeric()]))]}.png")).subsample(3, 3)
                     self.characterPlaceholderList[(a + b + max(a, 1)) - 1].configure(image=characterPortrait)
                     characterPortraitList.append(characterPortrait)
 
                     counterLists = []
                     
                     for counterRole in ["Tank", "DPS", "Support"]:
-                        counterLists.extend(jsonData.counters[self.characters[self.roleFrameDict[str(character.master)]][int("".join([o for o in list(str(character)) if o.isnumeric()]))]][counterRole].values())
+                        counterLists.extend(jsonData.counters[CHARACTERS[self.roleFrameDict[str(character.master)]][int("".join([o for o in list(str(character)) if o.isnumeric()]))]][counterRole].values())
                     
                     for i, counter in enumerate(counterLists):
                         portrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{counter}.png")).subsample(6, 6)
@@ -505,14 +532,14 @@ class ui:
                         counterPortraitList.append(portrait)
         else:
             for c, character in enumerate(self.selectedCharacters):
-                characterPortrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{self.characters[self.roleFrameDict[str(character.master)]][int(''.join([o for o in list(str(character)) if o.isnumeric()]))]}.png")).subsample(3, 3)
+                characterPortrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{CHARACTERS[self.roleFrameDict[str(character.master)]][int(''.join([o for o in list(str(character)) if o.isnumeric()]))]}.png")).subsample(3, 3)
                 self.characterPlaceholderList[c].configure(image=characterPortrait)
                 characterPortraitList.append(characterPortrait)
 
                 counterLists = []
                 
                 for counterRole in ["Tank", "DPS", "Support"]:
-                    counterLists.extend(jsonData.counters[self.characters[self.roleFrameDict[str(character.master)]][int("".join([o for o in list(str(character)) if o.isnumeric()]))]][counterRole].values())
+                    counterLists.extend(jsonData.counters[CHARACTERS[self.roleFrameDict[str(character.master)]][int("".join([o for o in list(str(character)) if o.isnumeric()]))]][counterRole].values())
                 
                 for i, counter in enumerate(counterLists):
                     portrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{counter}.png")).subsample(6, 6)
