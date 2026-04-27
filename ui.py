@@ -1,7 +1,7 @@
 from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, Button, PhotoImage, NORMAL, DISABLED, NE
 from resourceManager import prefer_local_resource, resource_path, ensure_configurable, IS_BUNDLED, IS_LOCAL 
+from src.constants import DEBUG, CHARACTERS
 from configparser import ConfigParser
-from src.constants import DEBUG
 from src.parse import translate
 from pynput import keyboard
 from os import startfile
@@ -17,12 +17,6 @@ class ui:
         self.root.geometry("850x550")
         self.root.title("Overwatch Fucked Me")
         self.root.configure(background="#3C3C3C")
-
-        self.characters = [
-            ["Dva", "Doomfist", "Junker Queen", "Orisa", "Ramattra", "Reinhardt", "Roadhog", "Sigma", "Winston", "Wrecking Ball", "Zarya"],
-            ["Ashe", "Bastion", "Cassidy", "Echo", "Genji", "Hanzo", "Junkrat", "Mei", "Pharah", "Reaper", "Sojourn", "Soldier 76", "Sombra", "Symmetra", "Torbjorn", "Tracer", "Widowmaker"],
-            ["Ana", "Baptiste", "Brigitte", "Kiriko", "Lucio", "Mercy", "Moira", "Zenyatta"]
-        ]
         
         self.characterButtonsDictionary = {}
 
@@ -64,11 +58,15 @@ class ui:
 
     # Setup
     def initializeWindow(self):
+        # General UI
         self._menubar()
         self._frames()
         self._labels()
         self._buttons()
         
+        # Character selection 
+        self.BUTTON_SPACING = 75
+
         self.tank()
         self.dps()
         self.support()
@@ -211,17 +209,31 @@ class ui:
 
     # Select characters
     def tank(self):
-        # global self.buttonList, tankPortraitList
+        # Constants
+        GRID = {                                                                        # Number of buttons in each row
+            0: 3,                                                                       
+            1: 3,
+            2: 3,
+            3: 3,
+            4: 2
+        }
 
+        MAX_IN_ROW = max(GRID.values())
+        
         tankButtonList = []
-
         self.tankPortraitList = [PhotoImage(file=resource_path("res", "portraits", "tank", f"{self.characters[0][x]}.png")).subsample(4, 4) for x, i in enumerate(self.characters[0])]
 
         i = 0
-        for y in range(4):
-            for x in range(3 - int((y+1) / 4)):
+        for y in GRID:
+            for x in range(GRID[y]):
                 tankButton = Button(self.tankFrame, image=self.tankPortraitList[i], name=f"tankButton{i}")
-                tankButton.place(x=((x * 75) + ((75/2) * int((y+1) / 4))), y=(y * 75))
+                tankButton.place(
+                    x=(
+                        (x * self.BUTTON_SPACING) 
+                        + ((self.BUTTON_SPACING/2) * (MAX_IN_ROW - GRID[y]))
+                    ), 
+                    y=(y * self.BUTTON_SPACING)
+                )
 
                 tankButton.bind("<Button>", self.mouseButtonCharacters)
                 tankButton.bind("<Enter>", self.animationFocus)
@@ -234,17 +246,32 @@ class ui:
         self.buttonList.append(tankButtonList)
 
     def dps(self):
-        # global self.buttonList, dpsPortraitList
+        # Constants
+        GRID = {                                                                        # Number of buttons in each row
+            0: 5,                                                                       
+            1: 5,
+            2: 5,
+            3: 5,
+            4: 3
+        }
+
+        MAX_IN_ROW = max(GRID.values())
+
 
         dpsButtonList = []
-
         self.dpsPortraitList = [PhotoImage(file=resource_path("res", "portraits", "dps", f"{self.characters[1][x]}.png")).subsample(4, 4) for x, i in enumerate(self.characters[1])]
 
         i = 0
-        for y in range(4):
-            for x in range(5 - (int((y+1) / 4) * 3)):
+        for y in GRID:
+            for x in range(GRID[y]):
                 dpsButton = Button(self.dpsFrame, image=self.dpsPortraitList[i], name=f"dpsButton{i}")
-                dpsButton.place(x=((x * 75) + ((75 + (75/2)) * int((y+1) / 4)) + 5), y=(y * 75))
+                dpsButton.place(
+                    x=(
+                        (x * self.BUTTON_SPACING) 
+                        + ((self.BUTTON_SPACING/2) * (MAX_IN_ROW - GRID[y]))
+                    ), 
+                    y=(y * self.BUTTON_SPACING)
+                )
 
                 dpsButton.bind("<Button>", self.mouseButtonCharacters)
                 dpsButton.bind("<Enter>", self.animationFocus)
@@ -257,15 +284,31 @@ class ui:
         self.buttonList.append(dpsButtonList)
 
     def support(self):
-        supportButtonList = []
+        # Constants
+        GRID = {                                                                        # Number of buttons in each row
+            0: 3,                                                                       
+            1: 3,
+            2: 3,
+            3: 3,
+            4: 2
+        }
 
+        MAX_IN_ROW = max(GRID.values())
+
+        supportButtonList = []
         self.supportPortraitList = [PhotoImage(file=resource_path("res", "portraits", "support", f"{self.characters[2][x]}.png")).subsample(4, 4) for x, i in enumerate(self.characters[2])]
 
         i = 0
-        for y in range(3):
-            for x in range(3 - int((y+1) / 3)):
+        for y in GRID:
+            for x in range(GRID[y]):
                 supportButton = Button(self.supportFrame, image=self.supportPortraitList[i], name=f"supportButton{i}")
-                supportButton.place(x=((x * 75) + ((75/2) * int((y+1) / 3)) + 5), y=(y * 75))
+                supportButton.place(
+                    x=(
+                        (x * self.BUTTON_SPACING) 
+                        + ((self.BUTTON_SPACING/2) * (MAX_IN_ROW - GRID[y]))
+                    ), 
+                    y=(y * self.BUTTON_SPACING)
+                )
                 
                 supportButton.bind("<Button>", self.mouseButtonCharacters)
                 supportButton.bind("<Enter>", self.animationFocus)
