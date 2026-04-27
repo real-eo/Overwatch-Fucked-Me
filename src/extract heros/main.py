@@ -53,4 +53,3 @@ for hero in playableHeroes:
         continue
 
     images[IMAGE_3D_INDEX].save(SAVE_DIRECTORY_3D / f"{hero.name}.png")                 # Save the 3D image
-
