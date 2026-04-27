@@ -92,7 +92,7 @@ class ui:
         
         self.characterButtonsDictionary = {}
 
-        self.buttonList = []
+        self.buttonList: dict[str, list] = {}
 
         self.selectedCharacters = []
         self.selectedRoles = {ROLE_TANK: [], ROLE_DPS: [], ROLE_SUPPORT: []}
@@ -106,8 +106,11 @@ class ui:
         self.initializeWindow()
 
         self.fullbuttonList = []
-        for i in self.buttonList:
+        for i in self.buttonList.values():
             self.fullbuttonList.extend(i)
+
+        # // print(self.buttonList)
+        # // print(self.fullbuttonList)
 
         self.characterHighlighted = ""
         self.characterHighlightedRectList = []
@@ -288,7 +291,7 @@ class ui:
                 tankButtonList.append(tankButton)
                 i += 1
 
-        self.buttonList.append(tankButtonList)
+        self.buttonList[ROLE_TANK] = tankButtonList
 
     def dps(self):
         dpsButtonList = []
@@ -314,7 +317,7 @@ class ui:
                 dpsButtonList.append(dpsButton)
                 i += 1
         
-        self.buttonList.append(dpsButtonList)
+        self.buttonList[ROLE_DPS] = dpsButtonList
 
     def support(self):
         supportButtonList = []
@@ -341,7 +344,7 @@ class ui:
                 
                 i += 1
 
-        self.buttonList.append(supportButtonList)
+        self.buttonList[ROLE_SUPPORT] = supportButtonList
 
 
     # Event handlers
@@ -349,7 +352,7 @@ class ui:
         if event.num == 1:
             if (event.widget["state"] == NORMAL 
                 and not self.extendedLimits 
-                and len(self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]) < min(2, (self.roleFrameDict[str(event.widget.master)] + 0.5) * 2) 
+                and len(self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]) < (2 - (ROLE_TANK == self.roleFrameDict[str(event.widget.master)]))
                 and event.widget not in self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]):
                 
 
@@ -357,7 +360,7 @@ class ui:
                 self.selectedRoles[self.roleFrameDict[str(event.widget.master)]].append(event.widget)
                 
                 # * [1]
-                if len(self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]) == min(2, (self.roleFrameDict[str(event.widget.master)] + 0.5) * 2):
+                if len(self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]) == (2 - (ROLE_TANK == self.roleFrameDict[str(event.widget.master)])):
                     # * [2]
                     for i in self.buttonList[self.roleFrameDict[str(event.widget.master)]]:
                         # * [3]
@@ -404,7 +407,7 @@ class ui:
             self.extendedLimits = [True, False][self.extendedLimits]
             self.extendedLimitsButton.configure(bg=["SystemButtonFace", "Green"][self.extendedLimits])
             self.selectedCharacters.clear()
-            self.selectedRoles = [[], [], []]
+            self.selectedRoles = {ROLE_TANK: [], ROLE_DPS: [], ROLE_SUPPORT: []}
             self.updateTeamComp()
             if not self.aiActive:
                 for button in self.fullbuttonList:
@@ -414,7 +417,7 @@ class ui:
             self.aiActive = [True, False][self.aiActive]
             self.aiActiveButton.configure(bg=["SystemButtonFace", "Green"][self.aiActive])
             self.selectedCharacters.clear()
-            self.selectedRoles = [[], [], []]
+            self.selectedRoles = {ROLE_TANK: [], ROLE_DPS: [], ROLE_SUPPORT: []}
             self.updateTeamComp()
             if self.aiActive:
                 for button in self.fullbuttonList:
@@ -514,9 +517,8 @@ class ui:
         characterPortraitList = []
         
         if not self.extendedLimits and not aiRequest:
-            for a, role in enumerate(self.selectedRoles):
-                for b, character in enumerate(role):
-                    print(character.master)
+            for a, (role, characters) in enumerate(self.selectedRoles.items()):
+                for b, character in enumerate(characters):
                     characterPortrait = PhotoImage(file=resource_path("res", "portraits", ['tank', 'dps', 'support'][a], f"{CHARACTERS[self.roleFrameDict[str(character.master)]][int(''.join([o for o in list(str(character)) if o.isnumeric()]))]}.png")).subsample(3, 3)
                     self.characterPlaceholderList[(a + b + max(a, 1)) - 1].configure(image=characterPortrait)
                     characterPortraitList.append(characterPortrait)

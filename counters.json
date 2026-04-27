@@ -1,573 +1,257 @@
 {
-	"Dva": {
-		"Tank": {
-			"0": "Roadhog",
-			"1": "Zarya",
-			"2": "Winston"
-		},
-		"DPS": {
-			"0": "Symmetra",
-			"1": "Reaper",
-			"2": "Junkrat",
-			"3": "Pharah"
-		},
-		"Support": {
-			"0": "Moira"
-		}
-	},
-	"Doomfist": {
-		"Tank": {
-			
-		},
-		"DPS": {
-			"0": "Pharah",
-			"1": "Ashe",
-			"2": "Bastion",
-			"3": "Widowmaker"
-		},
-		"Support": {
-			"0": "Ana"
-		}
-	},
-	"Junker Queen": {
-		"Tank": {
-			"0": "Wrecking Ball"
-		},
-		"DPS": {
-			"0": "Widowmaker"
-		},
-		"Support": {
-			"0": "Ana",
-			"1": "Zenyatta"
-		}
-	},
-	"Orisa": {
-		"Tank": {
-			"0": "Winston",
-			"1": "Zarya",
-			"2": "Doomfist"
-		},
-		"DPS": {
-			"0": "Reaper",
-			"1": "Symmetra"
-		},
-		"Support": {
-			"0": "Zenyatta",
-			"1": "Moira"
-		}
-	},
-	"Ramattra": {
-		"Tank": {
-			"0": "Roadhog",
-			"1": "Zarya"
-		},
-		"DPS": {
-			"0": "Reaper",
-			"1": "Tracer",
-			"2": "Pharah",
-			"3": "Genji",
-			"4": "Ashe",
-			"5": "Widowmaker",
-			"6": "Symmetra",
-			"7": "Bastion"
-		},
-		"Support": {
-			"0": "Ana",
-			"1": "Zenyatta"
-		}
-	},
-	"Reinhardt": {
-		"Tank": {
-			
-		},
-		"DPS": {
-			"0": "Reaper",
-			"1": "Pharah",
-			"2": "Junkrat",
-			"3": "Sombra",
-			"4": "Mei"
-		},
-		"Support": {
-			"0": "Ana",
-			"1": "Brigitte"
-		}
-	},
-	"Roadhog": {
-		"Tank": {
-			"0": "Wrecking Ball",
-			"1": "Roadhog",
-			"2": "Doomfist",
-			"3": "Zarya"
-		},
-		"DPS": {
-			"0": "Widowmaker",
-			"1": "Reaper",
-			"2": "Pharah",
-			"3": "Junkrat",
-			"4": "Echo",
-			"5": "Tracer",
-			"6": "Sombra",
-			"7": "Genji"
-		},
-		"Support": {
-			"0": "Ana"
-		}
-	},
-	"Sigma": {
-		"Tank": {
-			"0": "Zarya"
-		},
-		"DPS": {
-			"0": "Genji",
-			"1": "Tracer",
-			"2": "Sombra",
-			"3": "Symmetra"
-		},
-		"Support": {
-			"0": "Lucio",
-			"1": "Moira"
-		}
-	},
-	"Winston": {
-		"Tank": {
-			"0": "Roadhog",
-			"1": "Doomfist",
-			"2": "Zarya"
-		},
-		"DPS": {
-			"0": "Mei",
-			"1": "Junkrat",
-			"2": "Pharah",
-			"3": "Reaper"
-		},
-		"Support": {
-			"0": "Ana",
-			"1": "Brigitte"
-		}
-	},
-	"Wrecking Ball": {
-		"Tank": {
-			"0": "Roadhog"
-		},
-		"DPS": {
-			"0": "Mei"
-		},
-		"Support": {
-			"0": "Ana",
-			"1": "Brigitte"
-		}
-	},
-	"Zarya": {
-		"Tank": {
-			
-		},
-		"DPS": {
-			"0": "Pharah",
-			"1": "Bastion",
-			"2": "Junkrat",
-			"3": "Echo",
-			"4": "Widowmaker"
-		},
-		"Support": {
-			
-		}
-	},
-	"Ashe": {
-		"Tank": {
-			"0": "Doomfist",
-			"1": "Roadhog"
-		},
-		"DPS": {
-			"0": "Tracer",
-			"1": "Genji",
-			"2": "Echo",
-			"3": "Soldier 76",
-			"4": "Sombra",
-			"5": "Reaper"
-		},
-		"Support": {
-			
-		}
-	},
-	"Bastion": {
-		"Tank": {
-			"0": "Roadhog",
-			"1": "Zarya"
-		},
-		"DPS": {
-			"0": "Junkrat",
-			"1": "Pharah",
-			"2": "Sombra",
-			"3": "Tracer"
-		},
-		"Support": {
-			"0": "Ana"
-		}
-	},
-	"Cassidy": {
-		"Tank": {
-			"0": "Reinhardt"
-		},
-		"DPS": {
-			"0": "Widowmaker",
-			"1": "Genji",
-			"2": "Ashe",
-			"3": "Bastion",
-			"4": "Hanzo",
-			"5": "Pharah"
-		},
-		"Support": {
-			
-		}
-	},
-	"Echo": {
-		"Tank": {
-			"0": "Zarya",
-			"1": "Dva"
-		},
-		"DPS": {
-			"0": "Widowmaker",
-			"1": "Soldier 76",
-			"2": "Cassidy",
-			"3": "Ashe",
-			"4": "Reaper"
-		},
-		"Support": {
-			"0": "Ana",
-			"1": "Baptiste",
-			"2": "Moira"
-		}
-	},
-	"Genji": {
-		"Tank": {
-			"0": "Zarya",
-			"1": "Winston"
-		},
-		"DPS": {
-			"0": "Symmetra",
-			"1": "Mei"
-		},
-		"Support": {
-			"0": "Brigitte",
-			"1": "Moira"
-		}
-	},
-	"Hanzo": {
-		"Tank": {
-			"0": "Dva",
-			"1": "Wrecking Ball"
-		},
-		"DPS": {
-			"0": "Genji",
-			"1": "Tracer",
-			"2": "Pharah",
-			"3": "Sombra"
-		},
-		"Support": {
-			"0": "Lucio",
-			"1": "Moira"
-		}
-	},
-	"Junkrat": {
-		"Tank": {
-			"0": "Wrecking Ball",
-			"1": "Zarya"
-		},
-		"DPS": {
-			"0": "Pharah",
-			"1": "Echo",
-			"2": "Reaper",
-			"3": "Cassidy",
-			"4": "Soldier 76",
-			"5": "Tracer"
-		},
-		"Support": {
-			"0": "Lucio"
-		}
-	},
-	"Mei": {
-		"Tank": {
-			
-		},
-		"DPS": {
-			"0": "Sombra",
-			"1": "Echo",
-			"2": "Pharah",
-			"3": "Widowmaker",
-			"4": "Ashe",
-			"5": "Reaper",
-			"6": "Tracer"
-		},
-		"Support": {
-			
-		}
-	},
-	"Pharah": {
-		"Tank": {
-			
-		},
-		"DPS": {
-			"0": "Widowmaker",
-			"1": "Soldier 76",
-			"2": "Ashe"
-		},
-		"Support": {
-			"0": "Baptiste",
-			"1": "Ana"
-		}
-	},
-	"Reaper": {
-		"Tank": {
-			
-		},
-		"DPS": {
-			"0": "Widowmaker",
-			"1": "Echo",
-			"2": "Pharah",
-			"3": "Junkrat",
-			"4": "Ashe"
-		},
-		"Support": {
-			"0": "Ana"
-		}
-	},
-	"Sojourn": {
-		"Tank": {
-			"0": "Zarya",
-			"1": "Sigma"
-		},
-		"DPS": {
-			"0": "Genji",
-			"1": "Tracer",
-			"2": "Sombra"
-		},
-		"Support": {
-			"0": "Lucio"
-		}
-	},
-	"Soldier 76": {
-		"Tank": {
-			"0": "Roadhog"
-		},
-		"DPS": {
-			"0": "Cassidy",
-			"1": "Junkrat",
-			"2": "Widowmaker"
-		},
-		"Support": {
-			"0": "Ana"
-		}
-	},
-	"Sombra": {
-		"Tank": {
-			"0": "Winston"
-		},
-		"DPS": {
-			"0": "Hanzo",
-			"1": "Mei",
-			"2": "Junkrat",
-			"3": "Pharah"
-		},
-		"Support": {
-			"0": "Ana",
-			"1": "Moira"
-		}
-	},
-	"Symmetra": {
-		"Tank": {
-			"0": "Winston"
-		},
-		"DPS": {
-			"0": "Pharah",
-			"1": "Echo",
-			"2": "Junkrat",
-			"3": "Reaper",
-			"4": "Tracer",
-			"5": "Sombra"
-		},
-		"Support": {
-			
-		}
-	},
-	"Torbjorn": {
-		"Tank": {
-			
-		},
-		"DPS": {
-			"0": "Pharah",
-			"1": "Widowmaker",
-			"2": "Junkrat",
-			"3": "Sombra"
-		},
-		"Support": {
-			"0": "Ana"
-		}
-	},
-	"Tracer": {
-		"Tank": {
-			"0": "Winston"
-		},
-		"DPS": {
-			"0": "Pharah",
-			"1": "Torbjorn",
-			"2": "Mei",
-			"3": "Junkrat",
-			"4": "Sombra",
-			"5": "Widowmaker"
-		},
-		"Support": {
-			
-		}
-	},
-	"Widowmaker": {
-		"Tank": {
-			
-		},
-		"DPS": {
-			"0": "Genji",
-			"1": "Tracer",
-			"2": "Widowmaker",
-			"3": "Sombra",
-			"4": "Reaper",
-			"5": "Ashe"
-		},
-		"Support": {
-			"0": "Zenyatta"
-		}
-	},
-	"Ana": {
-		"Tank": {
-			"0": "Doomfist"
-		},
-		"DPS": {
-			"0": "Pharah",
-			"1": "Tracer",
-			"2": "Echo",
-			"3": "Genji",
-			"4": "Sombra"
-		},
-		"Support": {
-			"0": "Lucio"
-		}
-	},
-	"Baptiste": {
-		"Tank": {
-			"0": "Roadhog"
-		},
-		"DPS": {
-			"0": "Genji",
-			"1": "Hanzo",
-			"2": "Tracer",
-			"3": "Echo",
-			"4": "Pharah",
-			"5": "Sombra",
-			"6": "Reaper"
-		},
-		"Support": {
-			"0": "Lucio"
-		}
-	},
-	"Kiriko": {
-		"Tank": {
-			"0": "Roadhog"
-		},
-		"DPS": {
-			"0": "Widowmaker",
-			"1": "Sojourn",
-			"2": "Tracer",
-			"3": "Mei",
-			"4": "Cassidy",
-			"5": "Reaper"
-		},
-		"Support": {
-			"0": "Ana"
-		}
-	},
-	"Lucio": {
-		"Tank": {
-			"0": "Winston",
-			"1": "Roadhog"
-		},
-		"DPS": {
-			"0": "Soldier 76",
-			"1": "Ashe",
-			"2": "Cassidy",
-			"3": "Symmetra",
-			"4": "Widowmaker",
-			"5": "Mei"
-		},
-		"Support": {
-			"0": "Moira"
-		}
-	},
-	"Mercy": {
-		"Tank": {
-			"0": "Winston",
-			"1": "Roadhog"
-		},
-		"DPS": {
-			"0": "Soldier 76",
-			"1": "Cassidy",
-			"2": "Ashe",
-			"3": "Genji",
-			"4": "Tracer",
-			"5": "Sojourn"
-		},
-		"Support": {
-			"0": "Baptiste"
-		}
-	},
-	"Moira": {
-		"Tank": {
-			"0": "Roadhog",
-			"1": "Zarya"
-		},
-		"DPS": {
-			"0": "Sombra",
-			"1": "Pharah",
-			"2": "Echo",
-			"3": "Junkrat",
-			"4": "Ashe",
-			"5": "Widowmaker",
-			"6": "Reaper"
-		},
-		"Support": {
-			"0": "Ana"
-		}
-	},
-	"Zenyatta": {
-		"Tank": {
-			"0": "Sigma",
-			"1": "Dva"
-		},
-		"DPS": {
-			"0": "Widowmaker",
-			"1": "Genji",
-			"2": "Pharah",
-			"3": "Junkrat",
-			"4": "Ashe",
-			"5": "Cassidy",
-			"6": "Hanzo",
-			"7": "Tracer",
-			"8": "Reaper"
-		},
-		"Support": {
-			"0": "Kiriko"
-		}
-	},
-	"Brigitte": {
-		"Tank": {
-			
-		},
-		"DPS": {
-			"0": "Junkrat",
-			"1": "Pharah",
-			"2": "Echo",
-			"4": "Genji",
-			"5": "Widowmaker"
-		},
-		"Support": {
-			"0": "Moira"
-		}
-	}
+    "D.Va": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Domina": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Doomfist": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Hazard": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Junker Queen": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Mauga": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Orisa": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Ramattra": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Reinhardt": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Roadhog": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Sigma": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Winston": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Wrecking Ball": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Zarya": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Anran": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Ashe": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Bastion": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Cassidy": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Echo": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Emre": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Freja": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Genji": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Hanzo": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Junkrat": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Mei": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Pharah": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Reaper": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Sierra": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Sojourn": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Soldier_ 76": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Sombra": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Symmetra": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Torbj\u00f6rn": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Tracer": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Vendetta": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Venture": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Widowmaker": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Ana": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Baptiste": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Brigitte": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Illari": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Jetpack Cat": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Juno": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Kiriko": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Lifeweaver": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "L\u00facio": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Mercy": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Mizuki": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Moira": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Wuyang": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    },
+    "Zenyatta": {
+        "Tank": {},
+        "DPS": {},
+        "Support": {}
+    }
 }
