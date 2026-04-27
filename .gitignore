@@ -20,3 +20,7 @@ Overwatch leaderboard-portrait dataset.lnk
 # Generated
 out/state/*
 out/imported/*
+
+# Testing
+test.json
+test.py
