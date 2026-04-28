@@ -1,6 +1,6 @@
 # Same level imports
 try:                from resolve                    import Path, shortcut
-except ImportError: from src.extractHeroes.resolve  import Path, shortcut
+except ImportError: from src.extract.resolve        import Path, shortcut
 
 # Super level imports
 import sys
@@ -8,7 +8,7 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path: sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.constants import CHARACTERS, ROLE_ALL, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT
+from src.constants import HEROES, ROLE_ALL, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT
 
 # Global imports
 from PIL import Image
@@ -74,9 +74,9 @@ if not confirmation.lower() in ["y", "yes"]:
 
 # Copy the images into the app directory
 for image in SAVE_DIRECTORY_3D.iterdir():   shutil.copy2(image, PORTRAIT_DIRECTORY / ROLE_ALL / image.name)
-for tank in CHARACTERS[ROLE_TANK]:          shutil.copy2(SAVE_DIRECTORY_3D / f"{tank}.png", PORTRAIT_DIRECTORY / ROLE_TANK / f"{tank}.png")
-for dps in CHARACTERS[ROLE_DPS]:            shutil.copy2(SAVE_DIRECTORY_3D / f"{dps}.png", PORTRAIT_DIRECTORY / ROLE_DPS / f"{dps}.png")
-for support in CHARACTERS[ROLE_SUPPORT]:    shutil.copy2(SAVE_DIRECTORY_3D / f"{support}.png", PORTRAIT_DIRECTORY / ROLE_SUPPORT / f"{support}.png")
+for tank in HEROES[ROLE_TANK]:          shutil.copy2(SAVE_DIRECTORY_3D / f"{tank}.png", PORTRAIT_DIRECTORY / ROLE_TANK / f"{tank}.png")
+for dps in HEROES[ROLE_DPS]:            shutil.copy2(SAVE_DIRECTORY_3D / f"{dps}.png", PORTRAIT_DIRECTORY / ROLE_DPS / f"{dps}.png")
+for support in HEROES[ROLE_SUPPORT]:    shutil.copy2(SAVE_DIRECTORY_3D / f"{support}.png", PORTRAIT_DIRECTORY / ROLE_SUPPORT / f"{support}.png")
 
 # Log completion
 print("Done!")

@@ -1,6 +1,6 @@
 from resourceManager import prefer_local_resource, resource_path, ensure_configurable, IS_BUNDLED, IS_LOCAL 
 from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, Button, PhotoImage, NORMAL, DISABLED, NE
-from src.constants import DEBUG, CHARACTERS, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT
+from src.constants import DEBUG, HEROES, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT
 from configparser import ConfigParser
 from src.parse import translate
 from pynput import keyboard
@@ -269,7 +269,7 @@ class ui:
     # Select characters
     def tank(self):
         tankButtonList = []
-        self.tankPortraitList = [PhotoImage(file=resource_path("res", "portraits", "tank", f"{CHARACTERS[ROLE_TANK][i]}.png")).subsample(4, 4) for i, _ in enumerate(CHARACTERS[ROLE_TANK])]
+        self.tankPortraitList = [PhotoImage(file=resource_path("res", "portraits", "tank", f"{HEROES[ROLE_TANK][i]}.png")).subsample(4, 4) for i, _ in enumerate(HEROES[ROLE_TANK])]
 
         i = 0
         for y in self.Layout.GRID[ROLE_TANK]:
@@ -287,7 +287,7 @@ class ui:
                 tankButton.bind("<Enter>", self.animationFocus)
                 tankButton.bind("<Leave>", self.animationDefocus)
 
-                self.characterButtonsDictionary[CHARACTERS[ROLE_TANK][i]] = [tankButton, 0]
+                self.characterButtonsDictionary[HEROES[ROLE_TANK][i]] = [tankButton, 0]
                 tankButtonList.append(tankButton)
                 i += 1
 
@@ -295,7 +295,7 @@ class ui:
 
     def dps(self):
         dpsButtonList = []
-        self.dpsPortraitList = [PhotoImage(file=resource_path("res", "portraits", "dps", f"{CHARACTERS[ROLE_DPS][i]}.png")).subsample(4, 4) for i, _ in enumerate(CHARACTERS[ROLE_DPS])]
+        self.dpsPortraitList = [PhotoImage(file=resource_path("res", "portraits", "dps", f"{HEROES[ROLE_DPS][i]}.png")).subsample(4, 4) for i, _ in enumerate(HEROES[ROLE_DPS])]
 
         i = 0
         for y in self.Layout.GRID[ROLE_DPS]:
@@ -313,7 +313,7 @@ class ui:
                 dpsButton.bind("<Enter>", self.animationFocus)
                 dpsButton.bind("<Leave>", self.animationDefocus)
 
-                self.characterButtonsDictionary[CHARACTERS[ROLE_DPS][i]] = [dpsButton, 1]
+                self.characterButtonsDictionary[HEROES[ROLE_DPS][i]] = [dpsButton, 1]
                 dpsButtonList.append(dpsButton)
                 i += 1
         
@@ -321,7 +321,7 @@ class ui:
 
     def support(self):
         supportButtonList = []
-        self.supportPortraitList = [PhotoImage(file=resource_path("res", "portraits", "support", f"{CHARACTERS[ROLE_SUPPORT][i]}.png")).subsample(4, 4) for i, _ in enumerate(CHARACTERS[ROLE_SUPPORT])]
+        self.supportPortraitList = [PhotoImage(file=resource_path("res", "portraits", "support", f"{HEROES[ROLE_SUPPORT][i]}.png")).subsample(4, 4) for i, _ in enumerate(HEROES[ROLE_SUPPORT])]
 
         i = 0
         for y in self.Layout.GRID[ROLE_SUPPORT]:
@@ -339,7 +339,7 @@ class ui:
                 supportButton.bind("<Enter>", self.animationFocus)
                 supportButton.bind("<Leave>", self.animationDefocus)
 
-                self.characterButtonsDictionary[CHARACTERS[ROLE_SUPPORT][i]] = [supportButton, 2]
+                self.characterButtonsDictionary[HEROES[ROLE_SUPPORT][i]] = [supportButton, 2]
                 supportButtonList.append(supportButton)
                 
                 i += 1
@@ -519,14 +519,14 @@ class ui:
         if not self.extendedLimits and not aiRequest:
             for a, (role, characters) in enumerate(self.selectedRoles.items()):
                 for b, character in enumerate(characters):
-                    characterPortrait = PhotoImage(file=resource_path("res", "portraits", ['tank', 'dps', 'support'][a], f"{CHARACTERS[self.roleFrameDict[str(character.master)]][int(''.join([o for o in list(str(character)) if o.isnumeric()]))]}.png")).subsample(3, 3)
+                    characterPortrait = PhotoImage(file=resource_path("res", "portraits", ['tank', 'dps', 'support'][a], f"{HEROES[self.roleFrameDict[str(character.master)]][int(''.join([o for o in list(str(character)) if o.isnumeric()]))]}.png")).subsample(3, 3)
                     self.characterPlaceholderList[(a + b + max(a, 1)) - 1].configure(image=characterPortrait)
                     characterPortraitList.append(characterPortrait)
 
                     counterLists = []
                     
                     for counterRole in ["Tank", "DPS", "Support"]:
-                        counterLists.extend(jsonData.counters[CHARACTERS[self.roleFrameDict[str(character.master)]][int("".join([o for o in list(str(character)) if o.isnumeric()]))]][counterRole].values())
+                        counterLists.extend(jsonData.counters[HEROES[self.roleFrameDict[str(character.master)]][int("".join([o for o in list(str(character)) if o.isnumeric()]))]][counterRole].values())
                     
                     for i, counter in enumerate(counterLists):
                         portrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{counter}.png")).subsample(6, 6)
@@ -534,14 +534,14 @@ class ui:
                         counterPortraitList.append(portrait)
         else:
             for c, character in enumerate(self.selectedCharacters):
-                characterPortrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{CHARACTERS[self.roleFrameDict[str(character.master)]][int(''.join([o for o in list(str(character)) if o.isnumeric()]))]}.png")).subsample(3, 3)
+                characterPortrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{HEROES[self.roleFrameDict[str(character.master)]][int(''.join([o for o in list(str(character)) if o.isnumeric()]))]}.png")).subsample(3, 3)
                 self.characterPlaceholderList[c].configure(image=characterPortrait)
                 characterPortraitList.append(characterPortrait)
 
                 counterLists = []
                 
                 for counterRole in ["Tank", "DPS", "Support"]:
-                    counterLists.extend(jsonData.counters[CHARACTERS[self.roleFrameDict[str(character.master)]][int("".join([o for o in list(str(character)) if o.isnumeric()]))]][counterRole].values())
+                    counterLists.extend(jsonData.counters[HEROES[self.roleFrameDict[str(character.master)]][int("".join([o for o in list(str(character)) if o.isnumeric()]))]][counterRole].values())
                 
                 for i, counter in enumerate(counterLists):
                     portrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{counter}.png")).subsample(6, 6)
