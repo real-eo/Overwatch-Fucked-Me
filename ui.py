@@ -179,7 +179,7 @@ class ui:
         # Edit 
         editMenu = Menu(menubar, tearoff=False)                                         # Dropdown menu when clicking on "Edit" in the toolbar
 
-        editMenu.add_command(label="Edit counters.json", command=self.updateCounters)
+        editMenu.add_command(label="Edit counters.json", command=self.editCounters)
         editMenu.add_separator()
         editMenu.add_command(label="Reload counters", command=self.reloadCounters)
         
@@ -497,7 +497,7 @@ class ui:
         # Restart listener
         self.keyListener()
 
-    def updateCounters(self):
+    def editCounters(self):
         # Open counters.json in default editor
         startfile(ensure_configurable("counters.json"))
 
@@ -547,6 +547,8 @@ class ui:
                     portrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{counter}.png")).subsample(6, 6)
                     self.placeholderMatrix[c][i].configure(image=portrait)
                     counterPortraitList.append(portrait)
+            
+        print(counterLists) # E.g: ['Roadhog', 'Zarya', 'Winston', 'Symmetra', 'Reaper', 'Junkrat', 'Pharah', 'Moira']
         
     def animationFocus(self, event):
         if event.widget["state"] == NORMAL:
