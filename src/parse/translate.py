@@ -49,6 +49,7 @@ def hotkey(key: keyboard.Key, activeMods: set):
 
 
 def heroID(name: str) -> str:
+    # ! Editing this fucntion will not just impact scraping, but also the eveywhere else where heroID is used
     # 1) lowercase + trim
     s = name.strip().lower()
 
@@ -68,9 +69,5 @@ def heroID(name: str) -> str:
     # 6) collapse repeated hyphens
     s = sub(r"-{2,}", "-", s).strip("-")
 
-    # 7) special cases
-    match s:
-        case "freja":                                                                   # ! This will not just impact scraping, but also the eveywhere else where heroID is used
-            s = "freya"                                                                 # ? https://counterpickgg.com uses "freya" instead of "freja" :shrug:
-
     return s
+

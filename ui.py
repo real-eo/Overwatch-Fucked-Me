@@ -1,6 +1,7 @@
-from resourceManager import prefer_local_resource, resource_path, ensure_configurable, IS_BUNDLED, IS_LOCAL 
-from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, Button, PhotoImage, NORMAL, DISABLED, NE
-from src.constants import DEBUG, HEROES, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT
+from src.constants import DEBUG, HEROES, HERO_IDS, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT, HERO_ROLES, MAX_SLOTS_TANK, MAX_SLOTS_DPS, MAX_SLOTS_SUPPORT, ROLES, TOTAL_SLOTS_ALL
+from src.resources.manager import prefer_local_resource, resource_path, ensure_configurable, IS_BUNDLED, IS_LOCAL 
+from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, Button, PhotoImage, Event, NORMAL, DISABLED, NE
+from src.resources import createPhotoImages, portraits
 from configparser import ConfigParser
 from src.parse import translate
 from pynput import keyboard
@@ -12,7 +13,7 @@ import jsonData
 
 class ui:
     class Layout:
-        # * Consts
+        # * Constants
         # Padding
         ROLE_FRAME_SEPERATOR_PADDING: int = 5
         WINDOW_PADDING: int = 10
@@ -50,7 +51,10 @@ class ui:
             }
         }
 
-        # * Constexprs
+        # * Selected hero & counters layout constexrps
+        MAX_COUNTERS_PER_ROLE: int = 7
+
+        # * Hero selection layout constexrps
         # Role button rows
         TANK_BUTTON_ROWS: int = len(GRID[ROLE_TANK])
         DPS_BUTTON_ROWS: int = len(GRID[ROLE_DPS])
@@ -82,11 +86,19 @@ class ui:
 
         ROLE_FRAMES_Y: int = 250                                                        # Kinda arbitrary, but it works
 
+        
+        # * Globals
+        WINDOW_WIDTH: int = 850                                                         # TODO: I think this can be calculated
+        WINDOW_HEIGHT: int = 625                                                        # TODO: I think this can be calculated
+
+        VIEWPORT_WIDTH: int = WINDOW_WIDTH - (2 * WINDOW_PADDING)
+        VIEWPORT_HEIGHT: int = WINDOW_HEIGHT - (2 * WINDOW_PADDING)
+
 
     def __init__(self):
         self.root = Tk()
 
-        self.root.geometry("850x625")
+        self.root.geometry(f"{self.Layout.WINDOW_WIDTH}x{self.Layout.WINDOW_HEIGHT}")
         self.root.title("Overwatch Fucked Me")
         self.root.configure(background="#3C3C3C")
         
@@ -94,8 +106,10 @@ class ui:
 
         self.buttonList: dict[str, list] = {}
 
-        self.selectedCharacters = []
-        self.selectedRoles = {ROLE_TANK: [], ROLE_DPS: [], ROLE_SUPPORT: []}
+        # self.selectedCharacters = []
+        # self.selectedRoles = {ROLE_TANK: [], ROLE_DPS: [], ROLE_SUPPORT: []}
+        self.selectedHeroes: list[Button | None] = [None for _ in range(TOTAL_SLOTS_ALL)] 
+        self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
         self.roleFrameDict = {".tankFrame": ROLE_TANK, ".dpsFrame": ROLE_DPS, ".supportFrame": ROLE_SUPPORT}
         
         self.activeCounters = {}
@@ -133,6 +147,9 @@ class ui:
 
     # Setup
     def initializeWindow(self):
+        # Images
+        createPhotoImages()
+
         # General UI
         self._menubar()
         self._frames()
@@ -207,9 +224,12 @@ class ui:
         self.recommendedCharacterFrameList = []
 
         # Character portraits
-        for i in range(5):
-            characterFrame = Frame(master=self.root, height=125+50, width=(830/5), background="#3C3C3C", name=f"characterFrame{i}")
-            characterFrame.place(x=((830/5)*i + (5*i)), y=0)
+        for i in range(TOTAL_SLOTS_ALL):
+            characterFrame = Frame(master=self.root, height=125+50, width=(self.Layout.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL), background="#3C3C3C", name=f"characterFrame{i}")
+            characterFrame.place(
+                x=((self.Layout.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL)*i + (TOTAL_SLOTS_ALL*i)), 
+                y=0
+            )
             self.recommendedCharacterFrameList.append(characterFrame)
 
         # Character buttons
@@ -228,29 +248,56 @@ class ui:
         self.supportFrame.place(x=self.Layout.SUPPORT_FRAME_X,  y=self.Layout.ROLE_FRAMES_Y)    
 
     def _labels(self):
-        self.placeholderMatrix = []
-        self.characterPlaceholderList = []
+        self.counterImagePlaceholders: list[dict[str, list[Label]]] = []                # 2D list of labels which get replaced with portraits of the counters (3x7)
+        self.characterImagePlaceholders: list[Label] = []                               # List of labels which get replaced with portraits of the selected heroes (5)
 
-        placeholderPortrait = PhotoImage(file=resource_path("res", "portraits", "blank.png")).subsample(3, 3)
+        # placeholderPortrait = PhotoImage(file=resource_path("res", "portraits", "blank.png")).subsample(3, 3)
 
         for a, b in enumerate(self.recommendedCharacterFrameList):
-            placeholderList = []
+            characterPlaceholder = Label(
+                b, 
+                height=((125/3) + 50), 
+                width=(self.Layout.VIEWPORT_WIDTH/10), 
+                # image=placeholderPortrait, 
+                image=portraits.HERO_3X3["blank"],
+                bg="#4C4C4C", 
+                name=f"placeholder@{a}characterLabel"
+            )
 
-            characterPlaceholder = Label(b, height=((125/3) + 50), width=(830/10), image=placeholderPortrait, bg="#4C4C4C", name=f"placeholder@{a}characterLabel")
             characterPlaceholder.place(x=0, y=0)
 
-            self.characterPlaceholderList.append(characterPlaceholder)
+            self.characterImagePlaceholders.append(characterPlaceholder)
 
-            for y in range(2):
-                for x in range(7):
-                    counterPlaceholder = Label(b, height=(125/3), width=(830/5/7), image=placeholderPortrait, bg="#444444", name=f"placeholder@{a}-{x}-{y}Label")
-                    counterPlaceholder.place(x=(((830/5/7) * x)), y=((125 / 3) * (y + 1) + 50))
-                    placeholderList.append(counterPlaceholder)
-            self.placeholderMatrix.append(placeholderList)
+            # Counter placeholders
+            placeholderDict: dict[str, list[Label]] = {}
 
-        self.roleIconList = [PhotoImage(file=resource_path("res", "icons", "role", f"{i}Icon.png")).subsample(4, 4) for i in ['tank', 'dps', 'support']]
+            for roleIndex, role in enumerate(ROLES):
+                for counterIndex in range(self.Layout.MAX_COUNTERS_PER_ROLE):
+                    counterPlaceholder = Label(
+                        b, 
+                        height=(125/3), 
+                        width=(self.Layout.VIEWPORT_WIDTH / TOTAL_SLOTS_ALL / self.Layout.MAX_COUNTERS_PER_ROLE), 
+                        # image=placeholderPortrait, 
+                        image=portraits.HERO_3X3["blank"],
+                        bg="#444444",
+                        name=f"placeholder@{a}-{counterIndex}-{roleIndex}Label"
+                    )
 
-        for x, i in enumerate(['tank', 'dps', 'support']):
+                    counterPlaceholder.place(
+                        x=(((self.Layout.VIEWPORT_WIDTH / TOTAL_SLOTS_ALL / self.Layout.MAX_COUNTERS_PER_ROLE) * counterIndex)), 
+                        y=((125 / 3) * (roleIndex + 1) + 50)
+                    )
+
+                    # placeholderList.append(counterPlaceholder)
+                    placeholderDict.setdefault(
+                        role,                                                           # Get the list of placeholders for the current role (tank/dps/support)
+                        []                                                              # If it doesn't exist, create a new empty list
+                    ).append(counterPlaceholder)
+
+            self.counterImagePlaceholders.append(placeholderDict)
+        self.roleIconList = [PhotoImage(file=resource_path("res", "icons", "role", f"{i}Icon.png")).subsample(4, 4) for i in ROLES]
+
+        for x, i in enumerate(ROLES):
             iconLabel = Label(self.roleInfoFrame, image=self.roleIconList[x], bg="#3C3C3C", name=f"{i}IconLabel")
             iconLabel.place(x=([-5, -5+225+5, -5+600+10][x]), y=-7)
 
@@ -269,12 +316,24 @@ class ui:
     # Select characters
     def tank(self):
         tankButtonList = []
-        self.tankPortraitList = [PhotoImage(file=resource_path("res", "portraits", "tank", f"{HEROES[ROLE_TANK][i]}.png")).subsample(4, 4) for i, _ in enumerate(HEROES[ROLE_TANK])]
+        # self.tankPortraitList = [
+            # PhotoImage(file=resource_path("res", "portraits", "tank", f"{HERO_IDS[ROLE_TANK][index]}.png")).subsample(4, 4)
+            # for index, _ in enumerate(HEROES[ROLE_TANK])
+        # ]
+        self.tankPortraitList = [
+            portraits.HERO_4X4[heroID]
+            for heroID in HERO_IDS[ROLE_TANK]
+        ]
 
         i = 0
         for y in self.Layout.GRID[ROLE_TANK]:
             for x in range(self.Layout.GRID[ROLE_TANK][y]):
-                tankButton = Button(self.tankFrame, image=self.tankPortraitList[i], name=f"tankButton{i}")
+                tankButton: Button = Button(
+                    self.tankFrame, 
+                    image=self.tankPortraitList[i], 
+                    name=HERO_IDS[ROLE_TANK][i]
+                )
+
                 tankButton.place(
                     x=(
                         (x * self.Layout.CHARACTER_BUTTON_SIZE) 
@@ -295,12 +354,21 @@ class ui:
 
     def dps(self):
         dpsButtonList = []
-        self.dpsPortraitList = [PhotoImage(file=resource_path("res", "portraits", "dps", f"{HEROES[ROLE_DPS][i]}.png")).subsample(4, 4) for i, _ in enumerate(HEROES[ROLE_DPS])]
+        # self.dpsPortraitList = [PhotoImage(file=resource_path("res", "portraits", "dps", f"{HERO_IDS[ROLE_DPS][i]}.png")).subsample(4, 4) for i, _ in enumerate(HEROES[ROLE_DPS])]
+        self.dpsPortraitList = [
+            portraits.HERO_4X4[heroID]
+            for heroID in HERO_IDS[ROLE_DPS]
+        ]
 
         i = 0
         for y in self.Layout.GRID[ROLE_DPS]:
             for x in range(self.Layout.GRID[ROLE_DPS][y]):
-                dpsButton = Button(self.dpsFrame, image=self.dpsPortraitList[i], name=f"dpsButton{i}")
+                dpsButton = Button(
+                    self.dpsFrame, 
+                    image=self.dpsPortraitList[i], 
+                    name=HERO_IDS[ROLE_DPS][i]
+                )
+
                 dpsButton.place(
                     x=(
                         (x * self.Layout.CHARACTER_BUTTON_SIZE) 
@@ -321,12 +389,21 @@ class ui:
 
     def support(self):
         supportButtonList = []
-        self.supportPortraitList = [PhotoImage(file=resource_path("res", "portraits", "support", f"{HEROES[ROLE_SUPPORT][i]}.png")).subsample(4, 4) for i, _ in enumerate(HEROES[ROLE_SUPPORT])]
+        # self.supportPortraitList = [PhotoImage(file=resource_path("res", "portraits", "support", f"{HERO_IDS[ROLE_SUPPORT][i]}.png")).subsample(4, 4) for i, _ in enumerate(HEROES[ROLE_SUPPORT])]
+        self.supportPortraitList = [
+            portraits.HERO_4X4[heroID]
+            for heroID in HERO_IDS[ROLE_SUPPORT]
+        ]
 
         i = 0
         for y in self.Layout.GRID[ROLE_SUPPORT]:
             for x in range(self.Layout.GRID[ROLE_SUPPORT][y]):
-                supportButton = Button(self.supportFrame, image=self.supportPortraitList[i], name=f"supportButton{i}")
+                supportButton = Button(
+                    self.supportFrame, 
+                    image=self.supportPortraitList[i], 
+                    name=HERO_IDS[ROLE_SUPPORT][i]
+                )
+                
                 supportButton.place(
                     x=(
                         (x * self.Layout.CHARACTER_BUTTON_SIZE) 
@@ -348,33 +425,51 @@ class ui:
 
 
     # Event handlers
-    def mouseButtonCharacters(self, event):
+    def mouseButtonCharacters(self, event: Event):
+        heroButtonRole = self.roleFrameDict[str(event.widget.master)]
+
+        # TODO: Refactor this spaghetti code, it's really just a mess of if statements and repeated code. It's really hard to read and understand, and it's also really easy to introduce bugs when making changes to it. I have no idea how I ended up with this, but it needs to be fixed. Maybe I can use some helper functions to reduce the amount of repeated code, and maybe I can also use some enums or something to make the code more readable. I don't know, I'll figure it out later. For now, I'm just going to leave it as is, because it works and I'm tired of looking at it.
+        # TODO: Fix the "removing wrong hero" bug. I should be using keys to remove selected, not indexes
+
         if event.num == 1:
             if (event.widget["state"] == NORMAL 
                 and not self.extendedLimits 
-                and len(self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]) < (2 - (ROLE_TANK == self.roleFrameDict[str(event.widget.master)]))
-                and event.widget not in self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]):
-                
-
+                # and len(self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]) < (2 - (ROLE_TANK == self.roleFrameDict[str(event.widget.master)]))
+                and self.slotsRemaining[heroButtonRole] > 0
+                # and event.widget not in self.selectedRoles[heroPressedRole]):
+                and event.widget not in self.selectedHeroes
+            ):
                 event.widget.configure(bg="SystemHighlight")
-                self.selectedRoles[self.roleFrameDict[str(event.widget.master)]].append(event.widget)
+                # self.selectedRoles[heroPressedRole].append(event.widget)
+                self.selectedHeroes[min(TOTAL_SLOTS_ALL - sum(self.slotsRemaining.values()), 4)] = event.widget
+                # TODO: self.selectedHeroes.append(event.widget)
+                self.slotsRemaining[heroButtonRole] -= 1
                 
                 # * [1]
-                if len(self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]) == (2 - (ROLE_TANK == self.roleFrameDict[str(event.widget.master)])):
+                # if len(self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]) == (2 - (ROLE_TANK == self.roleFrameDict[str(event.widget.master)])):
+                if self.slotsRemaining[heroButtonRole] == 0:
                     # * [2]
-                    for i in self.buttonList[self.roleFrameDict[str(event.widget.master)]]:
+                    # for i in self.buttonList[self.roleFrameDict[str(event.widget.master)]]:
+                    for i in self.buttonList[heroButtonRole]:
                         # * [3]
-                        if i not in self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]:
+                        # if i not in self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]:
+                        if i not in self.selectedHeroes:
                             # * [4]
                             i["state"] = DISABLED
 
-            elif event.widget["state"] == NORMAL and self.extendedLimits and len(self.selectedCharacters) < 5 and event.widget not in self.selectedCharacters:
+            elif (
+                event.widget["state"] == NORMAL 
+                and self.extendedLimits 
+                and len(self.selectedHeroes) < TOTAL_SLOTS_ALL 
+                and event.widget not in self.selectedHeroes
+            ):
                 event.widget.configure(bg="SystemHighlight")
-                self.selectedCharacters.append(event.widget)
+                self.selectedHeroes[min(TOTAL_SLOTS_ALL - sum(self.slotsRemaining.values()), 4)] = event.widget
+                # TODO: self.selectedHeroes.append(event.widget)
 
-                if len(self.selectedCharacters) == 5:
+                if len(self.selectedHeroes) == TOTAL_SLOTS_ALL:
                     for i in self.fullbuttonList:
-                        if i not in self.selectedCharacters:
+                        if i not in self.selectedHeroes:
                             i["state"] = DISABLED
 
             threading.Thread(target=self.updateTeamComp, name="updateTeamComp-Thread").start()
@@ -385,16 +480,25 @@ class ui:
             # event.widget.configure(height=event.widget.winfo_height()-6, width=event.widget.winfo_width()-6)
 
         elif event.num == 3:
-            if not self.extendedLimits and event.widget in self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]:
+            if (not self.extendedLimits 
+                and event.widget in self.selectedHeroes
+            ):
                 event.widget.configure(bg="SystemButtonFace")
-                self.selectedRoles[self.roleFrameDict[str(event.widget.master)]].remove(event.widget)
+                self.slotsRemaining[heroButtonRole] += 1
+                self.selectedHeroes[min(TOTAL_SLOTS_ALL - sum(self.slotsRemaining.values()), 4)] = None
+                # TODO: self.selectedHeroes.remove(event.widget)
 
-                for i in self.buttonList[self.roleFrameDict[str(event.widget.master)]]:
+                for i in self.buttonList[heroButtonRole]:
                     i["state"] = NORMAL
 
-            elif self.extendedLimits and event.widget in self.selectedCharacters:
+            elif (
+                self.extendedLimits and 
+                event.widget in self.selectedHeroes
+            ):
                 event.widget.configure(bg="SystemButtonFace")
-                self.selectedCharacters.remove(event.widget)
+                self.slotsRemaining[heroButtonRole] += 1
+                self.selectedHeroes[min(TOTAL_SLOTS_ALL - sum(self.slotsRemaining.values()), 4)] = None
+                # TODO: self.selectedHeroes.remove(event.widget)
 
                 for i in self.fullbuttonList:
                     i["state"] = NORMAL
@@ -402,13 +506,18 @@ class ui:
             threading.Thread(target=self.updateTeamComp, name="updateTeamComp-Thread").start()
             return "break"
 
-    def mouseButton(self, event):
+    def mouseButton(self, event: Event):
         if event.widget == self.extendedLimitsButton:
             self.extendedLimits = [True, False][self.extendedLimits]
             self.extendedLimitsButton.configure(bg=["SystemButtonFace", "Green"][self.extendedLimits])
-            self.selectedCharacters.clear()
-            self.selectedRoles = {ROLE_TANK: [], ROLE_DPS: [], ROLE_SUPPORT: []}
+
+            # self.selectedHeroes.clear()
+            self.selectedHeroes = [None for _ in range(TOTAL_SLOTS_ALL)]
+            # self.selectedRoles = {ROLE_TANK: [], ROLE_DPS: [], ROLE_SUPPORT: []}
+            self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
+
             self.updateTeamComp()
+
             if not self.aiActive:
                 for button in self.fullbuttonList:
                     button.configure(bg="SystemButtonFace")
@@ -416,9 +525,14 @@ class ui:
         if event.widget == self.aiActiveButton:
             self.aiActive = [True, False][self.aiActive]
             self.aiActiveButton.configure(bg=["SystemButtonFace", "Green"][self.aiActive])
-            self.selectedCharacters.clear()
-            self.selectedRoles = {ROLE_TANK: [], ROLE_DPS: [], ROLE_SUPPORT: []}
+
+            # self.selectedHeroes.clear()
+            self.selectedHeroes = [None for _ in range(TOTAL_SLOTS_ALL)]
+            # self.selectedRoles = {ROLE_TANK: [], ROLE_DPS: [], ROLE_SUPPORT: []}
+            self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
+
             self.updateTeamComp()
+
             if self.aiActive:
                 for button in self.fullbuttonList:
                     button.configure(bg="SystemButtonFace")
@@ -437,15 +551,15 @@ class ui:
 
                 self.ongoingKeybaordRequest = True
 
-                self.selectedCharacters.clear()
-                self.selectedRoles = [[], [], []]
+                self.selectedHeroes.clear()
+                # self.selectedRoles = [[], [], []]
 
                 recognize.capture_image()
                 returnedClasses = recognize.recognize()
 
                 for i in returnedClasses:
                     if not i[0][i[0].find(' ') + 1:-1] == "Waiting" and not i[0][i[0].find(' ') + 1:-1] == "Not selected":
-                        self.selectedCharacters.append(self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][0])
+                        self.selectedHeroes.append(self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][0])
                     print(f"\"{i[0][i[0].find(' ') + 1:-1]}\"")
 
                 self.updateTeamComp(aiRequest=True)
@@ -511,53 +625,60 @@ class ui:
 
     # Processing
     def updateTeamComp(self, aiRequest=False):
-        global counterPortraitList, characterPortraitList
-        
-        counterPortraitList = []
-        characterPortraitList = []
-        
-        if not self.extendedLimits and not aiRequest:
-            for a, (role, characters) in enumerate(self.selectedRoles.items()):
-                for b, character in enumerate(characters):
-                    characterPortrait = PhotoImage(file=resource_path("res", "portraits", ['tank', 'dps', 'support'][a], f"{HEROES[self.roleFrameDict[str(character.master)]][int(''.join([o for o in list(str(character)) if o.isnumeric()]))]}.png")).subsample(3, 3)
-                    self.characterPlaceholderList[(a + b + max(a, 1)) - 1].configure(image=characterPortrait)
-                    characterPortraitList.append(characterPortrait)
+        # TODO: move this guard to the calling of the function instead of inside the function
+        # To prevent the user for updating the recognized team comp, return prematurely 
+        if aiRequest:  
+            return
 
-                    counterLists = []
-                    
-                    for counterRole in ["Tank", "DPS", "Support"]:
-                        counterLists.extend(jsonData.counters[HEROES[self.roleFrameDict[str(character.master)]][int("".join([o for o in list(str(character)) if o.isnumeric()]))]][counterRole].values())
-                    
-                    for i, counter in enumerate(counterLists):
-                        portrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{counter}.png")).subsample(6, 6)
-                        self.placeholderMatrix[(a + b + max(a, 1)) - 1][i].configure(image=portrait)
-                        counterPortraitList.append(portrait)
-        else:
-            for c, character in enumerate(self.selectedCharacters):
-                characterPortrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{HEROES[self.roleFrameDict[str(character.master)]][int(''.join([o for o in list(str(character)) if o.isnumeric()]))]}.png")).subsample(3, 3)
-                self.characterPlaceholderList[c].configure(image=characterPortrait)
-                characterPortraitList.append(characterPortrait)
-
-                counterLists = []
-                
-                for counterRole in ["Tank", "DPS", "Support"]:
-                    counterLists.extend(jsonData.counters[HEROES[self.roleFrameDict[str(character.master)]][int("".join([o for o in list(str(character)) if o.isnumeric()]))]][counterRole].values())
-                
-                for i, counter in enumerate(counterLists):
-                    portrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{counter}.png")).subsample(6, 6)
-                    self.placeholderMatrix[c][i].configure(image=portrait)
-                    counterPortraitList.append(portrait)
-            
-        print(counterLists) # E.g: ['Roadhog', 'Zarya', 'Winston', 'Symmetra', 'Reaper', 'Junkrat', 'Pharah', 'Moira']
+        # ? We need to keep a reference to the portraits we set on the
+        # ? labels, otherwise they get garbage collected and disappear
+        # ? from the UI. This is a quirk of how Tkinter handles images
+        # global counterPortraitList, characterPortraitList
         
-    def animationFocus(self, event):
+        # counterPortraitList = []
+        # characterPortraitList = []
+                
+        for index, heroButton in enumerate(self.selectedHeroes):                        # ? Enumerate so we can use the index for updating the placeholder label
+            if heroButton is None:                                                      # No hero selected in this slot
+                # Clear the portrait placeholder for this slot
+                self.characterImagePlaceholders[index].configure(image=portraits.HERO_3X3["blank"])
+
+                # Clear the counter placeholders for this slot
+                for role in ROLES:
+                    for counterPlaceholder in self.counterImagePlaceholders[index][role]:
+                        counterPlaceholder.configure(image=portraits.HERO_6X6["blank"])
+                        
+            else:
+                # * Character
+                # Create the portrait for the selected hero
+                # characterPortrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{heroButton.winfo_name()}.png")).subsample(3, 3)
+                characterPortrait = portraits.HERO_3X3[heroButton.winfo_name()]
+                
+                # and set it on the corresponding placeholder label
+                self.characterImagePlaceholders[index].configure(image=characterPortrait)
+
+                # Keep reference to the portrait to prevent garbage collection
+                # characterPortraitList.append(characterPortrait)
+
+                # * Counters
+                heroCounters = jsonData.counters[heroButton.winfo_name()]
+                for _index, counter in enumerate(heroCounters):
+                    role = HERO_ROLES[heroButton.winfo_name()]
+                    # portrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{counter}.png")).subsample(6, 6)
+                    portrait = portraits.HERO_6X6[counter]
+                    self.counterImagePlaceholders[index][role][0].configure(image=portrait)
+                    
+                    # counterPortraitList.append(portrait)
+
+        
+    def animationFocus(self, event: Event):
         if event.widget["state"] == NORMAL:
             self.characterHighlightedRectList.append([event.widget, event.widget.winfo_x(), event.widget.winfo_y()])    
             # print("<Enter>", event.widget.winfo_x() + 3, event.widget.winfo_y() + 3, event.widget.winfo_height(), event.widget.winfo_width())
             event.widget.configure(height=70, width=70)
             event.widget.place(x=event.widget.winfo_x() - 3, y=event.widget.winfo_y() - 3)
 
-    def animationDefocus(self, event):
+    def animationDefocus(self, event: Event):
         if event.widget["state"] == NORMAL:
             # print("<Leave>", event.widget.winfo_x() + 3, event.widget.winfo_y() + 3, event.widget.winfo_height(), event.widget.winfo_width())
             try:

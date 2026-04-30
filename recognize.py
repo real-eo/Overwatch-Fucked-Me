@@ -1,6 +1,6 @@
 from keras.models import load_model
 from PIL import Image, ImageGrab, ImageOps
-from resourceManager import resource_path, writable_path
+from src.resources.manager import resource_path, writable_path
 import numpy as np
 import os
 

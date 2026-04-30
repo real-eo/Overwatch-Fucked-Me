@@ -1,4 +1,4 @@
-from resourceManager import prefer_local_resource, PATH
+from src.resources.manager import prefer_local_resource, PATH
 from json import loads
 
 

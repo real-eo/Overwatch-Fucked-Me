@@ -4,16 +4,13 @@ import requests
 import json
 import sys
 
-# Same level imports
-try:                from counterpickgg                import HEADERS, PARAMS, COUNTERS_CHUNK, PROPS_INDEX, URL as COUNTERS_WEBSITE
-except ImportError: from src.scrape.counterpickgg     import HEADERS, PARAMS, COUNTERS_CHUNK, PROPS_INDEX, URL as COUNTERS_WEBSITE
-
 # Super level imports
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path: sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.constants import ALL_HERO_IDS
 from src import parse
+from src.constants import ALL_HERO_IDS
+from src.constants.counterpickgg import HEADERS, PARAMS, COUNTERS_CHUNK, PROPS_INDEX, counterpickggID, SPECIAL_CASE_REPLACE_PARAMETERS, URL as COUNTERS_WEBSITE
 
 
 # Counters specific constants
@@ -22,13 +19,23 @@ DISCARD_KEYS = {"locale", "translations"}
 
 def counters(heroID: str, saveDirectory: Path = None):
     # Make the GET request to the hero counters page with the appropriate headers and params
-    response = requests.get(f"{COUNTERS_WEBSITE}/{heroID}", params=PARAMS, headers=HEADERS)
+    response = requests.get(
+        f"{COUNTERS_WEBSITE}/{counterpickggID(heroID)}",                                # ? We have to use counterpickggID due to quirks in how counterpickgg formats heroIDs 
+        params=PARAMS, 
+        headers=HEADERS
+    )        
+    
+    # Replace all instances of counterpickgg's inconsistencies with the standardized variants
+    standardizedResponse = response.text
+    for args in SPECIAL_CASE_REPLACE_PARAMETERS:
+        standardizedResponse = standardizedResponse.replace(*args)
 
     # Extract the rsc records using the custom parser
-    records = parse.rsc(response.text)
+    records = parse.rsc(standardizedResponse)
 
     # Get the props object containing the counters data
     chunk1c = json.loads(records[COUNTERS_CHUNK])                                       # ["$","$L22",null,{...props...}]
+
     props: dict = chunk1c[PROPS_INDEX]                                                  # The 4th element in array is the actual props object containing the counters data
 
     # Remove unnecessary keys from props to reduce memory usage
@@ -53,7 +60,7 @@ def counters(heroID: str, saveDirectory: Path = None):
     
     # Save the counters data to a JSON file
     savePath = saveDirectory / f"{heroID}.json"
-    with open(savePath, "w") as f:
+    with open(savePath, "w", encoding="utf-8") as f:
         json.dump(props, f, indent=4)
 
 
