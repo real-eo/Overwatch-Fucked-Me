@@ -9,7 +9,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path: sys.path.insert(0, str(PROJECT_ROOT))
 
 from src import parse
-from src.constants import ALL_HERO_IDS
+from src.constants import scrape, ALL_HERO_IDS
 from src.constants.counterpickgg import HEADERS, PARAMS, COUNTERS_CHUNK, PROPS_INDEX, counterpickggID, SPECIAL_CASE_REPLACE_PARAMETERS, URL as COUNTERS_WEBSITE
 
 
@@ -66,10 +66,7 @@ def counters(heroID: str, saveDirectory: Path = None):
 
 
 if __name__ == "__main__":
-    # Execution constants
-    OUTPUT_DIRECTORY = Path("out/scraped/").resolve()
-
     # Scrape counters for all heroes and save them to "out/scraped/" directory
     for heroID in ALL_HERO_IDS:
         print(f"Scraping counters for {heroID}...")
-        counters(heroID, saveDirectory=OUTPUT_DIRECTORY)
+        counters(heroID, saveDirectory=scrape.OUTPUT_DIRECTORY)

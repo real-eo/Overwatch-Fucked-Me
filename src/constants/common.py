@@ -1,7 +1,7 @@
 try:                from parse.translate        import heroID
 except ImportError: from src.parse.translate    import heroID
 
-
+from pathlib import Path as _Path
 import sys
 
 
@@ -9,6 +9,10 @@ import sys
 IS_EXE = getattr(sys, "frozen", False)
 BUNDLED_ASSETS = IS_EXE and hasattr(sys, "_MEIPASS")
 DEBUG = not IS_EXE 
+
+
+# Files
+COUNTERS_FILE = "counters.json"
 
 
 # Heroes
@@ -36,47 +40,9 @@ ALL_HEROES = HEROES[ROLE_TANK] + HEROES[ROLE_DPS] + HEROES[ROLE_SUPPORT]
 ALL_HERO_IDS = HERO_IDS[ROLE_TANK] + HERO_IDS[ROLE_DPS] + HERO_IDS[ROLE_SUPPORT]
 
 
-# ? This will eventually be how we store the heroes, and replace "HEROES". But for now, we just assing a new constant
+# ? This will eventually be how we store the heroes, and replace either "HEROES" or "HERO_IDS". But for now, we just assing a new constant
 HERO_ROLES = {
     hero: role 
-    for role, heroList in HEROES.items()                                                # Loop through each role
+    for role, heroList in HERO_IDS.items()                                              # Loop through each role
     for hero in heroList                                                                # Loop through each list of heroes for that role
 } 
-
-
-
-# // m = set("""
-# // Kiriko
-# // 
-# // Lifeweaver
-# // 
-# // Mercy
-# // 
-# // Moira
-# // 
-# // Brigitte
-# // 
-# // Illari
-# // 
-# // Juno
-# // 
-# // Mizuki
-# // 
-# // Wuyang
-# // 
-# // Ana
-# // 
-# // Baptiste
-# // 
-# // Jetpack Cat
-# // 
-# // Lúcio
-# // 
-# // Zenyatta
-# // """.replace("\t", "").replace(":", "_").splitlines())
-# // 
-# // m.remove("")
-# // m = sorted(m)
-# // 
-# // 
-# // print(m)

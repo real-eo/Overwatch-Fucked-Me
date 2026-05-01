@@ -1,6 +1,6 @@
-from src.constants import DEBUG, HEROES, HERO_IDS, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT, HERO_ROLES, MAX_SLOTS_TANK, MAX_SLOTS_DPS, MAX_SLOTS_SUPPORT, ROLES, TOTAL_SLOTS_ALL
-from src.resources.manager import prefer_local_resource, resource_path, ensure_configurable, IS_BUNDLED, IS_LOCAL 
+from src.constants import DEBUG, HEROES, HERO_IDS, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT, HERO_ROLES, MAX_SLOTS_TANK, MAX_SLOTS_DPS, MAX_SLOTS_SUPPORT, ROLES, TOTAL_SLOTS_ALL, COUNTERS_FILE
 from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, Button, PhotoImage, Event, NORMAL, DISABLED, NE
+from src.resources.manager import prefer_local_resource, resource_path, ensure_configurable, IS_LOCAL 
 from src.resources import createPhotoImages, portraits
 from configparser import ConfigParser
 from src.parse import translate
@@ -52,7 +52,7 @@ class ui:
         }
 
         # * Selected hero & counters layout constexrps
-        MAX_COUNTERS_PER_ROLE: int = 7
+        MAX_COUNTERS_PER_ROLE: int = 7                                                  # TODO: Update this to 10, so we can support more counters
 
         # * Hero selection layout constexrps
         # Role button rows
@@ -223,6 +223,7 @@ class ui:
     def _frames(self):
         self.recommendedCharacterFrameList = []
 
+        # TODO: Fix the fact that the support row isn't appearing on screen, but exists, due to not crashing the program, or causing KeyErrors/IndexErrors
         # Character portraits
         for i in range(TOTAL_SLOTS_ALL):
             characterFrame = Frame(master=self.root, height=125+50, width=(self.Layout.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL), background="#3C3C3C", name=f"characterFrame{i}")
@@ -259,7 +260,7 @@ class ui:
                 height=((125/3) + 50), 
                 width=(self.Layout.VIEWPORT_WIDTH/10), 
                 # image=placeholderPortrait, 
-                image=portraits.HERO_3X3["blank"],
+                image=portraits.HERO_3x3["blank"],
                 bg="#4C4C4C", 
                 name=f"placeholder@{a}characterLabel"
             )
@@ -278,7 +279,7 @@ class ui:
                         height=(125/3), 
                         width=(self.Layout.VIEWPORT_WIDTH / TOTAL_SLOTS_ALL / self.Layout.MAX_COUNTERS_PER_ROLE), 
                         # image=placeholderPortrait, 
-                        image=portraits.HERO_3X3["blank"],
+                        image=portraits.HERO_3x3["blank"],
                         bg="#444444",
                         name=f"placeholder@{a}-{counterIndex}-{roleIndex}Label"
                     )
@@ -321,7 +322,7 @@ class ui:
             # for index, _ in enumerate(HEROES[ROLE_TANK])
         # ]
         self.tankPortraitList = [
-            portraits.HERO_4X4[heroID]
+            portraits.HERO_4x4[heroID]
             for heroID in HERO_IDS[ROLE_TANK]
         ]
 
@@ -356,7 +357,7 @@ class ui:
         dpsButtonList = []
         # self.dpsPortraitList = [PhotoImage(file=resource_path("res", "portraits", "dps", f"{HERO_IDS[ROLE_DPS][i]}.png")).subsample(4, 4) for i, _ in enumerate(HEROES[ROLE_DPS])]
         self.dpsPortraitList = [
-            portraits.HERO_4X4[heroID]
+            portraits.HERO_4x4[heroID]
             for heroID in HERO_IDS[ROLE_DPS]
         ]
 
@@ -391,7 +392,7 @@ class ui:
         supportButtonList = []
         # self.supportPortraitList = [PhotoImage(file=resource_path("res", "portraits", "support", f"{HERO_IDS[ROLE_SUPPORT][i]}.png")).subsample(4, 4) for i, _ in enumerate(HEROES[ROLE_SUPPORT])]
         self.supportPortraitList = [
-            portraits.HERO_4X4[heroID]
+            portraits.HERO_4x4[heroID]
             for heroID in HERO_IDS[ROLE_SUPPORT]
         ]
 
@@ -584,7 +585,7 @@ class ui:
 
     def editCounters(self):
         # Open counters.json in default editor
-        startfile(ensure_configurable("counters.json"))
+        startfile(ensure_configurable(COUNTERS_FILE))
 
         # Prompt a popup to know when the user is done editing 
         popup = self.popup(title="Editing counters.json", geometry="200x110")
@@ -600,47 +601,47 @@ class ui:
         # To prevent the user for updating the recognized team comp, return prematurely 
         if aiRequest:  
             return
-
-        # ? We need to keep a reference to the portraits we set on the
-        # ? labels, otherwise they get garbage collected and disappear
-        # ? from the UI. This is a quirk of how Tkinter handles images
-        # global counterPortraitList, characterPortraitList
-        
-        # counterPortraitList = []
-        # characterPortraitList = []
                 
+        # Update portraits and counters for the selected heroes
         for index, heroButton in enumerate(self.selectedHeroes):                        # ? Enumerate so we can use the index for updating the placeholder label
             if heroButton is None:                                                      # No hero selected in this slot
                 # Clear the portrait placeholder for this slot
-                self.characterImagePlaceholders[index].configure(image=portraits.HERO_3X3["blank"])
+                self.characterImagePlaceholders[index].configure(image=portraits.HERO_3x3["blank"])
 
                 # Clear the counter placeholders for this slot
                 for role in ROLES:
                     for counterPlaceholder in self.counterImagePlaceholders[index][role]:
-                        counterPlaceholder.configure(image=portraits.HERO_6X6["blank"])
+                        counterPlaceholder.configure(image=portraits.HERO_6x6["blank"])
                         
             else:
                 # * Character
                 # Create the portrait for the selected hero
-                # characterPortrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{heroButton.winfo_name()}.png")).subsample(3, 3)
-                characterPortrait = portraits.HERO_3X3[heroButton.winfo_name()]
-                
+                characterPortrait = portraits.HERO_3x3[heroButton.winfo_name()]
+            
                 # and set it on the corresponding placeholder label
                 self.characterImagePlaceholders[index].configure(image=characterPortrait)
 
-                # Keep reference to the portrait to prevent garbage collection
-                # characterPortraitList.append(characterPortrait)
 
                 # * Counters
                 heroCounters = jsonData.counters[heroButton.winfo_name()]
-                for _index, counter in enumerate(heroCounters):
-                    role = HERO_ROLES[heroButton.winfo_name()]
-                    # portrait = PhotoImage(file=resource_path("res", "portraits", "all", f"{counter}.png")).subsample(6, 6)
-                    portrait = portraits.HERO_6X6[counter]
-                    self.counterImagePlaceholders[index][role][0].configure(image=portrait)
-                    
-                    # counterPortraitList.append(portrait)
+                usedSlots = {ROLE_TANK: 0, ROLE_DPS: 0, ROLE_SUPPORT: 0}                # To keep track of how many counter slots we have used for each role, so we know where to place the next counter portrait
 
+                for counterID, data in heroCounters.items():                            # TODO: Use the `data` for something
+                    counterRole = HERO_ROLES[counterID]
+
+                    # TODO: Fix this issue (somehow)
+                    # Safety check to prevent index out of range errors 
+                    if usedSlots[counterRole] >= self.Layout.MAX_COUNTERS_PER_ROLE: 
+                        print(f"[!] Warning: Maximum counters reached for role " +  
+                              f"{counterRole}. Counter \"{counterID}\" will be skipped.")
+
+                        continue                                                        # Skip this counter if we've already used all available slots for its role
+                    
+                    portrait = portraits.HERO_6x6[counterID]
+                    self.counterImagePlaceholders[index][counterRole][usedSlots[counterRole]].configure(image=portrait)
+                    
+                    usedSlots[counterRole] += 1
+                    
         
     def animationFocus(self, event: Event):
         if event.widget["state"] == NORMAL:

@@ -1,5 +1,3 @@
-
-
 class __Portraits:
     """
     A proxy object to lazily load the portraits only when they are needed and ready. 

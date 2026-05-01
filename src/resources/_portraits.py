@@ -18,7 +18,7 @@ from src.constants import ALL_HERO_IDS, ROLE_ALL
 # ? labels, otherwise they get garbage collected and disappear
 # ? from the UI. This is a quirk of how Tkinter handles images
 # Store the portraits as PhotoImage objects in a dictionary for easy access. 
-HERO_3X3 = {
+HERO_3x3 = {
     hero: PhotoImage(
         file=resource_path(
             "res", 
@@ -30,7 +30,7 @@ HERO_3X3 = {
     for hero in ["blank"] + ALL_HERO_IDS
 }
     
-HERO_4X4 = {
+HERO_4x4 = {
         hero: PhotoImage(
         file=resource_path(
             "res", 
@@ -42,7 +42,7 @@ HERO_4X4 = {
     for hero in ["blank"] + ALL_HERO_IDS
 }
 
-HERO_6X6 = {
+HERO_6x6 = {
         hero: PhotoImage(
         file=resource_path(
             "res", 
