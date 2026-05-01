@@ -1,6 +1,8 @@
-from keras.models import load_model
-from PIL import Image, ImageGrab, ImageOps
 from src.resources.manager import resource_path, writable_path
+from PIL import Image, ImageGrab, ImageOps
+from src.constants import TOTAL_SLOTS_ALL
+from keras.models import load_model
+from keras import Model
 import numpy as np
 import os
 
@@ -115,7 +117,7 @@ def capture_image():
 def recognize():
     np.set_printoptions(suppress=True)
 
-    model = load_model(resource_path("model", "keras_model.h5"), compile=False)
+    model: Model = load_model(resource_path("model", "keras_model.h5"), compile=False)
     class_names = open(resource_path("model", "labels.txt"), 'r').readlines()
 
     data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
@@ -123,16 +125,16 @@ def recognize():
 
     classesReturned = []
 
-    for i in range(5):
+    for i in range(TOTAL_SLOTS_ALL):
         image = Image.open(writable_path("out", "state", f"e{i}.png")).convert('RGB')
 
         image = ImageOps.fit(image, size, Image.Resampling.LANCZOS)
 
-        image_array = np.asarray(image)
+        imageArray = np.asarray(image)
 
-        normalized_image_array = (image_array.astype(np.float32) / 127.0) - 1
+        normalizedImageArray = (imageArray.astype(np.float32) / 127.0) - 1
 
-        data[0] = normalized_image_array
+        data[0] = normalizedImageArray
 
         prediction = model.predict(data, verbose=0)
         index = np.argmax(prediction)
