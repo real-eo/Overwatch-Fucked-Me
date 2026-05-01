@@ -346,7 +346,7 @@ class ui:
                 tankButton.bind("<Enter>", self.animationFocus)
                 tankButton.bind("<Leave>", self.animationDefocus)
 
-                self.characterButtonsDictionary[HEROES[ROLE_TANK][i]] = [tankButton, 0]
+                self.characterButtonsDictionary[HEROES[ROLE_TANK][i]] = tankButton
                 tankButtonList.append(tankButton)
                 i += 1
 
@@ -381,7 +381,7 @@ class ui:
                 dpsButton.bind("<Enter>", self.animationFocus)
                 dpsButton.bind("<Leave>", self.animationDefocus)
 
-                self.characterButtonsDictionary[HEROES[ROLE_DPS][i]] = [dpsButton, 1]
+                self.characterButtonsDictionary[HEROES[ROLE_DPS][i]] = dpsButton
                 dpsButtonList.append(dpsButton)
                 i += 1
         
@@ -416,7 +416,7 @@ class ui:
                 supportButton.bind("<Enter>", self.animationFocus)
                 supportButton.bind("<Leave>", self.animationDefocus)
 
-                self.characterButtonsDictionary[HEROES[ROLE_SUPPORT][i]] = [supportButton, 2]
+                self.characterButtonsDictionary[HEROES[ROLE_SUPPORT][i]] = supportButton
                 supportButtonList.append(supportButton)
                 
                 i += 1
@@ -427,84 +427,55 @@ class ui:
     # Event handlers
     def mouseButtonCharacters(self, event: Event):
         heroButtonRole = self.roleFrameDict[str(event.widget.master)]
-
-        # TODO: Refactor this spaghetti code, it's really just a mess of if statements and repeated code. It's really hard to read and understand, and it's also really easy to introduce bugs when making changes to it. I have no idea how I ended up with this, but it needs to be fixed. Maybe I can use some helper functions to reduce the amount of repeated code, and maybe I can also use some enums or something to make the code more readable. I don't know, I'll figure it out later. For now, I'm just going to leave it as is, because it works and I'm tired of looking at it.
-        # TODO: Fix the "removing wrong hero" bug. I should be using keys to remove selected, not indexes
+        selectedCount = sum(1 for h in self.selectedHeroes if h is not None)
 
         if event.num == 1:
-            if (event.widget["state"] == NORMAL 
-                and not self.extendedLimits 
-                # and len(self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]) < (2 - (ROLE_TANK == self.roleFrameDict[str(event.widget.master)]))
-                and self.slotsRemaining[heroButtonRole] > 0
-                # and event.widget not in self.selectedRoles[heroPressedRole]):
+            canSelect = (
+                event.widget["state"] == NORMAL
                 and event.widget not in self.selectedHeroes
-            ):
-                event.widget.configure(bg="SystemHighlight")
-                # self.selectedRoles[heroPressedRole].append(event.widget)
-                self.selectedHeroes[min(TOTAL_SLOTS_ALL - sum(self.slotsRemaining.values()), 4)] = event.widget
-                # TODO: self.selectedHeroes.append(event.widget)
+                and (self.slotsRemaining[heroButtonRole] > 0 if not self.extendedLimits else selectedCount < TOTAL_SLOTS_ALL)
+            )
+            if not canSelect: return "break"
+
+            slot = self.selectedHeroes.index(None)
+            self.selectedHeroes[slot] = event.widget
+            event.widget.configure(bg="SystemHighlight")
+
+            if not self.extendedLimits:
                 self.slotsRemaining[heroButtonRole] -= 1
-                
-                # * [1]
-                # if len(self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]) == (2 - (ROLE_TANK == self.roleFrameDict[str(event.widget.master)])):
                 if self.slotsRemaining[heroButtonRole] == 0:
-                    # * [2]
-                    # for i in self.buttonList[self.roleFrameDict[str(event.widget.master)]]:
-                    for i in self.buttonList[heroButtonRole]:
-                        # * [3]
-                        # if i not in self.selectedRoles[self.roleFrameDict[str(event.widget.master)]]:
-                        if i not in self.selectedHeroes:
-                            # * [4]
-                            i["state"] = DISABLED
-
-            elif (
-                event.widget["state"] == NORMAL 
-                and self.extendedLimits 
-                and len(self.selectedHeroes) < TOTAL_SLOTS_ALL 
-                and event.widget not in self.selectedHeroes
-            ):
-                event.widget.configure(bg="SystemHighlight")
-                self.selectedHeroes[min(TOTAL_SLOTS_ALL - sum(self.slotsRemaining.values()), 4)] = event.widget
-                # TODO: self.selectedHeroes.append(event.widget)
-
-                if len(self.selectedHeroes) == TOTAL_SLOTS_ALL:
-                    for i in self.fullbuttonList:
-                        if i not in self.selectedHeroes:
-                            i["state"] = DISABLED
+                    for btn in self.buttonList[heroButtonRole]:
+                        if btn not in self.selectedHeroes:
+                            btn["state"] = DISABLED
+            else:
+                if selectedCount + 1 >= TOTAL_SLOTS_ALL:
+                    for btn in self.fullbuttonList:
+                        if btn not in self.selectedHeroes:
+                            btn["state"] = DISABLED
 
             threading.Thread(target=self.updateTeamComp, name="updateTeamComp-Thread").start()
             return "break"
-        
+
         elif event.num == 2:
             print(str(event.widget.master))
-            # event.widget.configure(height=event.widget.winfo_height()-6, width=event.widget.winfo_width()-6)
 
         elif event.num == 3:
-            if (not self.extendedLimits 
-                and event.widget in self.selectedHeroes
-            ):
-                event.widget.configure(bg="SystemButtonFace")
+            if event.widget not in self.selectedHeroes: return "break"
+
+            self.selectedHeroes[self.selectedHeroes.index(event.widget)] = None         # Fix: find by identity, not index
+            event.widget.configure(bg="SystemButtonFace")
+
+            if not self.extendedLimits:
                 self.slotsRemaining[heroButtonRole] += 1
-                self.selectedHeroes[min(TOTAL_SLOTS_ALL - sum(self.slotsRemaining.values()), 4)] = None
-                # TODO: self.selectedHeroes.remove(event.widget)
-
-                for i in self.buttonList[heroButtonRole]:
-                    i["state"] = NORMAL
-
-            elif (
-                self.extendedLimits and 
-                event.widget in self.selectedHeroes
-            ):
-                event.widget.configure(bg="SystemButtonFace")
-                self.slotsRemaining[heroButtonRole] += 1
-                self.selectedHeroes[min(TOTAL_SLOTS_ALL - sum(self.slotsRemaining.values()), 4)] = None
-                # TODO: self.selectedHeroes.remove(event.widget)
-
-                for i in self.fullbuttonList:
-                    i["state"] = NORMAL
+                for btn in self.buttonList[heroButtonRole]:
+                    btn["state"] = NORMAL
+            else:
+                for btn in self.fullbuttonList:
+                    btn["state"] = NORMAL
 
             threading.Thread(target=self.updateTeamComp, name="updateTeamComp-Thread").start()
             return "break"
+
 
     def mouseButton(self, event: Event):
         if event.widget == self.extendedLimitsButton:
@@ -550,20 +521,20 @@ class ui:
                 print('[§] Starting recognition')
 
                 self.ongoingKeybaordRequest = True
-
-                self.selectedHeroes.clear()
-                # self.selectedRoles = [[], [], []]
+                self.selectedHeroes = [None for _ in range(TOTAL_SLOTS_ALL)]
 
                 recognize.capture_image()
                 returnedClasses = recognize.recognize()
 
-                for i in returnedClasses:
-                    if not i[0][i[0].find(' ') + 1:-1] == "Waiting" and not i[0][i[0].find(' ') + 1:-1] == "Not selected":
-                        self.selectedHeroes.append(self.characterButtonsDictionary[i[0][i[0].find(' ') + 1:-1]][0])
-                    print(f"\"{i[0][i[0].find(' ') + 1:-1]}\"")
+                for cls in returnedClasses:
+                    classID, className, confidenceScore = cls[0].split(" ", 1) + [cls[1]]
+                    
+                    if not className == "Waiting" and not className == "Not selected":
+                        self.selectedHeroes.append(self.characterButtonsDictionary[className])
+
+                    print(f"\"{className}\"")
 
                 self.updateTeamComp(aiRequest=True)
-                
                 self.ongoingKeybaordRequest = False
 
         def startRecognition():
