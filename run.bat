@@ -12,7 +12,7 @@ for %%A in (%*) do (
 if "%DEV_MODE%"=="true" (
     echo Running in development mode...
     python main.py
-    
+
 :: Otherwise, run the compiled EXE
 ) else (
     cd "%~dp0dist"

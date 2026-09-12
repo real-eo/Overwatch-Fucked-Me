@@ -1,4 +1,54 @@
 {
+    "dmon": {
+        "ramattra": {
+            "rating": 8,
+            "description": "Ramattra can pierce D.Mon's D.Mon:R-CLICK with Ramattra:Shift. Also, D.Mon excels at pressuring the enemy backline using the mobility of D.Mon:Shift, but when Ramattra:E is used, D.Mon struggles to attack the backline."
+        },
+        "mei": {
+            "rating": 8,
+            "description": "D.Mon has no ability to fly and excels at diving deep into the frontline, so D.Mon is easily cut off from allies by Mei's Mei:E."
+        },
+        "torbjorn": {
+            "rating": 8,
+            "description": "D.Mon has very short reach and D.Mon:E doesn't have high DPS either, so D.Mon has a hard time destroying Torbj\u00c3\u00b6rn's turret."
+        },
+        "reinhardt": {
+            "rating": 7,
+            "description": "Reinhardt easily wins close-range trades against D.Mon, so D.Mon needs to fight while avoiding Reinhardt. However, although D.Mon has mobility, D.Mon cannot fly, making it hard to avoid fighting Reinhardt."
+        },
+        "bastion": {
+            "rating": 7,
+            "description": "Bastion can easily melt D.Mon along with the barrier using Bastion:Shift. When Bastion is on the enemy team, D.Mon must always watch out for Bastion:Shift."
+        },
+        "echo": {
+            "rating": 7,
+            "description": "Although D.Mon has D.Mon:E, D.Mon has almost no way to deal with airborne enemies, so while Echo is in the air D.Mon can barely do anything to her."
+        },
+        "pharah": {
+            "rating": 7,
+            "description": "Although D.Mon has D.Mon:E, D.Mon has almost no way to deal with airborne enemies, so while Pharah is in the air D.Mon can barely do anything to her."
+        },
+        "reaper": {
+            "rating": 7,
+            "description": "Reaper has overwhelmingly higher DPS than D.Mon, making it easy to gain an advantage against D.Mon in close-range fights."
+        },
+        "symmetra": {
+            "rating": 7,
+            "description": "Symmetra's turret can slow enemies' movement speed, making it easy to shut down D.Mon's mobility. D.Mon has a hard time destroying Symmetra's turret."
+        },
+        "baptiste": {
+            "rating": 7,
+            "description": "D.Mon has difficulty accessing high ground, so Baptiste can easily create distance from D.Mon with his jump."
+        },
+        "lifeweaver": {
+            "rating": 7,
+            "description": "D.Mon has difficulty accessing high ground, so Lifeweaver can create distance from D.Mon's approach with Lifeweaver:Shift."
+        },
+        "jetpack-cat": {
+            "rating": 7,
+            "description": "Although D.Mon has D.Mon:E, D.Mon has almost no way to deal with airborne enemies, so while Jetpack Cat is in the air D.Mon can barely do anything to it."
+        }
+    },
     "dva": {
         "zarya": {
             "rating": 8,
@@ -53,6 +103,10 @@
         "zarya": {
             "rating": 7,
             "description": "Domina's primary fire and abilities easily charge Zarya's barrier energy."
+        },
+        "dmon": {
+            "rating": 7,
+            "description": "D.Mon excels at taking the side, making it easy to get into the range Domina is weak at."
         },
         "ashe": {
             "rating": 7,
@@ -180,7 +234,7 @@
         },
         "roadhog": {
             "rating": 8,
-            "description": "Hazard is easy to hit with Roadhog:Shift during Hazard:R-CLICK. Roadhog can survive Hazard's burst with Roadhog:E."
+            "description": "Roadhog can easily land Roadhog:Shift during Hazard's Hazard:R-CLICK. Roadhog can withstand Hazard's burst damage."
         },
         "echo": {
             "rating": 8,
@@ -192,15 +246,15 @@
         },
         "mauga": {
             "rating": 7,
-            "description": "Hazard has no barrier, making him vulnerable to Mauga's burning effect."
+            "description": "Hazard has no barrier, making him constantly vulnerable to Mauga's burning effect."
         },
         "sigma": {
             "rating": 7,
-            "description": "Hazard is vulnerable to Sigma's poke and easy to hit with Sigma:E."
+            "description": "Hazard is easily poked down by Sigma and vulnerable to Sigma:E."
         },
         "zarya": {
             "rating": 7,
-            "description": "Zarya can easily charge her barrier against Hazard's Hazard:Shift and Hazard:R-CLICK using Zarya:Shift."
+            "description": "Zarya can easily gain charge against Hazard's Hazard:Shift and Hazard:R-CLICK with Zarya:Shift."
         },
         "torbjorn": {
             "rating": 7,
@@ -428,6 +482,10 @@
             "rating": 8,
             "description": "Sigma has difficulty dealing with Winston's space control. Sigma struggles when Winston places barriers on high ground or dives with Winston:E."
         },
+        "dmon": {
+            "rating": 8,
+            "description": "D.Mon can easily take the side using high mobility, making it easy to avoid Sigma's preferred range. D.Mon can easily block Sigma:E with D.Mon:R-CLICK."
+        },
         "sombra": {
             "rating": 8,
             "description": "Sombra can hack and interrupt Sigma's abilities and ultimate. Sigma is weak against flankers."
@@ -459,6 +517,10 @@
         "anran": {
             "rating": 7,
             "description": "Anran has a small hitbox and high mobility, making it difficult for Sigma to land his attacks. Anran's Anran:R-CLICK pierces through Sigma's Sigma:Shift."
+        },
+        "shion": {
+            "rating": 7,
+            "description": "Shion can act as a flanker by moving with Shion:E, and can dodge Sigma's attacks with Shion:Shift. By avoiding Sigma's preferred range while pressuring the backline as a flanker, Shion makes it hard for Sigma to fight."
         },
         "brigitte": {
             "rating": 7,
@@ -570,6 +632,10 @@
             "rating": 9,
             "description": "Winston rarely targets Zarya directly, making it difficult for Zarya to gain Zarya:Shift charge. Winston can immediately stop attacking when he sees Zarya:Shift."
         },
+        "dmon": {
+            "rating": 8,
+            "description": "D.Mon can stop attacking instantly at any time, making it hard to build Zarya's barrier charge."
+        },
         "bastion": {
             "rating": 8,
             "description": "Bastion can melt through Zarya along with her barrier."
@@ -596,6 +662,10 @@
         }
     },
     "anran": {
+        "zarya": {
+            "rating": 8,
+            "description": "Zarya can cleanse Anran's burning effect by using Zarya:Shift."
+        },
         "mei": {
             "rating": 8,
             "description": "Mei can cleanse the burning effect with Mei:Shift. Mei's primary fire requires no aim, making it easy to damage Anran despite Anran's fast movement."
@@ -607,6 +677,10 @@
         "reaper": {
             "rating": 8,
             "description": "Reaper can cleanse Anran's burning effect with Reaper:Shift."
+        },
+        "symmetra": {
+            "rating": 8,
+            "description": "Anran has difficulty destroying Symmetra's Symmetra:Shift."
         },
         "moira": {
             "rating": 8,
@@ -624,9 +698,9 @@
             "rating": 7,
             "description": "Orisa can land Orisa:R-CLICK by targeting the moment Anran's Anran:E ends. Even if Anran applies a burning effect on Orisa, Orisa can use Orisa:Shift to make it difficult for Anran to deal burst damage."
         },
-        "zarya": {
+        "roadhog": {
             "rating": 7,
-            "description": "Zarya can cleanse Anran's burning effect by using Zarya:Shift."
+            "description": "Roadhog can easily land his Roadhog:E by targeting the moment Anran's Anran:E ends."
         },
         "cassidy": {
             "rating": 7,
@@ -640,6 +714,10 @@
             "rating": 7,
             "description": "Anran has difficulty destroying Baptiste's Baptiste:E. Anran's Anran:Shift is vulnerable to hitscan attacks."
         },
+        "brigitte": {
+            "rating": 7,
+            "description": "Brigitte can prevent Anran's burning effect with Brigitte:R-CLICK."
+        },
         "mercy": {
             "rating": 7,
             "description": "Anran has difficulty attacking airborne targets."
@@ -652,7 +730,7 @@
     "ashe": {
         "winston": {
             "rating": 9,
-            "description": "Ashe's low DPS makes it hard to break Winston's barrier. Ashe:Shift has a long cooldown, so repeated Winston dives are difficult to handle."
+            "description": "Ashe's low DPS makes it difficult to break Winston's barrier. Ashe:Shift has a long cooldown, so repeated Winston dives are hard to handle."
         },
         "dva": {
             "rating": 8,
@@ -710,7 +788,7 @@
     "bastion": {
         "doomfist": {
             "rating": 8,
-            "description": "Bastion is easy to hit with Doomfist's Doomfist:R-CLICK and Doomfist:L-CLICK."
+            "description": "Bastion is an easy target for Doomfist's Doomfist:R-CLICK and Doomfist:L-CLICK."
         },
         "sigma": {
             "rating": 8,
@@ -772,19 +850,23 @@
         },
         "junker-queen": {
             "rating": 7,
-            "description": "Cassidy excels at mid-range, but Junker Queen can close the gap with Junker Queen:Shift."
+            "description": "Cassidy, who excels at mid-range, is vulnerable to Junker Queen closing the gap with Junker Queen:Shift."
         },
         "roadhog": {
             "rating": 7,
-            "description": "Cassidy often fights at mid-range, putting him within Roadhog's Roadhog:Shift range."
+            "description": "Cassidy often fights at mid-range, putting him within Roadhog:Shift range."
         },
         "sigma": {
             "rating": 7,
-            "description": "Cassidy often fights at mid-range, entering Sigma's effective range. Cassidy's Cassidy:ULT can be easily countered by Sigma's abilities."
+            "description": "Cassidy often fights at mid-range, within Sigma's preferred range. Cassidy's Cassidy:ULT can be easily negated by Sigma's abilities."
+        },
+        "dmon": {
+            "rating": 7,
+            "description": "D.Mon can easily close the distance against Cassidy. It becomes a mind game, but D.Mon can block Cassidy:E with the barrier."
         },
         "ashe": {
             "rating": 7,
-            "description": "Ashe has longer effective range than Cassidy and can stay out of Cassidy's preferred distance."
+            "description": "Ashe has longer effective range than Cassidy and can stay out of Cassidy's preferred engagement distance."
         },
         "hanzo": {
             "rating": 7,
@@ -832,6 +914,10 @@
             "rating": 7,
             "description": "Widowmaker's primary fire is hitscan, making it easy to hit Echo."
         },
+        "shion": {
+            "rating": 7,
+            "description": "Echo only has 225 HP, so she is easily melted by Shion's burst damage. Since Shion is hitscan, it is easy to land hits even on airborne targets."
+        },
         "moira": {
             "rating": 7,
             "description": "Moira can use Moira:Shift to negate Echo's Echo:R-CLICK."
@@ -870,11 +956,11 @@
         },
         "winston": {
             "rating": 7,
-            "description": "Winston can dive Freja. Freja:E helps escape but Winston can follow."
+            "description": "Freja's low DPS makes her weak against Winston's barrier-assisted dives."
         },
         "zarya": {
             "rating": 7,
-            "description": "Freja's Freja:R-CLICK makes it very easy for Zarya to gain barrier charge."
+            "description": "Freja's primary fire during Freja:R-CLICK makes it very easy for Zarya to gain barrier charge."
         },
         "lucio": {
             "rating": 7,
@@ -888,7 +974,7 @@
     "genji": {
         "mei": {
             "rating": 9,
-            "description": "Mei's primary fire is a beam with slow and freeze, making it very effective against fast targets like Genji. Even when in danger against Genji, Mei can become invulnerable with Mei:Shift."
+            "description": "Mei's primary fire is a beam with a slow effect, making it very effective against fast targets like Genji. Even when in danger against Genji, Mei can become invulnerable with Mei:Shift."
         },
         "symmetra": {
             "rating": 9,
@@ -900,11 +986,11 @@
         },
         "winston": {
             "rating": 8,
-            "description": "Winston's primary fire requires no aim, allowing him to consistently damage Genji. Genji:E passes through Winston's primary fire. Winston can chase Genji even when he tries to escape."
+            "description": "Winston's primary fire is auto-aim, allowing him to deal continuous damage to Genji. Winston's attack goes through Genji's Genji:E. Winston can chase down a low-health Genji."
         },
         "zarya": {
             "rating": 8,
-            "description": "Genji:E passes through beams. Zarya can use her barrier to save teammates from Genji."
+            "description": "Beams pierce through Genji's Genji:E. Zarya can protect teammates from Genji with her barrier."
         },
         "pharah": {
             "rating": 8,
@@ -934,7 +1020,7 @@
         },
         "winston": {
             "rating": 8,
-            "description": "Hanzo's low DPS makes it hard to break Winston's barrier. Hanzo has difficulty dealing with Winston's dives."
+            "description": "Hanzo's low DPS makes it difficult to break Winston's barrier. Hanzo lacks options to deal with Winston's dives."
         },
         "wrecking-ball": {
             "rating": 8,
@@ -962,7 +1048,7 @@
         },
         "sigma": {
             "rating": 7,
-            "description": "Sigma mainly fights from mid-range at the front. Hanzo is vulnerable to Sigma's poke damage."
+            "description": "Sigma excels at mid-range frontal combat. Hanzo is vulnerable to Sigma's poke damage."
         },
         "pharah": {
             "rating": 7,
@@ -992,11 +1078,11 @@
         },
         "mauga": {
             "rating": 8,
-            "description": "Mauga has strong anti-air."
+            "description": "Mauga is strong against airborne targets."
         },
         "zarya": {
             "rating": 8,
-            "description": "Junkrat's skills and primary fire make it easy for Zarya to gain barrier charge."
+            "description": "Junkrat's abilities and primary fire make it easy for Zarya to gain barrier charge."
         },
         "freja": {
             "rating": 8,
@@ -1056,6 +1142,10 @@
             "rating": 7,
             "description": "Mei's wide hitbox makes her vulnerable to Hanzo's headshots."
         },
+        "widowmaker": {
+            "rating": 7,
+            "description": "Mei lacks mobility, so she easily takes Widowmaker's headshots. Once headshot by Widowmaker, even Mei's Mei:Shift becomes meaningless."
+        },
         "freja": {
             "rating": 7,
             "description": "Mei's wide hitbox makes her easy to hit with Freja's primary fire."
@@ -1084,7 +1174,7 @@
     "pharah": {
         "juno": {
             "rating": 9,
-            "description": "Juno's hitscan shots and aerial mobility make her effective against Pharah."
+            "description": "Pharah's projectiles are slow, making it hard to hit airborne Juno. Juno's attacks are hitscan, making it easy to hit Pharah, and Juno's Juno:R-CLICK is homing, so it lands easily on Pharah."
         },
         "dva": {
             "rating": 8,
@@ -1096,7 +1186,7 @@
         },
         "soldier-76": {
             "rating": 8,
-            "description": "Soldier: 76's primary fire is hitscan, making it easy to hit Pharah."
+            "description": "Soldier: 76's primary fire is hitscan, making it easy to hit Pharah. Soldier: 76 can also use his ult to easily finish off Pharah."
         },
         "sombra": {
             "rating": 8,
@@ -1110,13 +1200,17 @@
             "rating": 8,
             "description": "Emre's primary fire is hitscan, making it easy to damage airborne targets like Pharah."
         },
+        "shion": {
+            "rating": 8,
+            "description": "Since Shion is hitscan, it is easy to land hits even on airborne targets. Pharah has a large hitbox, so she is easily melted by Shion:Shift."
+        },
         "illari": {
             "rating": 8,
             "description": "Illari's hitscan shots can easily hit Pharah."
         },
         "mauga": {
             "rating": 7,
-            "description": "Mauga has strong anti-air with Mauga:L-CLICK."
+            "description": "Mauga is strong against airborne targets."
         },
         "zarya": {
             "rating": 7,
@@ -1136,11 +1230,11 @@
         },
         "echo": {
             "rating": 7,
-            "description": "Echo's Echo:E is a beam, making it easier to hit Pharah. Echo has better projectile speed, giving her the advantage in aerial fights."
+            "description": "Echo's Echo:E is a beam, making it easier to hit Pharah in air-to-air combat. Echo also has better projectile speed than Pharah, giving Echo the advantage in aerial fights."
         },
         "baptiste": {
             "rating": 7,
-            "description": "Baptiste's hitscan shots make it easy to hit Pharah."
+            "description": "Baptiste's hitscan shots make it easy to hit Pharah. Against Pharah's ult, Baptiste can protect allies with Baptiste:E."
         },
         "jetpack-cat": {
             "rating": 7,
@@ -1154,11 +1248,11 @@
         },
         "pharah": {
             "rating": 8,
-            "description": "Reaper has no way to reach airborne Pharah."
+            "description": "Reaper has short range and cannot reach airborne targets."
         },
         "cassidy": {
             "rating": 7,
-            "description": "Cassidy's Cassidy:E makes it easy to punish Reaper when he closes in."
+            "description": "Cassidy's Cassidy:E makes it easy to punish Reaper as he tries to escape."
         },
         "symmetra": {
             "rating": 7,
@@ -1183,6 +1277,52 @@
         "jetpack-cat": {
             "rating": 7,
             "description": "Reaper's primary fire has short range, making it difficult to damage airborne targets."
+        }
+    },
+    "shion": {
+        "winston": {
+            "rating": 8,
+            "description": "Shion deals burst damage but struggles with sustained damage, so Shion is slow to break Winston's barrier. After using Shion:E, Shion only has Shion:Shift left, making it hard to create distance from Winston."
+        },
+        "symmetra": {
+            "rating": 8,
+            "description": "Shion needs to land two primary fire shots to destroy Symmetra's Symmetra:Shift, so Shion is slow to break Symmetra:Shift. Also, since Symmetra:Shift slows movement speed, Shion struggles to make use of Shion:E."
+        },
+        "brigitte": {
+            "rating": 8,
+            "description": "Brigitte can completely negate Shion's Shion:R-CLICK by raising her shield the moment Shion:R-CLICK starts charging, or by bashing Shion."
+        },
+        "roadhog": {
+            "rating": 7,
+            "description": "Roadhog can survive Shion's burst damage. While Shion:E is unavailable, Shion often fights at mid-range, making it easy to fall within range of Roadhog:Shift. Against Shion:ULT, Roadhog can negate Shion:ULT by using Roadhog:ULT as well."
+        },
+        "zarya": {
+            "rating": 7,
+            "description": "Zarya can easily use Shion's Shion:E and Shion:R-CLICK as barrier charge."
+        },
+        "hazard": {
+            "rating": 7,
+            "description": "Hazard can easily mitigate Shion:R-CLICK with Hazard:R-CLICK. Since Shion often fights at mid-range, Shion easily becomes a target for Hazard."
+        },
+        "dmon": {
+            "rating": 7,
+            "description": "D.Mon can easily chase down Shion while Shion:E is unavailable, making it easy to apply kill pressure."
+        },
+        "cassidy": {
+            "rating": 7,
+            "description": "Cassidy can stop Shion's Shion:E with Cassidy:E. Against Shion's Shion:R-CLICK, Cassidy can avoid heavy damage by using Cassidy:Shift."
+        },
+        "torbjorn": {
+            "rating": 7,
+            "description": "Torbj\u00c3\u00b6rn has higher health than other damage-role heroes, so he is not easily melted by Shion's burst damage. Also, Torbj\u00c3\u00b6rn's turret makes it harder for Shion to engage."
+        },
+        "tracer": {
+            "rating": 7,
+            "description": "Shion's abilities have a wind-up, so Tracer can easily dodge Shion's attacks with Tracer:Shift."
+        },
+        "moira": {
+            "rating": 7,
+            "description": "Moira can easily gain an advantage against Shion in a 1v1."
         }
     },
     "sierra": {
@@ -1234,17 +1374,17 @@
         },
         "genji": {
             "rating": 7,
-            "description": "Sojourn's attacks are easily reflected by Genji:E, potentially resulting in self-damage."
+            "description": "Sojourn's attacks are easily reflected by Genji's Genji:E, which can result in significant punishment when reflected."
         }
     },
     "soldier-76": {
         "dva": {
             "rating": 8,
-            "description": "His attacks are easily absorbed by D.Va:R-CLICK. Soldier: 76 has difficulty dealing with D.Va:Shift engages."
+            "description": "His attacks are easily absorbed by D.Va's D.Va:R-CLICK. Soldier: 76 has difficulty dealing with D.Va:Shift engages."
         },
         "sigma": {
             "rating": 8,
-            "description": "Sigma can absorb Soldier: 76's damage with Sigma:Shift."
+            "description": "Sigma excels at mid-range frontal combat. Soldier: 76's Soldier: 76:ULT can be easily negated by Sigma's Sigma:Shift or Sigma:R-CLICK."
         },
         "winston": {
             "rating": 8,
@@ -1266,7 +1406,7 @@
     "sombra": {
         "cassidy": {
             "rating": 8,
-            "description": "Cassidy's Cassidy:E can punish Sombra when she decloaks."
+            "description": "Cassidy's Cassidy:E makes it easy to punish Sombra as she tries to escape."
         },
         "symmetra": {
             "rating": 8,
@@ -1284,9 +1424,17 @@
             "rating": 7,
             "description": "D.Va's D.Va:L-CLICK has a very wide spread, making it easy to reveal Sombra while she's stealthed."
         },
+        "zarya": {
+            "rating": 7,
+            "description": "Even if Sombra hacks the enemy backline, it is easily cleansed by Zarya's Zarya:E."
+        },
+        "dmon": {
+            "rating": 7,
+            "description": "Even when about to be hacked by Sombra, D.Mon can cancel the hack by deploying the barrier."
+        },
         "mei": {
             "rating": 7,
-            "description": "Mei:Shift can survive Sombra's burst. Sombra:E cleanses Mei's freeze."
+            "description": "Even if Sombra ambushes Mei, Mei can easily shrug it off by becoming invulnerable with Mei:Shift."
         },
         "reaper": {
             "rating": 7,
@@ -1304,15 +1452,15 @@
     "symmetra": {
         "zarya": {
             "rating": 8,
-            "description": "Symmetra's Symmetra:Shift makes it easy for Zarya to gain barrier charge. Symmetra at mid-range often enters Zarya's effective range."
+            "description": "Symmetra's Symmetra:Shift makes it easy for Zarya to gain barrier charge. Symmetra, who fights at mid-range, often enters Zarya's effective range."
         },
         "pharah": {
             "rating": 8,
-            "description": "Symmetra has weak anti-air. Turrets don't reach Pharah."
+            "description": "Symmetra has weak anti-air. Pharah's range keeps her safe from Symmetra's turrets."
         },
         "wuyang": {
             "rating": 8,
-            "description": "Wuyang can kite Symmetra with mid-range poke."
+            "description": "Wuyang can poke from outside Symmetra's effective range, and can easily destroy Symmetra's Symmetra:Shift."
         },
         "jetpack-cat": {
             "rating": 8,
@@ -1320,15 +1468,15 @@
         },
         "roadhog": {
             "rating": 7,
-            "description": "Symmetra's beam charges quickly against Roadhog's large hitbox."
+            "description": "Symmetra often fights at mid-range, making her easy to catch with Roadhog:Shift."
         },
         "cassidy": {
             "rating": 7,
-            "description": "Symmetra fights at mid-range, but Cassidy's burst can kill her before beam charges."
+            "description": "Symmetra fights at mid-range, but before her beam charges up, Cassidy's burst damage can eliminate her easily."
         },
         "hanzo": {
             "rating": 7,
-            "description": "Symmetra's peeking patterns tend to be predictable, making her vulnerable to Hanzo's headshots."
+            "description": "Symmetra's peeking patterns tend to be predictable, making her vulnerable to Hanzo's headshots. In mid-range fights, Hanzo's Hanzo:E can melt Symmetra before her beam charges up."
         },
         "freja": {
             "rating": 7,
@@ -1338,19 +1486,19 @@
     "torbjorn": {
         "sigma": {
             "rating": 9,
-            "description": "Sigma can absorb turret damage and destroy it with abilities."
+            "description": "Sigma can easily destroy Torbjorn's Torbjorn:Shift. Sigma can stop Torbjorn's ultimate with his abilities."
         },
         "echo": {
             "rating": 8,
-            "description": "Echo can easily destroy Torbjorn:Shift from the air. Torbjorn's primary fire has difficulty hitting airborne Echo."
+            "description": "Echo can easily destroy Torbjorn's Torbjorn:Shift with primary fire and Echo:R-CLICK. Torbjorn's primary fire has difficulty hitting airborne targets."
         },
         "orisa": {
             "rating": 7,
-            "description": "Orisa can tank turret damage and destroy it."
+            "description": "Torbjorn's Torbjorn:Shift is easily destroyed by Orisa's primary fire."
         },
         "ramattra": {
             "rating": 7,
-            "description": "Ramattra can destroy turret easily in either form."
+            "description": "Ramattra can easily destroy Torbjorn's Torbjorn:Shift."
         },
         "zarya": {
             "rating": 7,
@@ -1362,15 +1510,15 @@
         },
         "ashe": {
             "rating": 7,
-            "description": "Torbjorn's wide hitbox makes him easy to hit. Torbjorn:Shift is easily destroyed by Ashe."
+            "description": "Torbjorn's wide hitbox makes him easy to hit with Ashe's primary fire. Torbjorn:Shift is easily destroyed by Ashe."
         },
         "hanzo": {
             "rating": 7,
-            "description": "Torbjorn:Shift is easily destroyed by Hanzo. Torbjorn's hitbox is wide."
+            "description": "Torbjorn's Torbjorn:Shift is easily destroyed by Hanzo. Torbjorn's wide hitbox makes him easy to hit with Hanzo's primary fire."
         },
         "pharah": {
             "rating": 7,
-            "description": "Torbjorn:Shift is easily destroyed by Pharah. Torbjorn's primary fire has travel time, making it hard to hit airborne targets."
+            "description": "Torbjorn's Torbjorn:Shift is easily destroyed by Pharah. Torbjorn's primary fire has travel time, making it hard to hit airborne targets."
         },
         "sojourn": {
             "rating": 7,
@@ -1388,19 +1536,19 @@
     "tracer": {
         "cassidy": {
             "rating": 8,
-            "description": "Cassidy can use Cassidy:E to catch Tracer when she tries to escape."
+            "description": "Cassidy's Cassidy:E makes it easy to punish Tracer as she tries to escape."
         },
         "echo": {
             "rating": 8,
-            "description": "Tracer has short range and struggles to reach airborne Echo."
+            "description": "Tracer's attacks have short range, making it difficult to damage airborne targets."
         },
         "pharah": {
             "rating": 8,
-            "description": "Tracer's attacks have short range, making it difficult to damage airborne targets."
+            "description": "Tracer has no way to reach airborne targets."
         },
         "torbjorn": {
             "rating": 8,
-            "description": "Torbjorn:Shift can damage Tracer when she flanks. Torbjorn:E gives him survivability."
+            "description": "Torbjorn can place Torbjorn:Shift to prepare for Tracer's flanks."
         },
         "brigitte": {
             "rating": 8,
@@ -1412,11 +1560,11 @@
         },
         "mei": {
             "rating": 7,
-            "description": "Mei's beam and slow are effective against Tracer. Mei:Shift can survive Tracer's burst."
+            "description": "Mei's Mei:L-CLICK beam is hard for Tracer to deal with. Mei can use Mei:Shift to survive Tracer's burst."
         },
         "symmetra": {
             "rating": 7,
-            "description": "Symmetra can place Symmetra:Shift turrets to react to Tracer's flanks."
+            "description": "Symmetra's turrets slow Tracer. Beam is effective if Tracer gets close."
         },
         "mercy": {
             "rating": 7,
@@ -1430,7 +1578,7 @@
     "vendetta": {
         "pharah": {
             "rating": 8,
-            "description": "Vendetta has limited options against airborne Pharah."
+            "description": "Vendetta has limited options against airborne targets."
         },
         "jetpack-cat": {
             "rating": 8,
@@ -1438,27 +1586,27 @@
         },
         "orisa": {
             "rating": 7,
-            "description": "Orisa can easily protect teammates from Vendetta with Orisa:R-CLICK."
+            "description": "Orisa can easily protect her teammates from Vendetta with Orisa:R-CLICK and Orisa:E."
         },
         "roadhog": {
             "rating": 7,
-            "description": "Roadhog can protect teammates from Vendetta's dive with Roadhog:Shift."
+            "description": "Roadhog can protect teammates from Vendetta's dives with Roadhog:Shift."
         },
         "cassidy": {
             "rating": 7,
-            "description": "Cassidy:E can stop Vendetta's mobility."
+            "description": "Cassidy's Cassidy:E can stop Vendetta's mobility."
         },
         "echo": {
             "rating": 7,
-            "description": "Vendetta struggles to reach airborne Echo."
+            "description": "Vendetta's skills and attacks have difficulty reaching airborne targets."
         },
         "mei": {
             "rating": 7,
-            "description": "Mei can slow Vendetta's mobility with her primary fire. She can survive danger with Mei:Shift."
+            "description": "Mei can buy time against Vendetta's engage with Mei:Shift. Mei:L-CLICK beam is effective for dealing with fast Vendetta."
         },
         "symmetra": {
             "rating": 7,
-            "description": "Symmetra can place Symmetra:Shift turrets to react to Vendetta's flanks."
+            "description": "Symmetra can prepare for Vendetta's flanks by placing Symmetra:Shift turrets."
         },
         "mizuki": {
             "rating": 7,
@@ -1468,27 +1616,27 @@
     "venture": {
         "echo": {
             "rating": 8,
-            "description": "Venture struggles to reach airborne Echo."
+            "description": "Venture's skills and attacks have difficulty reaching airborne targets."
         },
         "pharah": {
             "rating": 8,
-            "description": "Venture cannot reach airborne Pharah."
+            "description": "Venture cannot reach airborne targets."
         },
         "cassidy": {
             "rating": 7,
-            "description": "Cassidy:E can punish Venture when they surface."
+            "description": "Cassidy's Cassidy:E makes it easy to punish Venture as they try to escape."
         },
         "mei": {
             "rating": 7,
-            "description": "Mei can survive Venture's burst with Mei:Shift. Venture's ultimate can be blocked by Mei:E wall."
+            "description": "Mei can endure Venture's burst damage with Mei:Shift. Against Venture's ult, Mei:E can protect allies."
         },
         "symmetra": {
             "rating": 7,
-            "description": "Symmetra can place Symmetra:Shift turrets to react to Venture's flanks."
+            "description": "Symmetra can prepare for Venture's flanks by placing Symmetra:Shift turrets."
         },
         "torbjorn": {
             "rating": 7,
-            "description": "Torbjorn can place Torbjorn:Shift turret to react to Venture's flanks. Torbjorn's sustain is higher than most heroes, making it harder for Venture to burst him down."
+            "description": "Torbjorn can place Torbjorn:Shift to prepare for Venture's flanks. Torbjorn has higher HP than most heroes and Torbjorn:E, making him resilient against Venture's burst."
         },
         "freja": {
             "rating": 7,
@@ -1506,31 +1654,31 @@
         },
         "winston": {
             "rating": 9,
-            "description": "Winston can dive and pressure Widowmaker. Widowmaker:Shift helps escape."
+            "description": "Widowmaker lacks options to counter Winston's dives. Widowmaker:Shift has a long cooldown, so repeated dives are hard to handle."
         },
         "genji": {
             "rating": 9,
-            "description": "Widowmaker struggles against Genji's close-range pressure. Genji's speed makes headshots difficult."
+            "description": "Widowmaker has great difficulty dealing with Genji's close-range pressure. Genji's movement is very fast, making headshots difficult."
         },
         "doomfist": {
             "rating": 8,
-            "description": "Doomfist can dive Widowmaker. Widowmaker:Shift helps escape."
+            "description": "Widowmaker has great difficulty dealing with Doomfist engages."
         },
         "wrecking-ball": {
             "rating": 8,
-            "description": "Wrecking Ball can dive and pressure Widowmaker."
+            "description": "Widowmaker has difficulty dealing with Wrecking Ball's dives."
         },
         "hazard": {
             "rating": 8,
-            "description": "Widowmaker lacks survivability against Hazard's burst."
+            "description": "Widowmaker lacks survivability, making her vulnerable to Hazard's burst damage."
         },
         "sombra": {
             "rating": 8,
-            "description": "Sombra can easily flank and pressure Widowmaker."
+            "description": "Sombra can easily flank and pressure Widowmaker in close range."
         },
         "tracer": {
             "rating": 8,
-            "description": "Tracer can easily close in and pressure Widowmaker."
+            "description": "Tracer can easily pressure Widowmaker in close range."
         },
         "venture": {
             "rating": 7,
@@ -1556,11 +1704,11 @@
     "ana": {
         "winston": {
             "rating": 9,
-            "description": "Ana has great difficulty dealing with Winston's dives. Ana:Shift is her main counterplay."
+            "description": "Ana has no escape ability, and Winston's barrier blocks her abilities during dives, making it very difficult to deal with."
         },
         "zarya": {
             "rating": 9,
-            "description": "Even if hit by Ana:E, Zarya can cleanse it with her barrier."
+            "description": "Even if hit by Ana's Ana:E, Zarya can cleanse the anti-heal by deploying her barrier afterward."
         },
         "dva": {
             "rating": 8,
@@ -1570,9 +1718,13 @@
             "rating": 8,
             "description": "Sigma can negate Ana's abilities with Sigma:Shift and Sigma:R-CLICK while pressuring her with primary fire."
         },
+        "dmon": {
+            "rating": 8,
+            "description": "Ana has little mobility, so if she fails to land Ana:Shift when D.Mon closes in, she easily dies. D.Mon has a chance to block Ana:Shift and Ana:E with the barrier."
+        },
         "genji": {
             "rating": 8,
-            "description": "Ana has difficulty dealing with Genji's close-range pressure. Her attacks can be reflected by Genji:E."
+            "description": "Ana has difficulty dealing with Genji's close-range pressure. Ana's attacks are easily reflected by Genji's Genji:E, which can result in significant punishment when reflected."
         },
         "tracer": {
             "rating": 8,
@@ -1580,27 +1732,27 @@
         },
         "freja": {
             "rating": 8,
-            "description": "Ana lacks mobility, making her vulnerable to Freja's poke. Freja can stay at range where Ana's abilities are hard to land."
+            "description": "Ana has little mobility, so she easily takes damage from Freja's Freja:R-CLICK."
         },
         "hanzo": {
             "rating": 7,
-            "description": "Ana lacks mobility and her peek patterns tend to be predictable, making her vulnerable to Hanzo's headshots. Hanzo rarely pushes forward, so Ana's Ana:Shift and Ana:E are less likely to land."
+            "description": "Ana lacks mobility and her peek patterns tend to be predictable, making her vulnerable to Hanzo's headshots. Hanzo rarely pushes forward, so he's less likely to get hit by Ana's Ana:Shift and Ana:E."
         },
         "sombra": {
             "rating": 7,
-            "description": "Sombra can easily flank Ana. Ana:Shift can counter Sombra's engage if timed well."
+            "description": "Ana has difficulty dealing with Sombra's flanks. Even if Ana lands Ana:E, Sombra can cleanse the anti-heal with Sombra:E."
         },
         "widowmaker": {
             "rating": 7,
-            "description": "Ana lacks mobility and her peek patterns tend to be predictable, making her vulnerable to Widowmaker's headshots. Widowmaker rarely pushes forward, so Ana's Ana:Shift and Ana:E are less likely to land."
+            "description": "Ana easily takes Widowmaker's headshots due to her lack of mobility and predictable peeking pattern. Since Widowmaker rarely pushes forward, she is unlikely to be hit by Ana's Ana:Shift or Ana:E."
         },
         "venture": {
             "rating": 7,
-            "description": "Venture can easily dive Ana. Ana:Shift can sleep surfacing Venture."
+            "description": "Ana has difficulty dealing with Venture's dive."
         },
         "vendetta": {
             "rating": 7,
-            "description": "Vendetta can easily dive Ana. Ana:Shift is the main counter."
+            "description": "Ana has difficulty dealing with Vendetta's dive."
         },
         "anran": {
             "rating": 7,
@@ -1622,7 +1774,7 @@
     "baptiste": {
         "hanzo": {
             "rating": 7,
-            "description": "Hanzo can one-shot with headshots, making Baptiste:E timing critical."
+            "description": "Hanzo can one-shot many heroes with headshots, making it difficult for Baptiste's Baptiste:E to function in time."
         },
         "widowmaker": {
             "rating": 7,
@@ -1632,7 +1784,7 @@
     "brigitte": {
         "pharah": {
             "rating": 9,
-            "description": "Brigitte's attacks cannot reach airborne Pharah."
+            "description": "Brigitte's primary attack has very short range and cannot attack airborne targets."
         },
         "ramattra": {
             "rating": 8,
@@ -1644,11 +1796,11 @@
         },
         "bastion": {
             "rating": 8,
-            "description": "Bastion:Shift firepower makes it difficult for Brigitte to close in."
+            "description": "Bastion:Shift's firepower makes it difficult for Brigitte to close in."
         },
         "echo": {
             "rating": 8,
-            "description": "Brigitte's attacks cannot reach airborne Echo. Her heal pack is interrupted by Echo's poke."
+            "description": "Brigitte's primary attack has very short range and cannot attack airborne targets. Brigitte's heal pack is easily depleted by Echo's poke."
         },
         "symmetra": {
             "rating": 8,
@@ -1662,13 +1814,17 @@
             "rating": 7,
             "description": "Mauga's close-range damage is very high, and Brigitte's large hitbox makes her melt quickly."
         },
+        "dmon": {
+            "rating": 7,
+            "description": "D.Mon's primary fire is a melee attack, so it pierces Brigitte's barrier. D.Mon has very high mobility, so once Brigitte is caught up to, it's hard for her to escape."
+        },
         "ashe": {
             "rating": 7,
             "description": "Ashe often positions on high ground at long range, making it difficult for Brigitte to close in."
         },
         "junkrat": {
             "rating": 7,
-            "description": "Brigitte has no jump abilities, making her vulnerable to Junkrat. Junkrat:Shift easily creates distance."
+            "description": "Brigitte has no jump abilities, making her vulnerable to Junkrat's attacks. Even when Brigitte closes in, Junkrat:Shift easily creates distance."
         },
         "torbjorn": {
             "rating": 7,
@@ -1676,11 +1832,11 @@
         },
         "widowmaker": {
             "rating": 7,
-            "description": "Brigitte cannot reach Widowmaker at sniping positions."
+            "description": "Brigitte cannot reach Widowmaker at her sniping positions."
         },
         "freja": {
             "rating": 7,
-            "description": "Brigitte cannot reach Freja at flying positions."
+            "description": "Brigitte cannot reach Freja at her flying positions."
         },
         "wuyang": {
             "rating": 7,
@@ -1690,15 +1846,19 @@
     "illari": {
         "dva": {
             "rating": 7,
-            "description": "Illari's ultimate can be absorbed by D.Va:R-CLICK."
+            "description": "Illari's ultimate can be absorbed by D.Va's D.Va:R-CLICK."
         },
         "winston": {
             "rating": 7,
-            "description": "Winston can dive and destroy Illari:E easily."
+            "description": "Winston excels at taking space, making it easy to destroy Illari's Illari:E. Illari's low DPS makes it difficult to break Winston's barrier."
         },
         "hanzo": {
             "rating": 7,
-            "description": "Hanzo can one-shot, making Illari:E timing critical."
+            "description": "Hanzo can one-shot many heroes with headshots, making it difficult for Illari's Illari:E to function in time."
+        },
+        "sombra": {
+            "rating": 7,
+            "description": "Sombra can easily get a line of fire from the side, making it easy to destroy Illari's Illari:E."
         },
         "widowmaker": {
             "rating": 7,
@@ -1707,6 +1867,10 @@
         "sojourn": {
             "rating": 7,
             "description": "Illari's Illari:E can be easily destroyed by Sojourn's Sojourn:E."
+        },
+        "shion": {
+            "rating": 7,
+            "description": "Shion has strong side-flanking ability and good range with Shion:Shift, making it easy to destroy Illari's Illari:E."
         }
     },
     "jetpack-cat": {
@@ -1766,15 +1930,15 @@
     "juno": {
         "winston": {
             "rating": 8,
-            "description": "Winston can dive Juno when she's at lower altitudes."
+            "description": "Winston's auto-aim primary fire allows him to deal continuous damage to Juno."
         },
         "ashe": {
             "rating": 8,
-            "description": "Ashe's hitscan shots make it easy to hit airborne Juno."
+            "description": "Ashe's primary fire is hitscan, making it easy to hit airborne targets."
         },
         "dva": {
             "rating": 7,
-            "description": "D.Va can commit to airborne Juno."
+            "description": "D.Va can commit to airborne targets."
         },
         "mauga": {
             "rating": 7,
@@ -1786,7 +1950,7 @@
         },
         "cassidy": {
             "rating": 7,
-            "description": "Cassidy's hitscan shots make it easy to hit airborne Juno."
+            "description": "Cassidy's hitscan shots make it easy to hit airborne targets."
         },
         "soldier-76": {
             "rating": 7,
@@ -1794,7 +1958,7 @@
         },
         "sombra": {
             "rating": 7,
-            "description": "Sombra can hack and pressure Juno."
+            "description": "Sombra can hack airborne Juno to bring her down to the ground. Sombra's primary fire is hitscan, making it easy to hit airborne targets."
         },
         "widowmaker": {
             "rating": 7,
@@ -1822,7 +1986,7 @@
         },
         "pharah": {
             "rating": 8,
-            "description": "Lifeweaver's projectiles have slow speed, making it hard to hit Pharah. Pharah can easily attack targets on Lifeweaver's lift platform."
+            "description": "Lifeweaver's primary fire has slow projectile speed, making it hard for him to damage Pharah. Pharah can easily attack targets on Lifeweaver's lift."
         },
         "vendetta": {
             "rating": 8,
@@ -1838,7 +2002,7 @@
         },
         "reaper": {
             "rating": 7,
-            "description": "Lifeweaver has difficulty dealing with Reaper's close-range pressure. Wide hitbox makes Reaper effective."
+            "description": "Lifeweaver has difficulty dealing with Reaper's close-range pressure. Lifeweaver's wide hitbox makes Reaper's spread effective."
         },
         "sombra": {
             "rating": 7,
@@ -1846,13 +2010,13 @@
         },
         "venture": {
             "rating": 7,
-            "description": "Lifeweaver is vulnerable to Venture's dives."
+            "description": "Lifeweaver has difficulty dealing with Venture's close-range pressure."
         }
     },
     "lucio": {
         "sombra": {
             "rating": 8,
-            "description": "Lucio:R-CLICK can knock Sombra away when she engages."
+            "description": "Sombra can temporarily disable Lucio's wall riding by hacking him."
         },
         "mauga": {
             "rating": 7,
@@ -1860,7 +2024,7 @@
         },
         "cassidy": {
             "rating": 7,
-            "description": "Cassidy:E can stop Lucio's wall riding."
+            "description": "Cassidy's Cassidy:E can stop Lucio's wall riding."
         },
         "moira": {
             "rating": 7,
@@ -1870,11 +2034,11 @@
     "mercy": {
         "ashe": {
             "rating": 8,
-            "description": "Ashe's hitscan shots hit airborne Mercy. Mercy often gets hit by Ashe:E with allies."
+            "description": "Ashe's primary fire is hitscan, making it easy to hit airborne targets. Mercy is often near teammates, making her likely to get hit by Ashe:E along with allies."
         },
         "cassidy": {
             "rating": 8,
-            "description": "Cassidy's hitscan shots make it easy to hit airborne Mercy."
+            "description": "Cassidy's hitscan shots make it easy to hit airborne targets."
         },
         "soldier-76": {
             "rating": 8,
@@ -1882,11 +2046,11 @@
         },
         "ana": {
             "rating": 8,
-            "description": "Ana:E disables Mercy's healing. However, Mercy's mobility makes her hard to hit."
+            "description": "Mercy can basically only heal or damage-boost, so when an ally is hit by Ana's Ana:E, Mercy is left with few options."
         },
         "dva": {
             "rating": 7,
-            "description": "D.Va can commit to airborne Mercy."
+            "description": "D.Va can commit to airborne targets."
         },
         "mauga": {
             "rating": 7,
@@ -1896,17 +2060,25 @@
             "rating": 7,
             "description": "Domina's primary fire is hitscan, making it easy to hit airborne targets."
         },
+        "dmon": {
+            "rating": 7,
+            "description": "Mercy is often near allies to boost and heal them, so she easily takes D.Mon's primary fire along with those allies. When Mercy has an airborne ally, she can also gain an advantage."
+        },
         "bastion": {
             "rating": 7,
-            "description": "Bastion has strong anti-air. Mercy's healing can't keep up with Bastion's damage."
+            "description": "Bastion has strong anti-air capability. Mercy's healing often can't keep up with Bastion's damage output."
         },
         "sombra": {
             "rating": 7,
-            "description": "Sombra's hack disables Guardian Angel, making Mercy very vulnerable."
+            "description": "Sombra's hack disables Guardian Angel, making Mercy vulnerable."
         },
         "widowmaker": {
             "rating": 7,
-            "description": "Widowmaker can easily hit airborne Mercy. Mercy's predictable flight path is vulnerable."
+            "description": "Widowmaker can easily hit airborne Mercy."
+        },
+        "shion": {
+            "rating": 7,
+            "description": "Shion's primary fire and Shion:R-CLICK are hitscan, making it easy to hit Mercy. Shion can also flank to the side easily, creating more chances to target Mercy than a hero firing hitscan from the front."
         },
         "baptiste": {
             "rating": 7,
@@ -1938,7 +2110,7 @@
     "moira": {
         "symmetra": {
             "rating": 8,
-            "description": "Even when Moira engages, Symmetra can counter with Symmetra:Shift turrets and primary fire."
+            "description": "Symmetra can handle Moira's engage with Symmetra:Shift turrets and primary fire."
         },
         "roadhog": {
             "rating": 7,
@@ -1946,7 +2118,7 @@
         },
         "cassidy": {
             "rating": 7,
-            "description": "Cassidy can use Cassidy:E to catch Moira trying to escape."
+            "description": "Cassidy's Cassidy:E makes it easy to punish Moira as she tries to escape."
         },
         "torbjorn": {
             "rating": 7,
@@ -1960,53 +2132,53 @@
         },
         "sigma": {
             "rating": 7,
-            "description": "Wuyang fights at mid-range where Sigma is effective."
+            "description": "In poke battles that Wuyang excels at, Sigma can gain the advantage with Sigma:Shift and Sigma:R-CLICK."
         },
         "echo": {
             "rating": 7,
-            "description": "Wuyang's projectiles have difficulty hitting agile airborne Echo."
+            "description": "Wuyang's primary fire has difficulty hitting agile airborne Echo."
         }
     },
     "zenyatta": {
         "dva": {
             "rating": 8,
-            "description": "Zenyatta's attacks are easily absorbed by D.Va:R-CLICK. Zenyatta has great difficulty against D.Va:Shift."
+            "description": "His attacks are easily absorbed by D.Va's D.Va:R-CLICK. Zenyatta has great difficulty dealing with D.Va:Shift engages."
         },
         "doomfist": {
             "rating": 8,
-            "description": "Zenyatta is easy to hit with Doomfist's Doomfist:R-CLICK and Doomfist:L-CLICK."
+            "description": "Zenyatta is an easy target for Doomfist's Doomfist:R-CLICK and Doomfist:L-CLICK."
         },
         "winston": {
             "rating": 8,
-            "description": "Zenyatta has great difficulty against Winston's dives."
+            "description": "Zenyatta has difficulty dealing with Winston's dives."
         },
         "tracer": {
             "rating": 8,
-            "description": "Zenyatta has difficulty dealing with Tracer's close-range pressure. Zenyatta's wide hitbox makes him vulnerable to Tracer's spread."
+            "description": "Zenyatta has difficulty dealing with Tracer's close-range pressure. Zenyatta's wide hitbox makes Tracer's spread effective."
         },
         "venture": {
             "rating": 8,
-            "description": "Zenyatta is vulnerable to Venture's dives."
+            "description": "Venture can easily dive Zenyatta."
         },
         "vendetta": {
             "rating": 8,
-            "description": "Zenyatta is very vulnerable to Vendetta's dive."
+            "description": "Vendetta can easily dive Zenyatta."
         },
         "sigma": {
             "rating": 7,
-            "description": "Zenyatta is vulnerable to Sigma's poke. Sigma has abundant defensive options, making him resilient even with Zenyatta:E applied."
+            "description": "Zenyatta is vulnerable to Sigma's poke. Sigma's many defensive options make him hard to kill even when marked with Zenyatta:E."
         },
         "genji": {
             "rating": 7,
-            "description": "Zenyatta has great difficulty dealing with Genji's close-range pressure."
+            "description": "Zenyatta has difficulty dealing with Genji's close-range pressure."
         },
         "hanzo": {
             "rating": 7,
-            "description": "Zenyatta's large hitbox and no mobility make him easy to hit."
+            "description": "Zenyatta has a large and tall hitbox with no mobility, making him easy to hit with Hanzo's primary fire."
         },
         "pharah": {
             "rating": 7,
-            "description": "Zenyatta's projectiles have slow speed, making it difficult to hit airborne Pharah."
+            "description": "Zenyatta's primary fire has slow projectile speed, making it difficult to hit airborne targets."
         },
         "reaper": {
             "rating": 7,
@@ -2014,15 +2186,19 @@
         },
         "sombra": {
             "rating": 7,
-            "description": "Sombra can easily dive and hack Zenyatta."
+            "description": "Zenyatta is very vulnerable to Sombra's flanks and hack."
         },
         "widowmaker": {
             "rating": 7,
-            "description": "Zenyatta lacks mobility and often pushes forward for poke, making him vulnerable to Widowmaker's headshots."
+            "description": "Zenyatta's large hitbox and no mobility make him an easy target."
         },
         "freja": {
             "rating": 7,
-            "description": "Zenyatta's large hitbox and no mobility make him easy to hit with Freja's attacks."
+            "description": "Zenyatta has a large and tall hitbox with no mobility, making him easy to hit with Freja's attacks."
+        },
+        "shion": {
+            "rating": 7,
+            "description": "Zenyatta has a large hitbox and lacks mobility, so he easily takes heavy damage from Shion's Shion:R-CLICK."
         },
         "lucio": {
             "rating": 7,
