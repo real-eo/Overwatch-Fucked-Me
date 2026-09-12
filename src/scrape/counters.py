@@ -10,7 +10,7 @@ if str(PROJECT_ROOT) not in sys.path: sys.path.insert(0, str(PROJECT_ROOT))
 
 from src import parse
 from src.constants import scrape, ALL_HERO_IDS
-from src.constants.counterpickgg import HEADERS, PARAMS, COUNTERS_CHUNK, PROPS_INDEX, counterpickggID, SPECIAL_CASE_REPLACE_PARAMETERS, URL as COUNTERS_WEBSITE
+from src.constants.counterpickgg import HEADERS, PARAMS, COUNTERS_CHUNK, SPECIAL_CASE_COUNTERS_CHUNK, PROPS_INDEX, counterpickggID, SPECIAL_CASE_REPLACE_PARAMETERS, URL as COUNTERS_WEBSITE
 
 
 # Counters specific constants
@@ -34,9 +34,16 @@ def counters(heroID: str, saveDirectory: Path = None):
     records = parse.rsc(standardizedResponse)
 
     # Get the props object containing the counters data
-    chunk1c = json.loads(records[COUNTERS_CHUNK])                                       # ["$","$L22",null,{...props...}]
+    # ? Try to load the default chunk for counters
+    countersChunk = json.loads(records[COUNTERS_CHUNK])                                 # ["$","$L22",null,{...props...}]
+    props: dict = countersChunk[PROPS_INDEX]                                            # The 4th element in array is the actual props object containing the counters data
 
-    props: dict = chunk1c[PROPS_INDEX]                                                  # The 4th element in array is the actual props object containing the counters data
+    # | This implemenation is a hotfix
+    # Check if the current hero is a special chunk case
+    if "abilities" in props:
+        # If so, load the counters via the special chunk code
+        countersChunk = json.loads(records[SPECIAL_CASE_COUNTERS_CHUNK])       
+        props: dict = countersChunk[PROPS_INDEX]                                        # The 4th element in array is the actual props object containing the counters data
 
     # Remove unnecessary keys from props to reduce memory usage
     for key in DISCARD_KEYS:
