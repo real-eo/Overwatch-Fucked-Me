@@ -71,3 +71,7 @@ def heroID(name: str) -> str:
 
     return s
 
+
+if __name__ == "__main__":
+    print("[!] This file is not ment to be run!\n\n")
+    input("Press \"Enter\" to exit . . .")

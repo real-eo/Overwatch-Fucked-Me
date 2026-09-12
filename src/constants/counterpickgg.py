@@ -9,10 +9,6 @@ WINRATE_BY_RANK_CHUNK = "1d"                                                    
 WINRATE_BY_MAP_CHUNK = "1e"                                                             # This contains the winrate by map data in a JSON string format
 KNOWN_PROFESSIONAL_PLAYERS_CHUNK = "1f"                                                 # This contains known professional players on a certain hero in a JSON string format
 
-# ! SOME TANKS HAVE THEIR COUNTER DATA STORED IN A DIFFERENT CHUNK!
-SPECIAL_CASE_ABILITIES_CHUNK = "1b"                                                     # ? This contains the abilities data in a JSON string format. But for some reason, tanks have their data stored in different chunks compared to the other heroes 
-SPECIAL_CASE_COUNTERS_CHUNK = "1c"                                                      # ? This contains the counters data in a JSON string format. But for some reason, tanks have their data stored in different chunks compared to the other heroes
-
 PROPS_INDEX = 3                                                                         # The index in the array where the actual props object is located (0-based index)
 
 
@@ -29,6 +25,11 @@ SPECIAL_CASE_REPLACE_PARAMETERS = (                                             
 HERO_ID_COMPATIBILITY_CONVERSIONS = {                                                   # ! ONLY USED FOR `counterpickggID` FUNCTION 
     SPECIAL_CASE_REPLACE_PARAMETERS[0][NEW]: SPECIAL_CASE_REPLACE_PARAMETERS[0][OLD],   # freja -> freya
 }
+
+# ! SOME TANKS HAVE THEIR COUNTER DATA STORED IN A DIFFERENT CHUNK!
+SPECIAL_CASE_ABILITIES_CHUNK = "1b"                                                     # ? This contains the abilities data in a JSON string format. But for some reason, tanks have their data stored in different chunks compared to the other heroes 
+SPECIAL_CASE_COUNTERS_CHUNK = "1c"                                                      # ? This contains the counters data in a JSON string format. But for some reason, tanks have their data stored in different chunks compared to the other heroes
+
 
 
 def counterpickggID(name: str) -> str:

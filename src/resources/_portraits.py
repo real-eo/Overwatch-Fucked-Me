@@ -54,3 +54,6 @@ HERO_6x6 = {
     for hero in ["blank"] + ALL_HERO_IDS
 }
 
+if __name__ == "__main__":
+    print("[!] This file is not ment to be run!\n\n")
+    input("Press \"Enter\" to exit . . .")
