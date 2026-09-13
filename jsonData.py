@@ -1,4 +1,5 @@
-from resourceManager import prefer_local_resource, PATH
+from src.resources.manager import prefer_local_resource, PATH
+from src.constants import COUNTERS_FILE
 from json import loads
 
 
@@ -6,7 +7,7 @@ def load():
     global counters                                                                     # Cache the counters in a global variable, so it can be accessed without reloading the file every time
 
     # Read counters from Json file
-    with open(prefer_local_resource("counters.json")[PATH], "r") as jsonFile:
+    with open(prefer_local_resource(COUNTERS_FILE)[PATH], "r") as jsonFile:
         jsonData = jsonFile.read()
 
     # Parse Json

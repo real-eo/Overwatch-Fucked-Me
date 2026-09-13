@@ -1,6 +1,7 @@
 [COUNTERS]
 https://esports.gg/news/overwatch/overwatch-2-hero-counters/
 https://overpicker.com/counters
+https://counterpickgg.com/?gamemode=quickplay
 
 [HEROES]
 https://overwatch.fandom.com/wiki/Heroes
