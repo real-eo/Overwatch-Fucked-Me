@@ -56,7 +56,10 @@ class ui:
         SELECTED_HERO_HEIGHT: int = 83                                           
         COUNTERS_AREA_HEIGHT: int = 125
 
-        MAX_COUNTERS_PER_ROLE: int = 7                                                  # TODO: Update this to 10, so we can support more counters
+        MAX_COUNTERS_PER_ROLE: int = 7                                                  # TODO: Update this so we can support more counters, and
+                                                                                        #     : implement a solution which allows for infinite 
+                                                                                        #     : counters to show while retaining the quick and clean
+                                                                                        #     : overview the current implementation has
 
         # * Switch- & icon layout constexprs 
         INPUT_FRAME_HEIGHT: int = 35
@@ -89,7 +92,6 @@ class ui:
 
         # * Globals
         WINDOW_WIDTH: int = 850                                                         # TODO: I think this can be calculated
-        # WINDOW_HEIGHT: int = 625                                                        # TODO: I think this can be calculated
         WINDOW_HEIGHT: int = sum((
             SELECTED_HERO_HEIGHT, 
             COUNTERS_AREA_HEIGHT, 
@@ -114,8 +116,8 @@ class ui:
 
         # Switch- & icon positions
         ROLE_ICON_Y: int = ROLE_FRAMES_Y - ROLE_ICON_FRAME_HEIGHT
-        # INPUT_FRAME_Y: int = ROLE_ICON_Y - SMALL_PADDING - INPUT_FRAME_HEIGHT
-        INPUT_FRAME_Y: int = SELECTED_HERO_HEIGHT + COUNTERS_AREA_HEIGHT
+        INPUT_FRAME_Y: int = ROLE_ICON_Y - SMALL_PADDING - INPUT_FRAME_HEIGHT                       # ? Bottom-based layout (anchored to bottom)
+        # // INPUT_FRAME_Y: int = SELECTED_HERO_HEIGHT + COUNTERS_AREA_HEIGHT                       # ? Top-based layout (anchored to top)
 
 
 
@@ -130,8 +132,6 @@ class ui:
 
         self.buttonList: dict[str, list] = {}
 
-        # self.selectedCharacters = []
-        # self.selectedRoles = {ROLE_TANK: [], ROLE_DPS: [], ROLE_SUPPORT: []}
         self.selectedHeroes: list[Button | None] = [None for _ in range(TOTAL_SLOTS_ALL)] 
         self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
         self.roleFrameDict = {".tankFrame": ROLE_TANK, ".dpsFrame": ROLE_DPS, ".supportFrame": ROLE_SUPPORT}
@@ -146,9 +146,6 @@ class ui:
         self.fullbuttonList = []
         for i in self.buttonList.values():
             self.fullbuttonList.extend(i)
-
-        # // print(self.buttonList)
-        # // print(self.fullbuttonList)
 
         self.characterHighlighted = ""
         self.characterHighlightedRectList = []
