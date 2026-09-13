@@ -544,8 +544,10 @@ class ui:
 
                 for cls in returnedClasses:
                     classID, className, confidenceScore = cls[0].split(" ", 1) + [cls[1]]
-                    
-                    if className not in ("Waiting for player", "Player not selected"):
+
+                    # ! NOTE:
+                    #   TODO: ADD COUNTERS AND LAYOUT SUPPORT FOR "Doctrine"
+                    if className not in ("Waiting for player", "Player not selected", "Doctrine"):
                         try:
                             self.selectedHeroes.append(self.characterButtonsDictionary[className])
                             continue                                                    # ? A bit hacky, but we `continue` to avoid appending 
@@ -574,7 +576,8 @@ class ui:
         def savePortraits():
             # | Debug only function
             # Used when collecting images for portrait dataset
-            recognize.capture_image(persistPortraits=True)
+            if DEBUG: 
+                recognize.capture_image(persistPortraits=True)
 
 
         # Set up hotkeys
@@ -582,7 +585,7 @@ class ui:
                 self.config.get("keybinds", "capture"): startRecognition,
                 self.config.get("keybinds", "debug"): triggerDebug,
                 # | DISABLE THIS AS THIS IS DEBUG ONLY
-                # self.config.get("keybinds", "save"): savePortraits    
+                # // self.config.get("keybinds", "save"): savePortraits    
         })
 
 
