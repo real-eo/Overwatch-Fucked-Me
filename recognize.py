@@ -90,6 +90,7 @@ def capture_image(persistPortraits: bool = False):
     """
     # * 1) Determine, where the x1 of the leeaderboard is based on how many upgrades are active for the most progressed person
     leaderboardX1 = _determine_leaderboard_x1()
+    # leaderboardX1 = 550                                                                 # ! HOTFIX FOR GETTING DATA FROM REPLAYS
 
 
     # * 2) Determine how many players per team

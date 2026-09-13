@@ -545,7 +545,7 @@ class ui:
                 for cls in returnedClasses:
                     classID, className, confidenceScore = cls[0].split(" ", 1) + [cls[1]]
                     
-                    if className not in ("Waiting", "Not selected"):
+                    if className not in ("Waiting for player", "Player not selected"):
                         try:
                             self.selectedHeroes.append(self.characterButtonsDictionary[className])
                             continue                                                    # ? A bit hacky, but we `continue` to avoid appending 
@@ -556,7 +556,7 @@ class ui:
                     # ? This is kinda a bad fix, but for every case where we don't add a character
                     # ? classification, we add `None`. This SHOULD always make the for-loop iterate 
                     # ? 5 times regardless, but it's not programmed explicitly, so there can be some bugs here
-                    self.selectedHeroes.append[None]
+                    self.selectedHeroes.append(None)
 
                 self.updateTeamComp()
                 self.ongoingKeybaordRequest = False
@@ -581,7 +581,8 @@ class ui:
         self.hk = keyboard.GlobalHotKeys({
                 self.config.get("keybinds", "capture"): startRecognition,
                 self.config.get("keybinds", "debug"): triggerDebug,
-                self.config.get("keybinds", "save"): savePortraits
+                # | DISABLE THIS AS THIS IS DEBUG ONLY
+                # self.config.get("keybinds", "save"): savePortraits    
         })
 
 
