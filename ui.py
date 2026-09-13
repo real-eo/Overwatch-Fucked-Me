@@ -537,7 +537,7 @@ class ui:
                 print('[§] Starting recognition')
 
                 self.ongoingKeybaordRequest = True
-                self.selectedHeroes = [None for _ in range(TOTAL_SLOTS_ALL)]
+                self.selectedHeroes = []
 
                 recognize.capture_image()
                 returnedClasses = recognize.recognize()
@@ -548,13 +548,17 @@ class ui:
                     if className not in ("Waiting", "Not selected"):
                         try:
                             self.selectedHeroes.append(self.characterButtonsDictionary[className])
+                            continue
 
                         except KeyError:
                             print(f"[!] ERROR: Coun't find recognized character \"{className}\" in `self.characterButtonsDictionary`!")
 
-                    # | print(f"\"{className}\"")
+                    # ? This is kinda a bad fix, but for every case where we don't add a character
+                    # ? classification, we add `None`. This SHOULD always make the for-loop iterate 
+                    # ? 5 times regardless, but it's not programmed explicitly, so there can be some bugs here
+                    self.selectedHeroes.append[None]
 
-                self.updateTeamComp(aiRequest=True)
+                self.updateTeamComp()
                 self.ongoingKeybaordRequest = False
 
         def startRecognition():
@@ -622,11 +626,13 @@ class ui:
 
 
     # Processing
-    def updateTeamComp(self, aiRequest=False):
-        # TODO: move this guard to the calling of the function instead of inside the function
-        # To prevent the user for updating the recognized team comp, return prematurely 
-        if aiRequest:  
-            return
+    def updateTeamComp(self):
+    # | I THINK THESE GRAY COMMENTS ARE OLD CODE
+    # // def updateTeamComp(self, aiRequest=False):
+        # // # TODO: move this guard to the calling of the function instead of inside the function
+        # // # To prevent the user for updating the recognized team comp, return prematurely 
+        # // if aiRequest:  
+        # //     return
                 
         # Update portraits and counters for the selected heroes
         for index, heroButton in enumerate(self.selectedHeroes):                        # ? Enumerate so we can use the index for updating the placeholder label
