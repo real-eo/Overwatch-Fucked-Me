@@ -14,21 +14,15 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path: sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.constants import CHARACTERS, ROLE_ALL, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT
+from src.constants import ALL_HERO_IDS, COUNTERS_FILE
 
 
 # Generate the empty dictionary for the counters
 counters = {
-    character: {
-        "Tank": {}, 
-        "DPS": {}, 
-        "Support": {}
-    } 
-    for character in CHARACTERS[ROLE_TANK] 
-                   + CHARACTERS[ROLE_DPS] 
-                   + CHARACTERS[ROLE_SUPPORT]
+    character: {} 
+    for character in ALL_HERO_IDS
 }
 
 # Use json.dump to write the dictionary to a file
-with open("counters.json", "w") as countersFile:
+with open(COUNTERS_FILE, "w") as countersFile:
     json.dump(counters, countersFile, indent=4)

@@ -1,4 +1,6 @@
+from unicodedata import normalize, combining
 from pynput import keyboard
+from re import sub
 
 
 def hotkey(key: keyboard.Key, activeMods: set):
@@ -44,3 +46,32 @@ def hotkey(key: keyboard.Key, activeMods: set):
     orderedMods = [mod for mod in ("<ctrl>", "<alt>", "<shift>") if mod in activeMods]  # ! "<tab>"
 
     return "+".join(orderedMods + [base]) if orderedMods else base
+
+
+def heroID(name: str) -> str:
+    # ! Editing this fucntion will not just impact scraping, but also the eveywhere else where heroID is used
+    # 1) lowercase + trim
+    s = name.strip().lower()
+
+    # 2) remove accents (Lúcio -> Lucio)
+    s = normalize("NFKD", s)
+    s = "".join(ch for ch in s if not combining(ch))
+
+    # 3) remove dots (D.Va -> DVa)
+    s = s.replace(".", "")
+
+    # 4) spaces/underscores -> hyphen
+    s = sub(r"[_\s]+", "-", s)
+
+    # 5) keep only a-z, 0-9, hyphen
+    s = sub(r"[^a-z0-9-]", "", s)
+
+    # 6) collapse repeated hyphens
+    s = sub(r"-{2,}", "-", s).strip("-")
+
+    return s
+
+
+if __name__ == "__main__":
+    print("[!] This file is not ment to be run!\n\n")
+    input("Press \"Enter\" to exit . . .")
