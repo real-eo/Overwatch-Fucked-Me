@@ -567,10 +567,17 @@ class ui:
             for key, value in self.config.items("keybinds", raw=True):
                 print(f"[¤]     {key}: {value}")
 
+        def savePortraits():
+            # | Debug only function
+            # Used when collecting images for portrait dataset
+            recognize.capture_image(persistPortraits=True)
+
+
         # Set up hotkeys
         self.hk = keyboard.GlobalHotKeys({
                 self.config.get("keybinds", "capture"): startRecognition,
-                self.config.get("keybinds", "debug"): triggerDebug
+                self.config.get("keybinds", "debug"): triggerDebug,
+                self.config.get("keybinds", "save"): savePortraits
         })
 
 
