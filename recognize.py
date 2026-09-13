@@ -142,7 +142,7 @@ def recognize() -> list[tuple[str, float]]:
         print('[§] Class:', className, end='')
         print('[§] Confidence score:', confidenceScore)
 
-        classesReturned.append([className, confidenceScore])
+        classesReturned.append([className.strip(), confidenceScore])
     
     return classesReturned
 

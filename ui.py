@@ -101,8 +101,6 @@ class ui:
             ROLE_FRAMES_HEIGHT
         ))
 
-        print(WINDOW_HEIGHT)
-
         VIEWPORT_WIDTH: int = WINDOW_WIDTH - (2 * WINDOW_PADDING)
         VIEWPORT_HEIGHT: int = WINDOW_HEIGHT - (2 * WINDOW_PADDING)
 
@@ -547,10 +545,14 @@ class ui:
                 for cls in returnedClasses:
                     classID, className, confidenceScore = cls[0].split(" ", 1) + [cls[1]]
                     
-                    if not className == "Waiting" and not className == "Not selected":
-                        self.selectedHeroes.append(self.characterButtonsDictionary[className])
+                    if className not in ("Waiting", "Not selected"):
+                        try:
+                            self.selectedHeroes.append(self.characterButtonsDictionary[className])
 
-                    print(f"\"{className}\"")
+                        except KeyError:
+                            print(f"[!] ERROR: Coun't find recognized character \"{className}\" in `self.characterButtonsDictionary`!")
+
+                    # | print(f"\"{className}\"")
 
                 self.updateTeamComp(aiRequest=True)
                 self.ongoingKeybaordRequest = False
