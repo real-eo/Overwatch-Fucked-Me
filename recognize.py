@@ -4,13 +4,13 @@ from src.constants import TOTAL_SLOTS_ALL
 from keras.models import load_model
 from keras import Model
 import numpy as np
+import random
 import os
 
 
 
-
 # * Private functions
-def _crop_image(img: Image.Image, dx: int, dy: int):
+def _crop_image(img: Image.Image, dx: int, dy: int, randomName: bool = False):
     _, h = img.size                                                                     # Ignore the width since it's currently unused during cropping 
 
     for i in range(1, int(h-h%dy+1), int(dy)):
@@ -20,7 +20,13 @@ def _crop_image(img: Image.Image, dx: int, dy: int):
             dx, 
             i+dy + (2 * int((i-1)/dy))
         )
-        img.crop(box).save(writable_path("out", "state", f"e{int((i-1)/dy)}.png"))
+        img.crop(box).save(
+            writable_path("out", "state", 
+                f"e{int((i-1)/dy)}.png"                                                 # Default name
+                if not randomName                                                       # Check to see if we should provide a random name 
+                else str(random.random())[2:] + ".png"                                  # Generate a random name
+            )
+        )
 
 
 def _determine_leaderboard_x1() -> int:
@@ -68,7 +74,7 @@ def _determine_leaderboard_x1() -> int:
 
 
 # * Public functions
-def capture_image():
+def capture_image(persistPortraits: bool = False):
     """
     Captures the enemy leaderboard in game
 
@@ -84,6 +90,7 @@ def capture_image():
     """
     # * 1) Determine, where the x1 of the leeaderboard is based on how many upgrades are active for the most progressed person
     leaderboardX1 = _determine_leaderboard_x1()
+    # leaderboardX1 = 550                                                                 # ! HOTFIX FOR GETTING DATA FROM REPLAYS
 
 
     # * 2) Determine how many players per team
@@ -105,7 +112,7 @@ def capture_image():
     # Character image size is: 64x64
     # Role icon image size is: 27x64
     # Border size is: 2x2
-    _crop_image(enemyLeaderboardImage, 93, 64)
+    _crop_image(enemyLeaderboardImage, 93, 64, randomName=persistPortraits)
 
 
     # * 5) Save full leaderboard
@@ -142,7 +149,7 @@ def recognize() -> list[tuple[str, float]]:
         print('[§] Class:', className, end='')
         print('[§] Confidence score:', confidenceScore)
 
-        classesReturned.append([className, confidenceScore])
+        classesReturned.append([className.strip(), confidenceScore])
     
     return classesReturned
 

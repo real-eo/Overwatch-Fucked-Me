@@ -101,8 +101,6 @@ class ui:
             ROLE_FRAMES_HEIGHT
         ))
 
-        print(WINDOW_HEIGHT)
-
         VIEWPORT_WIDTH: int = WINDOW_WIDTH - (2 * WINDOW_PADDING)
         VIEWPORT_HEIGHT: int = WINDOW_HEIGHT - (2 * WINDOW_PADDING)
 
@@ -244,7 +242,6 @@ class ui:
     def _frames(self):
         self.recommendedCharacterFrameList = []
 
-        # TODO: Fix the fact that the support row isn't appearing on screen, but exists, due to not crashing the program, or causing KeyErrors/IndexErrors
         # Character portraits
         for i in range(TOTAL_SLOTS_ALL):
             characterFrame = Frame(
@@ -279,8 +276,6 @@ class ui:
     def _labels(self):
         self.counterImagePlaceholders: list[dict[str, list[Label]]] = []                # 2D list of labels which get replaced with portraits of the counters (3x7)
         self.characterImagePlaceholders: list[Label] = []                               # List of labels which get replaced with portraits of the selected heroes (5)
-
-        # placeholderPortrait = PhotoImage(file=resource_path("res", "portraits", "blank.png")).subsample(3, 3)
 
         for a, b in enumerate(self.recommendedCharacterFrameList):
             characterPlaceholder = Label(
@@ -483,7 +478,7 @@ class ui:
         elif event.num == 3:
             if event.widget not in self.selectedHeroes: return "break"
 
-            self.selectedHeroes[self.selectedHeroes.index(event.widget)] = None         # Fix: find by identity, not index
+            self.selectedHeroes[self.selectedHeroes.index(event.widget)] = None         # TODO: Fix: find by identity, not index
             event.widget.configure(bg="SystemButtonFace")
 
             if not self.extendedLimits:
@@ -542,20 +537,30 @@ class ui:
                 print('[§] Starting recognition')
 
                 self.ongoingKeybaordRequest = True
-                self.selectedHeroes = [None for _ in range(TOTAL_SLOTS_ALL)]
+                self.selectedHeroes = []
 
                 recognize.capture_image()
                 returnedClasses = recognize.recognize()
 
                 for cls in returnedClasses:
                     classID, className, confidenceScore = cls[0].split(" ", 1) + [cls[1]]
-                    
-                    if not className == "Waiting" and not className == "Not selected":
-                        self.selectedHeroes.append(self.characterButtonsDictionary[className])
 
-                    print(f"\"{className}\"")
+                    # ! NOTE:
+                    #   TODO: ADD COUNTERS AND LAYOUT SUPPORT FOR "Doctrine"
+                    if className not in ("Waiting for player", "Player not selected", "Doctrine"):
+                        try:
+                            self.selectedHeroes.append(self.characterButtonsDictionary[className])
+                            continue                                                    # ? A bit hacky, but we `continue` to avoid appending 
+                                                                                        # ? `None` to selectedHeroes in two separate places
+                        except KeyError:
+                            print(f"[!] ERROR: Coun't find recognized character \"{className}\" in `self.characterButtonsDictionary`!")
 
-                self.updateTeamComp(aiRequest=True)
+                    # ? This is kinda a bad fix, but for every case where we don't add a character
+                    # ? classification, we add `None`. This SHOULD always make the for-loop iterate 
+                    # ? 5 times regardless, but it's not programmed explicitly, so there can be some bugs here
+                    self.selectedHeroes.append(None)
+
+                self.updateTeamComp()
                 self.ongoingKeybaordRequest = False
 
         def startRecognition():
@@ -568,10 +573,19 @@ class ui:
             for key, value in self.config.items("keybinds", raw=True):
                 print(f"[¤]     {key}: {value}")
 
+        def savePortraits():
+            # | Debug only function
+            # Used when collecting images for portrait dataset
+            if DEBUG: 
+                recognize.capture_image(persistPortraits=True)
+
+
         # Set up hotkeys
         self.hk = keyboard.GlobalHotKeys({
                 self.config.get("keybinds", "capture"): startRecognition,
-                self.config.get("keybinds", "debug"): triggerDebug
+                self.config.get("keybinds", "debug"): triggerDebug,
+                # | DISABLE THIS AS THIS IS DEBUG ONLY
+                # // self.config.get("keybinds", "save"): savePortraits    
         })
 
 
@@ -616,11 +630,13 @@ class ui:
 
 
     # Processing
-    def updateTeamComp(self, aiRequest=False):
-        # TODO: move this guard to the calling of the function instead of inside the function
-        # To prevent the user for updating the recognized team comp, return prematurely 
-        if aiRequest:  
-            return
+    def updateTeamComp(self):
+    # | I THINK THESE GRAY COMMENTS ARE OLD CODE
+    # // def updateTeamComp(self, aiRequest=False):
+        # // # TODO: move this guard to the calling of the function instead of inside the function
+        # // # To prevent the user for updating the recognized team comp, return prematurely 
+        # // if aiRequest:  
+        # //     return
                 
         # Update portraits and counters for the selected heroes
         for index, heroButton in enumerate(self.selectedHeroes):                        # ? Enumerate so we can use the index for updating the placeholder label
