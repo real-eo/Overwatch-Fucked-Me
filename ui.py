@@ -1,5 +1,5 @@
-from src.constants import DEBUG, HEROES, HERO_IDS, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT, HERO_ROLES, MAX_SLOTS_TANK, MAX_SLOTS_DPS, MAX_SLOTS_SUPPORT, ROLES, TOTAL_SLOTS_ALL, COUNTERS_FILE
-from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, Button, PhotoImage, Event, NORMAL, DISABLED, NE
+from src.constants import DEBUG, HEROES, HERO_IDS, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT, HERO_ROLES, MAX_SLOTS_TANK, MAX_SLOTS_DPS, MAX_SLOTS_SUPPORT, ROLES, ROLE_COUNT, TOTAL_SLOTS_ALL, COUNTERS_FILE
+from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, Button, PhotoImage, Event, NORMAL, DISABLED, W, E, NE
 from src.resources.manager import prefer_local_resource, resource_path, ensure_configurable, IS_LOCAL 
 from src.resources import createPhotoImages, portraits
 from configparser import ConfigParser
@@ -15,6 +15,7 @@ class ui:
     class Layout:
         # * Constants
         # Padding
+        SMALL_PADDING: int = 2
         ROLE_FRAME_SEPERATOR_PADDING: int = 5
         WINDOW_PADDING: int = 10
         
@@ -29,7 +30,7 @@ class ui:
                 1: 3,
                 2: 3,
                 3: 3,
-                4: 2
+                4: 3
             },
 
             # DPS
@@ -38,7 +39,7 @@ class ui:
                 1: 5,
                 2: 5,
                 3: 5,
-                4: 3
+                4: 4
             },
 
             # Support
@@ -51,10 +52,17 @@ class ui:
             }
         }
 
-        # * Selected hero & counters layout constexrps
+        # * Selected hero & counters layout constexprs
+        SELECTED_HERO_HEIGHT: int = 83                                           
+        COUNTERS_AREA_HEIGHT: int = 125
+
         MAX_COUNTERS_PER_ROLE: int = 7                                                  # TODO: Update this to 10, so we can support more counters
 
-        # * Hero selection layout constexrps
+        # * Switch- & icon layout constexprs 
+        INPUT_FRAME_HEIGHT: int = 35
+        ROLE_ICON_FRAME_HEIGHT: int = 35
+        
+        # * Hero selection layout constexprs
         # Role button rows
         TANK_BUTTON_ROWS: int = len(GRID[ROLE_TANK])
         DPS_BUTTON_ROWS: int = len(GRID[ROLE_DPS])
@@ -79,20 +87,36 @@ class ui:
 
         ROLE_FRAMES_HEIGHT: int = CHARACTER_BUTTON_ROWS * CHARACTER_BUTTON_SIZE         # ? Amount of rows * size of one button
 
-        # Frame positions
-        TANK_FRAME_X: int = 0 + WINDOW_PADDING                                                      # 0                     + window_padding
-        DPS_FRAME_X: int = (TANK_FRAME_X + TANK_FRAME_WIDTH) + ROLE_FRAME_SEPERATOR_PADDING         # 255 +   role_padding  + window_padding
-        SUPPORT_FRAME_X: int = (DPS_FRAME_X + DPS_FRAME_WIDTH) + ROLE_FRAME_SEPERATOR_PADDING       # 600 + 2*role_padding  + window_padding
-
-        ROLE_FRAMES_Y: int = 250                                                        # Kinda arbitrary, but it works
-
-        
         # * Globals
         WINDOW_WIDTH: int = 850                                                         # TODO: I think this can be calculated
-        WINDOW_HEIGHT: int = 625                                                        # TODO: I think this can be calculated
+        # WINDOW_HEIGHT: int = 625                                                        # TODO: I think this can be calculated
+        WINDOW_HEIGHT: int = sum((
+            SELECTED_HERO_HEIGHT, 
+            COUNTERS_AREA_HEIGHT, 
+            INPUT_FRAME_HEIGHT,
+            SMALL_PADDING, 
+            ROLE_ICON_FRAME_HEIGHT,
+            ROLE_FRAMES_HEIGHT
+        ))
+
+        print(WINDOW_HEIGHT)
 
         VIEWPORT_WIDTH: int = WINDOW_WIDTH - (2 * WINDOW_PADDING)
         VIEWPORT_HEIGHT: int = WINDOW_HEIGHT - (2 * WINDOW_PADDING)
+
+        # * Positions
+        # Role frame positions
+        TANK_FRAME_X: int = 0 + WINDOW_PADDING                                                      # 0                     + window_padding
+        DPS_FRAME_X: int = (TANK_FRAME_X + TANK_FRAME_WIDTH) + ROLE_FRAME_SEPERATOR_PADDING         # 255 +   role_padding  + window_padding
+        SUPPORT_FRAME_X: int = (DPS_FRAME_X + DPS_FRAME_WIDTH) + ROLE_FRAME_SEPERATOR_PADDING       # 600 + 2*role_padding  + window_padding
+        
+        ROLE_FRAMES_Y: int = WINDOW_HEIGHT - ROLE_FRAMES_HEIGHT
+
+        # Switch- & icon positions
+        ROLE_ICON_Y: int = ROLE_FRAMES_Y - ROLE_ICON_FRAME_HEIGHT
+        # INPUT_FRAME_Y: int = ROLE_ICON_Y - SMALL_PADDING - INPUT_FRAME_HEIGHT
+        INPUT_FRAME_Y: int = SELECTED_HERO_HEIGHT + COUNTERS_AREA_HEIGHT
+
 
 
     def __init__(self):
@@ -226,7 +250,14 @@ class ui:
         # TODO: Fix the fact that the support row isn't appearing on screen, but exists, due to not crashing the program, or causing KeyErrors/IndexErrors
         # Character portraits
         for i in range(TOTAL_SLOTS_ALL):
-            characterFrame = Frame(master=self.root, height=125+50, width=(self.Layout.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL), background="#3C3C3C", name=f"characterFrame{i}")
+            characterFrame = Frame(
+                master=self.root, 
+                height=self.Layout.SELECTED_HERO_HEIGHT + self.Layout.COUNTERS_AREA_HEIGHT, 
+                width=(self.Layout.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL), 
+                background="#3C3C3C", 
+                name=f"characterFrame{i}"
+            )
+
             characterFrame.place(
                 x=((self.Layout.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL)*i + (TOTAL_SLOTS_ALL*i)), 
                 y=0
@@ -234,15 +265,15 @@ class ui:
             self.recommendedCharacterFrameList.append(characterFrame)
 
         # Character buttons
-        self.inputFrame = Frame(master=self.root, height=35, width=850, background="#3C3C3C", name="inputFrame")
-        self.roleInfoFrame = Frame(master=self.root, height=35, width=850, background="#3C3C3C", name="roleInfoFrame")
+        self.inputFrame = Frame(master=self.root, height=self.Layout.INPUT_FRAME_HEIGHT, width=self.Layout.WINDOW_WIDTH, background="#3C3C3C", name="inputFrame")
+        self.roleInfoFrame = Frame(master=self.root, height=self.Layout.ROLE_ICON_FRAME_HEIGHT, width=self.Layout.WINDOW_WIDTH, background="#3C3C3C", name="roleInfoFrame")
 
         self.tankFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.TANK_FRAME_WIDTH, background="#3C3C3C", name="tankFrame")
         self.dpsFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.DPS_FRAME_WIDTH, background="#3C3C3C", name="dpsFrame")
         self.supportFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.SUPPORT_FRAME_WIDTH, background="#3C3C3C", name="supportFrame")
 
-        self.inputFrame.place(x=0, y=178)
-        self.roleInfoFrame.place(x=0 + self.Layout.WINDOW_PADDING, y=215)
+        self.inputFrame.place(x=0, y=self.Layout.INPUT_FRAME_Y)
+        self.roleInfoFrame.place(x=0 + self.Layout.WINDOW_PADDING, y=self.Layout.ROLE_ICON_Y)
 
         self.tankFrame.place(   x=self.Layout.TANK_FRAME_X,     y=self.Layout.ROLE_FRAMES_Y)
         self.dpsFrame.place(    x=self.Layout.DPS_FRAME_X,      y=self.Layout.ROLE_FRAMES_Y)
@@ -257,7 +288,7 @@ class ui:
         for a, b in enumerate(self.recommendedCharacterFrameList):
             characterPlaceholder = Label(
                 b, 
-                height=((125/3) + 50), 
+                height=(self.Layout.SELECTED_HERO_HEIGHT), 
                 width=(self.Layout.VIEWPORT_WIDTH/10), 
                 # image=placeholderPortrait, 
                 image=portraits.HERO_3x3["blank"],
@@ -276,7 +307,7 @@ class ui:
                 for counterIndex in range(self.Layout.MAX_COUNTERS_PER_ROLE):
                     counterPlaceholder = Label(
                         b, 
-                        height=(125/3), 
+                        height=((self.Layout.COUNTERS_AREA_HEIGHT / ROLE_COUNT)), 
                         width=(self.Layout.VIEWPORT_WIDTH / TOTAL_SLOTS_ALL / self.Layout.MAX_COUNTERS_PER_ROLE), 
                         # image=placeholderPortrait, 
                         image=portraits.HERO_3x3["blank"],
@@ -286,7 +317,7 @@ class ui:
 
                     counterPlaceholder.place(
                         x=(((self.Layout.VIEWPORT_WIDTH / TOTAL_SLOTS_ALL / self.Layout.MAX_COUNTERS_PER_ROLE) * counterIndex)), 
-                        y=((125 / 3) * (roleIndex + 1) + 50)
+                        y=((self.Layout.COUNTERS_AREA_HEIGHT / ROLE_COUNT) * (roleIndex) + self.Layout.SELECTED_HERO_HEIGHT)
                     )
 
                     # placeholderList.append(counterPlaceholder)
@@ -303,24 +334,18 @@ class ui:
             iconLabel.place(x=([-5, -5+225+5, -5+600+10][x]), y=-7)
 
     def _buttons(self):
-        # global self.extendedLimitsButton
-
         self.extendedLimitsButton = Button(master=self.inputFrame, text="Extended Limits", name="extendedLimitsButton")
-        self.extendedLimitsButton.place(x=5, y=0)
+        self.extendedLimitsButton.place(x=5, y=self.Layout.INPUT_FRAME_HEIGHT / 2, anchor=W)
         self.extendedLimitsButton.bind("<Button>", self.mouseButton)
 
         self.aiActiveButton = Button(master=self.inputFrame, text="AI Recognition", name="aiActiveButton")
-        self.aiActiveButton.place(x=845, y=0, anchor=NE)
+        self.aiActiveButton.place(x=self.Layout.WINDOW_WIDTH - 5, y=self.Layout.INPUT_FRAME_HEIGHT / 2, anchor=E)
         self.aiActiveButton.bind("<Button>", self.mouseButton)
 
 
     # Select characters
     def tank(self):
         tankButtonList = []
-        # self.tankPortraitList = [
-            # PhotoImage(file=resource_path("res", "portraits", "tank", f"{HERO_IDS[ROLE_TANK][index]}.png")).subsample(4, 4)
-            # for index, _ in enumerate(HEROES[ROLE_TANK])
-        # ]
         self.tankPortraitList = [
             portraits.HERO_4x4[heroID]
             for heroID in HERO_IDS[ROLE_TANK]
@@ -355,7 +380,6 @@ class ui:
 
     def dps(self):
         dpsButtonList = []
-        # self.dpsPortraitList = [PhotoImage(file=resource_path("res", "portraits", "dps", f"{HERO_IDS[ROLE_DPS][i]}.png")).subsample(4, 4) for i, _ in enumerate(HEROES[ROLE_DPS])]
         self.dpsPortraitList = [
             portraits.HERO_4x4[heroID]
             for heroID in HERO_IDS[ROLE_DPS]
@@ -390,7 +414,6 @@ class ui:
 
     def support(self):
         supportButtonList = []
-        # self.supportPortraitList = [PhotoImage(file=resource_path("res", "portraits", "support", f"{HERO_IDS[ROLE_SUPPORT][i]}.png")).subsample(4, 4) for i, _ in enumerate(HEROES[ROLE_SUPPORT])]
         self.supportPortraitList = [
             portraits.HERO_4x4[heroID]
             for heroID in HERO_IDS[ROLE_SUPPORT]

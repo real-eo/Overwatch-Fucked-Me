@@ -22,6 +22,7 @@ ROLE_SUPPORT = "support";   MAX_SLOTS_SUPPORT = 2                               
 ROLE_ALL = "all";           TOTAL_SLOTS_ALL = 5                                         # TODO: This implementation has to be reworked once we implement 6v6
 
 ROLES = [ROLE_TANK, ROLE_DPS, ROLE_SUPPORT]
+ROLE_COUNT = len(ROLES)
 
 HEROES = {
     ROLE_TANK: ['D.Mon', 'D.Va', 'Domina', 'Doomfist', 'Hazard', 'Junker Queen', 'Mauga', 'Orisa', 'Ramattra', 'Reinhardt', 'Roadhog', 'Sigma', 'Winston', 'Wrecking Ball', 'Zarya'],
