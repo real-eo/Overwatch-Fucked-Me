@@ -548,8 +548,8 @@ class ui:
                     if className not in ("Waiting", "Not selected"):
                         try:
                             self.selectedHeroes.append(self.characterButtonsDictionary[className])
-                            continue
-
+                            continue                                                    # ? A bit hacky, but we `continue` to avoid appending 
+                                                                                        # ? `None` to selectedHeroes in two separate places
                         except KeyError:
                             print(f"[!] ERROR: Coun't find recognized character \"{className}\" in `self.characterButtonsDictionary`!")
 
