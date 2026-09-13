@@ -244,7 +244,6 @@ class ui:
     def _frames(self):
         self.recommendedCharacterFrameList = []
 
-        # TODO: Fix the fact that the support row isn't appearing on screen, but exists, due to not crashing the program, or causing KeyErrors/IndexErrors
         # Character portraits
         for i in range(TOTAL_SLOTS_ALL):
             characterFrame = Frame(
@@ -279,8 +278,6 @@ class ui:
     def _labels(self):
         self.counterImagePlaceholders: list[dict[str, list[Label]]] = []                # 2D list of labels which get replaced with portraits of the counters (3x7)
         self.characterImagePlaceholders: list[Label] = []                               # List of labels which get replaced with portraits of the selected heroes (5)
-
-        # placeholderPortrait = PhotoImage(file=resource_path("res", "portraits", "blank.png")).subsample(3, 3)
 
         for a, b in enumerate(self.recommendedCharacterFrameList):
             characterPlaceholder = Label(
@@ -483,7 +480,7 @@ class ui:
         elif event.num == 3:
             if event.widget not in self.selectedHeroes: return "break"
 
-            self.selectedHeroes[self.selectedHeroes.index(event.widget)] = None         # Fix: find by identity, not index
+            self.selectedHeroes[self.selectedHeroes.index(event.widget)] = None         # TODO: Fix: find by identity, not index
             event.widget.configure(bg="SystemButtonFace")
 
             if not self.extendedLimits:
