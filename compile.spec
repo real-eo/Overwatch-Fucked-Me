@@ -28,7 +28,6 @@ a = Analysis(
         'sklearn', 'skimage',
         'IPython', 'ipykernel', 'jupyter',
         'notebook', 'nbformat', 'nbconvert',
-        'h5py',
         'tensorboard',
         'tf2onnx', 'onnx',
         'cv2',         
