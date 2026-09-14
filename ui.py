@@ -154,9 +154,6 @@ class ui:
         self.config = ConfigParser()
         self.config.read(self.configPath)
 
-        # self.initateStop = False
-
-        # self.root.bind("<Control-i>", captureImage)
         threading.Thread(target=self.keyListener, daemon=True, name="listening-Thread").start()
 
         self.root.protocol("WM_DELETE_WINDOW", self.onClose)
@@ -297,6 +294,7 @@ class ui:
 
             for roleIndex, role in enumerate(ROLES):
                 for counterIndex in range(self.Layout.MAX_COUNTERS_PER_ROLE):
+                    # Object
                     counterPlaceholder = Label(
                         b, 
                         height=((self.Layout.COUNTERS_AREA_HEIGHT / ROLE_COUNT)), 
@@ -307,12 +305,21 @@ class ui:
                         name=f"placeholder@{a}-{counterIndex}-{roleIndex}Label"
                     )
 
+                    # Location
                     counterPlaceholder.place(
                         x=(((self.Layout.VIEWPORT_WIDTH / TOTAL_SLOTS_ALL / self.Layout.MAX_COUNTERS_PER_ROLE) * counterIndex)), 
                         y=((self.Layout.COUNTERS_AREA_HEIGHT / ROLE_COUNT) * (roleIndex) + self.Layout.SELECTED_HERO_HEIGHT)
                     )
 
-                    # placeholderList.append(counterPlaceholder)
+                    # Data
+                    counterPlaceholder.counterData = None
+                    counterPlaceholder.counterID = None
+
+                    # Functionality
+                    counterPlaceholder.bind("<Enter>", self.showCounterTooltip)
+                    counterPlaceholder.bind("<Leave>", self.hideCounterTooltip)
+
+                    # Storage
                     placeholderDict.setdefault(
                         role,                                                           # Get the list of placeholders for the current role (tank/dps/support)
                         []                                                              # If it doesn't exist, create a new empty list
@@ -469,7 +476,7 @@ class ui:
                         if btn not in self.selectedHeroes:
                             btn["state"] = DISABLED
 
-            threading.Thread(target=self.updateTeamComp, name="updateTeamComp-Thread").start()
+            self.root.after(0, self.updateTeamComp)
             return "break"
 
         elif event.num == 2:
@@ -489,7 +496,7 @@ class ui:
                 for btn in self.fullbuttonList:
                     btn["state"] = NORMAL
 
-            threading.Thread(target=self.updateTeamComp, name="updateTeamComp-Thread").start()
+            self.root.after(0, self.updateTeamComp)
             return "break"
 
 
@@ -560,7 +567,8 @@ class ui:
                     # ? 5 times regardless, but it's not programmed explicitly, so there can be some bugs here
                     self.selectedHeroes.append(None)
 
-                self.updateTeamComp()
+                # // self.updateTeamComp()
+                self.root.after(0, lambda: self.updateTeamComp(forceReload=True))       # ? Tkinter widgets should only be updated on the main thread
                 self.ongoingKeybaordRequest = False
 
         def startRecognition():
@@ -576,8 +584,9 @@ class ui:
         def savePortraits():
             # | Debug only function
             # Used when collecting images for portrait dataset
-            if DEBUG: 
-                recognize.capture_image(persistPortraits=True)
+            if not DEBUG:   return 
+
+            recognize.capture_image(persistPortraits=True)
 
 
         # Set up hotkeys
@@ -585,7 +594,7 @@ class ui:
                 self.config.get("keybinds", "capture"): startRecognition,
                 self.config.get("keybinds", "debug"): triggerDebug,
                 # | DISABLE THIS AS THIS IS DEBUG ONLY
-                # // self.config.get("keybinds", "save"): savePortraits    
+                # // "<ctrl>+s": savePortraits
         })
 
 
@@ -627,29 +636,85 @@ class ui:
         Label(popup, text="After you are done editing, click \nthe button below to refresh \nthe counters in the app.").pack(pady=(8, 6))
         Button(popup, text="Update counters", command=lambda: [popup.destroy(), self.reloadCounters()]).pack(pady=(0, 8))
 
+    def showCounterTooltip(self, event: Event):
+        data = event.widget.counterData
+
+        if not data: return
+
+        self.counterTooltip = Toplevel(self.root)
+        self.counterTooltip.wm_overrideredirect(True)
+        self.counterTooltip.configure(background="#222222")
+
+        text = (
+            f"Rating: {data['rating']}/10\n\n"
+            f"{data['description']}"
+        )
+
+        Label(
+            self.counterTooltip,
+            text=text,
+            justify="left",
+            wraplength=280,
+            padx=8,
+            pady=6,
+            fg="white",
+            bg="#222222"
+        ).pack()
+
+        x = event.widget.winfo_rootx() + event.widget.winfo_width() + 5
+        y = event.widget.winfo_rooty()
+
+        self.counterTooltip.geometry(f"+{x}+{y}")
+
+
+    def hideCounterTooltip(self, event: Event):
+        tooltip = getattr(self, "counterTooltip", None)
+
+        if tooltip is not None:
+            tooltip.destroy()
+            self.counterTooltip = None
 
 
     # Processing
-    def updateTeamComp(self):
-    # | I THINK THESE GRAY COMMENTS ARE OLD CODE
-    # // def updateTeamComp(self, aiRequest=False):
-        # // # TODO: move this guard to the calling of the function instead of inside the function
-        # // # To prevent the user for updating the recognized team comp, return prematurely 
-        # // if aiRequest:  
-        # //     return
-                
+    def updateTeamComp(self, forceReload: bool = False):
         # Update portraits and counters for the selected heroes
         for index, heroButton in enumerate(self.selectedHeroes):                        # ? Enumerate so we can use the index for updating the placeholder label
             if heroButton is None:                                                      # No hero selected in this slot
                 # Clear the portrait placeholder for this slot
                 self.characterImagePlaceholders[index].configure(image=portraits.HERO_3x3["blank"])
-
-                # Clear the counter placeholders for this slot
+                
+                # Clear the counter placeholders' data for this slot
                 for role in ROLES:
                     for counterPlaceholder in self.counterImagePlaceholders[index][role]:
+                        counterPlaceholder.counterID = None
+                        counterPlaceholder.counterData = None
                         counterPlaceholder.configure(image=portraits.HERO_6x6["blank"])
+
+                # ! NOTE:
+                # ? The reason as to why i decided to go with this implementation flow, instead
+                # ? of just always clearing the counters on update, is so that we keep the GUI
+                # ? feeling responsive, and not flickering when adding/removing manually. Yet 
+                # ? we still want the GUI to update correctly, so when scanning for heroes, or
+                # ? when we update a hero's counters, we need to clear the previous counters, 
+                # ? as they never get to be set to None
+                continue
                         
-            else:
+            else:  
+                # ! NOTE:
+                # ? The reason as to why i decided to go with this implementation flow, instead
+                # ? of just always clearing the counters on update, is so that we keep the GUI
+                # ? feeling responsive, and not flickering when adding/removing manually. Yet 
+                # ? we still want the GUI to update correctly, so when scanning for heroes, or
+                # ? when we update a hero's counters, we need to clear the previous counters, 
+                # ? as they never get to be set to None
+                if forceReload:
+                    # Clear the counter placeholders' data for this slot
+                    for role in ROLES:
+                        for counterPlaceholder in self.counterImagePlaceholders[index][role]:
+                            counterPlaceholder.counterID = None
+                            counterPlaceholder.counterData = None
+                            counterPlaceholder.configure(image=portraits.HERO_6x6["blank"])
+
                 # * Character
                 # Create the portrait for the selected hero
                 characterPortrait = portraits.HERO_3x3[heroButton.winfo_name()]
@@ -672,10 +737,19 @@ class ui:
                               f"{counterRole}. Counter \"{counterID}\" will be skipped.")
 
                         continue                                                        # Skip this counter if we've already used all available slots for its role
-                    
+
+                    # Update the counters' data and portrait
                     portrait = portraits.HERO_6x6[counterID]
-                    self.counterImagePlaceholders[index][counterRole][usedSlots[counterRole]].configure(image=portrait)
-                    
+                    # self.counterImagePlaceholders[index][counterRole][usedSlots[counterRole]].configure(image=portrait)
+
+                    counterPlaceholder = (
+                        self.counterImagePlaceholders[index][counterRole][usedSlots[counterRole]]
+                    )
+                                        
+                    counterPlaceholder.counterID = counterID
+                    counterPlaceholder.counterData = data
+                    counterPlaceholder.configure(image=portrait)
+
                     usedSlots[counterRole] += 1
                     
         
@@ -710,7 +784,6 @@ class ui:
         
         # * UI elements
         # Labels
-        # // Label(popup, text=f"Action: {action}").pack(pady=(12, 4))
         Label(popup, textvariable=status).pack(pady=(8, 4))
 
         # Buttons
@@ -842,7 +915,7 @@ class ui:
         jsonData.load()
 
         # Update the team comp display to reflect any changes in counters
-        self.updateTeamComp()
+        self.updateTeamComp(forceReload=True)
 
 
 if __name__ == "__main__":
