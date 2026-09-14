@@ -584,8 +584,9 @@ class ui:
         def savePortraits():
             # | Debug only function
             # Used when collecting images for portrait dataset
-            if DEBUG: 
-                recognize.capture_image(persistPortraits=True)
+            if not DEBUG:   return 
+
+            recognize.capture_image(persistPortraits=True)
 
 
         # Set up hotkeys
