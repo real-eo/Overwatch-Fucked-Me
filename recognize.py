@@ -125,7 +125,7 @@ def recognize() -> list[tuple[str, float]]:
     np.set_printoptions(suppress=True)
 
     model: Model = load_model(resource_path("model", "keras_model.h5"), compile=False)
-    classNames = open(resource_path("model", "labels.txt"), 'r').readlines()
+    classNames = open(resource_path("model", "labels.txt"), 'r', encoding="utf-8").readlines()
 
     data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
     size = (224, 224)
