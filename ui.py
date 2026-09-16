@@ -5,6 +5,7 @@ from src.resources import createPhotoImages, portraits
 from configparser import ConfigParser
 from src.parse import translate
 from colorsys import hls_to_rgb
+from PIL import Image, ImageTk
 from pynput import keyboard
 from os import startfile
 import recognize
@@ -135,6 +136,7 @@ class ui:
         self.roleFrameDict = {".tankFrame": ROLE_TANK, ".dpsFrame": ROLE_DPS, ".supportFrame": ROLE_SUPPORT}
         
         self.activeCounters = {}
+        self.heroImageCache = {}
 
         self.extendedLimits = False
         self.aiActive = False
@@ -356,7 +358,12 @@ class ui:
                 tankButton: Button = Button(
                     self.tankFrame, 
                     image=self.tankPortraitList[i], 
-                    name=HERO_IDS[ROLE_TANK][i]
+                    name=HERO_IDS[ROLE_TANK][i],
+
+                    bg="SystemButtonFace",
+                    activebackground="SystemButtonFace",
+                    # borderwidth=0,
+                    # highlightthickness=0,
                 )
 
                 tankButton.place(
@@ -462,7 +469,21 @@ class ui:
 
             slot = self.selectedHeroes.index(None)
             self.selectedHeroes[slot] = event.widget
-            event.widget.configure(bg="SystemHighlight")
+            # event.widget.configure(bg="SystemHighlight")
+            # event.widget.configure(
+            #     bg="SystemButtonFace",
+            #     activebackground="SystemButtonFace",
+            #     bd=5,
+            #     relief="solid",
+            #     highlightbackground="#3B82F6",
+            #     highlightcolor="#3B82F6",
+            #     highlightthickness=2
+            # )
+            event.widget.configure(
+                bg="SystemHighlight",
+                activebackground="SystemHighlight"
+            )
+            
 
             if not self.extendedLimits:
                 self.slotsRemaining[heroButtonRole] -= 1
@@ -480,14 +501,23 @@ class ui:
             self.root.after(0, self.updateCounterHighlights)
             return "break"
 
-        elif event.num == 2:
-            print(str(event.widget.master))
-
         elif event.num == 3:
             if event.widget not in self.selectedHeroes: return "break"
 
             self.selectedHeroes[self.selectedHeroes.index(event.widget)] = None         # TODO: Fix: find by identity, not index
-            event.widget.configure(bg="SystemButtonFace")
+            # event.widget.configure(bg="SystemButtonFace")
+            # event.widget.configure(
+            #     bg="SystemButtonFace",
+            #     bd=2,
+            #     relief="raised",
+            #     highlightbackground="SystemButtonFace",
+            #     highlightcolor="SystemWindowFrame",
+            #     highlightthickness=1
+            # )
+            event.widget.configure(
+                bg="SystemButtonFace",
+                activebackground="SystemButtonFace"
+            )
 
             if not self.extendedLimits:
                 self.slotsRemaining[heroButtonRole] += 1
@@ -500,6 +530,27 @@ class ui:
             self.root.after(0, self.updateTeamComp)
             self.root.after(0, self.updateCounterHighlights)
             return "break"
+
+        # | DEBUG
+        elif event.num == 2 and DEBUG:
+            button = event.widget
+
+            print(f"\n[D] Hero button: \"{button.winfo_name()}\"")
+
+            # Tkinter configuration options and current values
+            for option, details in button.configure().items():
+                print(f"[D]   {option}: {details[-1]}")
+
+            # Widget geometry and Tk metadata
+            print(f"[D]   winfo_class: {button.winfo_class()}")
+            print(f"[D]   winfo_geometry: {button.winfo_geometry()}")
+            print(f"[D]   winfo_x: {button.winfo_x()}")
+            print(f"[D]   winfo_y: {button.winfo_y()}")
+            print(f"[D]   winfo_width: {button.winfo_width()}")
+            print(f"[D]   winfo_height: {button.winfo_height()}")
+            print(f"[D]   bindtags: {button.bindtags()}")
+            print(f"[D]   state: {button.cget('state')}")
+
 
     def mouseButton(self, event: Event):
         if event.widget == self.extendedLimitsButton:
@@ -754,6 +805,50 @@ class ui:
                     usedSlots[counterRole] += 1
 
 
+    # def updateCounterHighlights(self):
+    #     selectedIds = {
+    #         heroButton.winfo_name()
+    #         for heroButton in self.selectedHeroes
+    #         if heroButton is not None
+    #     }
+
+    #     for button in self.fullbuttonList:
+    #         # Skip selected heroes
+    #         # if button in self.selectedHeroes:
+    #         #     continue
+
+
+    #         heroId = button.winfo_name()
+    #         counterScore = sum(
+    #             selectedId in jsonData.counters.get(heroId, {})
+    #             for selectedId in selectedIds
+    #         )
+            
+    #         intensity = min(counterScore / TOTAL_SLOTS_ALL, 1.0)
+
+    #         # HSL:
+    #         # 0.0 -> 60 degrees, 100% saturation, 100% lightness
+    #         # 1.0 -> 0 degrees, 100% saturation, 50% lightness
+    #         hue = (60 * (1 - intensity)) / 360
+    #         lightness = 1.0 - (0.5 * intensity)
+    #         saturation = 1.0
+
+    #         red, green, blue = hls_to_rgb(
+    #             hue,
+    #             lightness,
+    #             saturation
+    #         )
+
+    #         color = (
+    #             f"#{round(red * 255):02X}"
+    #             f"{round(green * 255):02X}"
+    #             f"{round(blue * 255):02X}"
+    #         )
+
+    #         button.configure(
+    #             bg=color,
+    #             activebackground=color
+    #         )
     def updateCounterHighlights(self):
         selectedIds = {
             heroButton.winfo_name()
@@ -762,32 +857,16 @@ class ui:
         }
 
         for button in self.fullbuttonList:
-            # Skip selected heroes
-            # if button in self.selectedHeroes:
-            #     continue
-
-
             heroId = button.winfo_name()
+
             counterScore = sum(
                 selectedId in jsonData.counters.get(heroId, {})
                 for selectedId in selectedIds
             )
 
-            # # Always use five total team slots:
-            # # one counter = 20%, five counters = 100%
-            # intensity = counterScore / TOTAL_SLOTS_ALL
-
-            # greenBlue = round(255 * (1 - intensity))
-            # color = f"#FF{greenBlue:02X}{greenBlue:02X}"
-
-            # button.configure(
-            #     bg=color,
-            #     activebackground=color
-            # )
-                
             intensity = min(counterScore / TOTAL_SLOTS_ALL, 1.0)
 
-            # HSL:
+            # HLS values:
             # 0.0 -> 60 degrees, 100% saturation, 100% lightness
             # 1.0 -> 0 degrees, 100% saturation, 50% lightness
             hue = (60 * (1 - intensity)) / 360
@@ -806,9 +885,16 @@ class ui:
                 f"{round(blue * 255):02X}"
             )
 
+            buttonImage = self.getHeroImage(heroId, color)
+
+            isSelected = button in self.selectedHeroes
+
             button.configure(
-                bg=color,
-                activebackground=color
+                image=buttonImage,
+                bg="SystemHighlight" if isSelected else color,
+                activebackground="SystemHighlight" if isSelected else color,
+                padx=2,
+                pady=2
             )
                     
     def animationFocus(self, event: Event):
@@ -975,6 +1061,26 @@ class ui:
         # Update the team comp display to reflect any changes in counters
         self.updateTeamComp(forceReload=True)
 
+
+    # * Getters
+    def getHeroImage(self, heroId, backgroundColor):
+        cacheKey = (heroId, backgroundColor)
+
+        if cacheKey not in self.heroImageCache:
+            sourceImage = ImageTk.getimage(
+                portraits.HERO_4x4[heroId]
+            ).convert("RGBA")
+
+            backgroundImage = Image.new(
+                "RGBA",
+                sourceImage.size,
+                backgroundColor
+            )
+            backgroundImage.alpha_composite(sourceImage)
+
+            self.heroImageCache[cacheKey] = ImageTk.PhotoImage(backgroundImage)
+
+        return self.heroImageCache[cacheKey]
 
 if __name__ == "__main__":
     print("[!] This file is not ment to be run!\n\n")
