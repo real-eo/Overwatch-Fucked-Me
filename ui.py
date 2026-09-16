@@ -1,9 +1,11 @@
 from src.constants import DEBUG, HEROES, HERO_IDS, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT, HERO_ROLES, MAX_SLOTS_TANK, MAX_SLOTS_DPS, MAX_SLOTS_SUPPORT, ROLES, ROLE_COUNT, TOTAL_SLOTS_ALL, COUNTERS_FILE
-from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, Button, PhotoImage, Event, NORMAL, DISABLED, W, E, NE
+from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, Button, PhotoImage, Event, NORMAL, DISABLED, W, E
 from src.resources.manager import prefer_local_resource, resource_path, ensure_configurable, IS_LOCAL 
 from src.resources import createPhotoImages, portraits
 from configparser import ConfigParser
 from src.parse import translate
+from colorsys import hls_to_rgb
+from PIL import Image, ImageTk
 from pynput import keyboard
 from os import startfile
 import recognize
@@ -117,6 +119,40 @@ class ui:
         INPUT_FRAME_Y: int = ROLE_ICON_Y - SMALL_PADDING - INPUT_FRAME_HEIGHT                       # ? Bottom-based layout (anchored to bottom)
         # // INPUT_FRAME_Y: int = SELECTED_HERO_HEIGHT + COUNTERS_AREA_HEIGHT                       # ? Top-based layout (anchored to top)
 
+    class Style:
+        # * Defaults
+        BACKGROUND = "#3C3C3C"
+        
+        class Label:
+            class SelectedHero:
+                BACKGROUND = "#4C4C4C"
+
+            class Counter:
+                BACKGROUND = "#444444"
+
+
+        class ControlButton:
+            # * Defaults
+            COLOR = "SystemButtonFace"                                                  # SystemButtonFace: "#F0F0F0"
+
+            class Active:
+                COLOR = "Green"
+
+        class HeroButton:
+            # * Defaults
+            COLOR = "#FFFFFF"                                                           
+            WIDTH = 68
+            HEIGHT = 68
+            BORDERWIDTH = 0
+
+            class Selected:    
+                COLOR = "#0078D7"
+
+            class Hovered:
+                WIDTH = 72    
+                HEIGHT = 72    
+
+        
 
 
     def __init__(self):
@@ -124,7 +160,7 @@ class ui:
 
         self.root.geometry(f"{self.Layout.WINDOW_WIDTH}x{self.Layout.WINDOW_HEIGHT}")
         self.root.title("Overwatch Fucked Me")
-        self.root.configure(background="#3C3C3C")
+        self.root.configure(background=self.Style.BACKGROUND)
         
         self.characterButtonsDictionary = {}
 
@@ -135,6 +171,7 @@ class ui:
         self.roleFrameDict = {".tankFrame": ROLE_TANK, ".dpsFrame": ROLE_DPS, ".supportFrame": ROLE_SUPPORT}
         
         self.activeCounters = {}
+        self.heroImageCache = {}
 
         self.extendedLimits = False
         self.aiActive = False
@@ -161,7 +198,7 @@ class ui:
         self.root.mainloop()
 
 
-    # Setup
+    # * Setup
     def initializeWindow(self):
         # Images
         createPhotoImages()
@@ -177,13 +214,12 @@ class ui:
         self.support()
 
 
-    # Program control
+    # * Program control
     def onClose(self):
         print('[§] Stopping listener!')
         self.hk.stop()
         print("[$] Stopping root!")
         self.root.destroy()
-
 
     def popup(self, title: str = "Alert", geometry: str = "300x200") -> Toplevel:
         # Create popup window
@@ -200,7 +236,8 @@ class ui:
 
         return popup
 
-    # UI elements
+
+    # * UI elements
     def _menubar(self):
         menubar = Menu(self.root)                                                       # Toolbar at the top of the window
 
@@ -245,7 +282,7 @@ class ui:
                 master=self.root, 
                 height=self.Layout.SELECTED_HERO_HEIGHT + self.Layout.COUNTERS_AREA_HEIGHT, 
                 width=(self.Layout.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL), 
-                background="#3C3C3C", 
+                background=self.Style.BACKGROUND, 
                 name=f"characterFrame{i}"
             )
 
@@ -256,12 +293,12 @@ class ui:
             self.recommendedCharacterFrameList.append(characterFrame)
 
         # Character buttons
-        self.inputFrame = Frame(master=self.root, height=self.Layout.INPUT_FRAME_HEIGHT, width=self.Layout.WINDOW_WIDTH, background="#3C3C3C", name="inputFrame")
-        self.roleInfoFrame = Frame(master=self.root, height=self.Layout.ROLE_ICON_FRAME_HEIGHT, width=self.Layout.WINDOW_WIDTH, background="#3C3C3C", name="roleInfoFrame")
+        self.inputFrame = Frame(master=self.root, height=self.Layout.INPUT_FRAME_HEIGHT, width=self.Layout.WINDOW_WIDTH, background=self.Style.BACKGROUND, name="inputFrame")
+        self.roleInfoFrame = Frame(master=self.root, height=self.Layout.ROLE_ICON_FRAME_HEIGHT, width=self.Layout.WINDOW_WIDTH, background=self.Style.BACKGROUND, name="roleInfoFrame")
 
-        self.tankFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.TANK_FRAME_WIDTH, background="#3C3C3C", name="tankFrame")
-        self.dpsFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.DPS_FRAME_WIDTH, background="#3C3C3C", name="dpsFrame")
-        self.supportFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.SUPPORT_FRAME_WIDTH, background="#3C3C3C", name="supportFrame")
+        self.tankFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.TANK_FRAME_WIDTH, background=self.Style.BACKGROUND, name="tankFrame")
+        self.dpsFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.DPS_FRAME_WIDTH, background=self.Style.BACKGROUND, name="dpsFrame")
+        self.supportFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.SUPPORT_FRAME_WIDTH, background=self.Style.BACKGROUND, name="supportFrame")
 
         self.inputFrame.place(x=0, y=self.Layout.INPUT_FRAME_Y)
         self.roleInfoFrame.place(x=0 + self.Layout.WINDOW_PADDING, y=self.Layout.ROLE_ICON_Y)
@@ -279,9 +316,8 @@ class ui:
                 b, 
                 height=(self.Layout.SELECTED_HERO_HEIGHT), 
                 width=(self.Layout.VIEWPORT_WIDTH/10), 
-                # image=placeholderPortrait, 
                 image=portraits.HERO_3x3["blank"],
-                bg="#4C4C4C", 
+                bg=self.Style.Label.SelectedHero.BACKGROUND, 
                 name=f"placeholder@{a}characterLabel"
             )
 
@@ -299,9 +335,8 @@ class ui:
                         b, 
                         height=((self.Layout.COUNTERS_AREA_HEIGHT / ROLE_COUNT)), 
                         width=(self.Layout.VIEWPORT_WIDTH / TOTAL_SLOTS_ALL / self.Layout.MAX_COUNTERS_PER_ROLE), 
-                        # image=placeholderPortrait, 
                         image=portraits.HERO_3x3["blank"],
-                        bg="#444444",
+                        bg=self.Style.Label.Counter.BACKGROUND,
                         name=f"placeholder@{a}-{counterIndex}-{roleIndex}Label"
                     )
 
@@ -329,7 +364,7 @@ class ui:
         self.roleIconList = [PhotoImage(file=resource_path("res", "icons", "role", f"{i}Icon.png")).subsample(4, 4) for i in ROLES]
 
         for x, i in enumerate(ROLES):
-            iconLabel = Label(self.roleInfoFrame, image=self.roleIconList[x], bg="#3C3C3C", name=f"{i}IconLabel")
+            iconLabel = Label(self.roleInfoFrame, image=self.roleIconList[x], bg=self.Style.BACKGROUND, name=f"{i}IconLabel")
             iconLabel.place(x=([-5, -5+225+5, -5+600+10][x]), y=-7)
 
     def _buttons(self):
@@ -342,7 +377,7 @@ class ui:
         self.aiActiveButton.bind("<Button>", self.mouseButton)
 
 
-    # Select characters
+    # * Select characters
     def tank(self):
         tankButtonList = []
         self.tankPortraitList = [
@@ -356,7 +391,11 @@ class ui:
                 tankButton: Button = Button(
                     self.tankFrame, 
                     image=self.tankPortraitList[i], 
-                    name=HERO_IDS[ROLE_TANK][i]
+                    name=HERO_IDS[ROLE_TANK][i],
+                    bg=self.Style.HeroButton.COLOR,
+                    borderwidth=self.Style.HeroButton.BORDERWIDTH,
+                    height=self.Style.HeroButton.HEIGHT, 
+                    width=self.Style.HeroButton.WIDTH
                 )
 
                 tankButton.place(
@@ -390,7 +429,11 @@ class ui:
                 dpsButton = Button(
                     self.dpsFrame, 
                     image=self.dpsPortraitList[i], 
-                    name=HERO_IDS[ROLE_DPS][i]
+                    name=HERO_IDS[ROLE_DPS][i],
+                    bg=self.Style.HeroButton.COLOR,
+                    borderwidth=self.Style.HeroButton.BORDERWIDTH,
+                    height=self.Style.HeroButton.HEIGHT, 
+                    width=self.Style.HeroButton.WIDTH
                 )
 
                 dpsButton.place(
@@ -424,7 +467,11 @@ class ui:
                 supportButton = Button(
                     self.supportFrame, 
                     image=self.supportPortraitList[i], 
-                    name=HERO_IDS[ROLE_SUPPORT][i]
+                    name=HERO_IDS[ROLE_SUPPORT][i],
+                    bg=self.Style.HeroButton.COLOR,
+                    borderwidth=self.Style.HeroButton.BORDERWIDTH,
+                    height=self.Style.HeroButton.HEIGHT, 
+                    width=self.Style.HeroButton.WIDTH
                 )
                 
                 supportButton.place(
@@ -447,7 +494,7 @@ class ui:
         self.buttonList[ROLE_SUPPORT] = supportButtonList
 
 
-    # Event handlers
+    # * Event handlers
     def mouseButtonCharacters(self, event: Event):
         heroButtonRole = self.roleFrameDict[str(event.widget.master)]
         selectedCount = sum(1 for h in self.selectedHeroes if h is not None)
@@ -462,7 +509,12 @@ class ui:
 
             slot = self.selectedHeroes.index(None)
             self.selectedHeroes[slot] = event.widget
-            event.widget.configure(bg="SystemHighlight")
+            # NOTE: I think this is safe to comment out as color now are handled by `self.updateHeroButtonHighlights`
+            # event.widget.configure(
+            #     bg=self.Style.HeroButton.Selected.COLOR,
+            #     activebackground=self.Style.HeroButton.Selected.COLOR
+            # )
+            
 
             if not self.extendedLimits:
                 self.slotsRemaining[heroButtonRole] -= 1
@@ -477,16 +529,17 @@ class ui:
                             btn["state"] = DISABLED
 
             self.root.after(0, self.updateTeamComp)
+            self.root.after(0, self.updateHeroButtonHighlights)
             return "break"
-
-        elif event.num == 2:
-            print(str(event.widget.master))
 
         elif event.num == 3:
             if event.widget not in self.selectedHeroes: return "break"
 
             self.selectedHeroes[self.selectedHeroes.index(event.widget)] = None         # TODO: Fix: find by identity, not index
-            event.widget.configure(bg="SystemButtonFace")
+            # event.widget.configure(
+            #     bg=self.Style.HeroButton.COLOR,
+            #     activebackground=self.Style.HeroButton.COLOR
+            # )
 
             if not self.extendedLimits:
                 self.slotsRemaining[heroButtonRole] += 1
@@ -497,39 +550,57 @@ class ui:
                     btn["state"] = NORMAL
 
             self.root.after(0, self.updateTeamComp)
+            self.root.after(0, self.updateHeroButtonHighlights)
             return "break"
 
+        # | DEBUG
+        elif event.num == 2 and DEBUG:
+            button = event.widget
+
+            print(f"\n[D] Hero button: \"{button.winfo_name()}\"")
+
+            # Tkinter configuration options and current values
+            for option, details in button.configure().items():
+                print(f"[-]   {option}: {details[-1]}")
+
+            # Widget geometry and Tk metadata
+            print(f"[-]   winfo_class: {button.winfo_class()}")
+            print(f"[-]   winfo_geometry: {button.winfo_geometry()}")
+            print(f"[-]   winfo_x: {button.winfo_x()}")
+            print(f"[-]   winfo_y: {button.winfo_y()}")
+            print(f"[-]   winfo_width: {button.winfo_width()}")
+            print(f"[-]   winfo_height: {button.winfo_height()}")
+            print(f"[-]   bindtags: {button.bindtags()}")
+            print(f"[-]   state: {button.cget('state')}")
 
     def mouseButton(self, event: Event):
         if event.widget == self.extendedLimitsButton:
             self.extendedLimits = [True, False][self.extendedLimits]
-            self.extendedLimitsButton.configure(bg=["SystemButtonFace", "Green"][self.extendedLimits])
+            self.extendedLimitsButton.configure(bg=[self.Style.ControlButton.COLOR, self.Style.ControlButton.Active.COLOR][self.extendedLimits])
 
-            # self.selectedHeroes.clear()
             self.selectedHeroes = [None for _ in range(TOTAL_SLOTS_ALL)]
-            # self.selectedRoles = {ROLE_TANK: [], ROLE_DPS: [], ROLE_SUPPORT: []}
             self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
 
             self.updateTeamComp()
+            self.updateHeroButtonHighlights()
 
             if not self.aiActive:
                 for button in self.fullbuttonList:
-                    button.configure(bg="SystemButtonFace")
+                    button.configure(bg=self.Style.HeroButton.COLOR)
                     button["state"] = NORMAL
         if event.widget == self.aiActiveButton:
             self.aiActive = [True, False][self.aiActive]
-            self.aiActiveButton.configure(bg=["SystemButtonFace", "Green"][self.aiActive])
+            self.aiActiveButton.configure(bg=[self.Style.ControlButton.COLOR, self.Style.ControlButton.Active.COLOR][self.aiActive])
 
-            # self.selectedHeroes.clear()
             self.selectedHeroes = [None for _ in range(TOTAL_SLOTS_ALL)]
-            # self.selectedRoles = {ROLE_TANK: [], ROLE_DPS: [], ROLE_SUPPORT: []}
             self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
 
             self.updateTeamComp()
+            self.updateHeroButtonHighlights()
 
             if self.aiActive:
                 for button in self.fullbuttonList:
-                    button.configure(bg="SystemButtonFace")
+                    button.configure(bg=self.Style.HeroButton.COLOR)
                     button["state"] = DISABLED
             else:
                 for button in self.fullbuttonList:
@@ -567,8 +638,8 @@ class ui:
                     # ? 5 times regardless, but it's not programmed explicitly, so there can be some bugs here
                     self.selectedHeroes.append(None)
 
-                # // self.updateTeamComp()
                 self.root.after(0, lambda: self.updateTeamComp(forceReload=True))       # ? Tkinter widgets should only be updated on the main thread
+                self.root.after(0, self.updateHeroButtonHighlights)                     # ? Tkinter widgets should only be updated on the main thread
                 self.ongoingKeybaordRequest = False
 
         def startRecognition():
@@ -666,7 +737,6 @@ class ui:
 
         self.counterTooltip.geometry(f"+{x}+{y}")
 
-
     def hideCounterTooltip(self, event: Event):
         tooltip = getattr(self, "counterTooltip", None)
 
@@ -675,7 +745,7 @@ class ui:
             self.counterTooltip = None
 
 
-    # Processing
+    # * Processing
     def updateTeamComp(self, forceReload: bool = False):
         # Update portraits and counters for the selected heroes
         for index, heroButton in enumerate(self.selectedHeroes):                        # ? Enumerate so we can use the index for updating the placeholder label
@@ -751,21 +821,69 @@ class ui:
                     counterPlaceholder.configure(image=portrait)
 
                     usedSlots[counterRole] += 1
+
+    def updateHeroButtonHighlights(self):
+        selectedIds = {
+            heroButton.winfo_name()
+            for heroButton in self.selectedHeroes
+            if heroButton is not None
+        }
+
+        for button in self.fullbuttonList:
+            heroId = button.winfo_name()
+            isSelected = button in self.selectedHeroes
+
+            counterScore = sum(
+                selectedId in jsonData.counters.get(heroId, {})
+                for selectedId in selectedIds
+            )
+
+            intensity = min(counterScore / TOTAL_SLOTS_ALL, 1.0)
+
+            # HLS values:
+            # 0.0 -> 60 degrees, 100% saturation, 100% lightness
+            # 1.0 -> 0 degrees, 100% saturation, 50% lightness
+            hue = (60 * (1 - intensity)) / 360
+            lightness = 1.0 - (0.5 * intensity)
+            saturation = 1.0
+
+            red, green, blue = hls_to_rgb(
+                hue,
+                lightness,
+                saturation
+            )
+
+            color = (
+                f"#{round(red * 255):02X}"
+                f"{round(green * 255):02X}"
+                f"{round(blue * 255):02X}"
+            )
+            
+            buttonImage = self.getHeroImage(heroId, (
+                color
+                if not isSelected 
+                or self.aiActive
+                or (isSelected and counterScore > 0)
+                else self.Style.HeroButton.Selected.COLOR
+            ))
+
+            button.configure(
+                image=buttonImage,
+                bg=self.Style.HeroButton.Selected.COLOR if (isSelected and not self.aiActive) else color,
+                activebackground=self.Style.HeroButton.Selected.COLOR if (isSelected and not self.aiActive) else color
+            )
                     
-        
     def animationFocus(self, event: Event):
         if event.widget["state"] == NORMAL:
             self.characterHighlightedRectList.append([event.widget, event.widget.winfo_x(), event.widget.winfo_y()])    
-            # print("<Enter>", event.widget.winfo_x() + 3, event.widget.winfo_y() + 3, event.widget.winfo_height(), event.widget.winfo_width())
-            event.widget.configure(height=70, width=70)
-            event.widget.place(x=event.widget.winfo_x() - 3, y=event.widget.winfo_y() - 3)
+            event.widget.configure(width=self.Style.HeroButton.Hovered.WIDTH, height=self.Style.HeroButton.Hovered.HEIGHT)
+            event.widget.place(x=event.widget.winfo_x() - 2, y=event.widget.winfo_y() - 2)
 
     def animationDefocus(self, event: Event):
         if event.widget["state"] == NORMAL:
-            # print("<Leave>", event.widget.winfo_x() + 3, event.widget.winfo_y() + 3, event.widget.winfo_height(), event.widget.winfo_width())
             try:
                 widget = self.characterHighlightedRectList.pop(0)
-                widget[0].configure(height=64, width=64)
+                widget[0].configure(width=self.Style.HeroButton.WIDTH, height=self.Style.HeroButton.HEIGHT)
                 widget[0].place(x=widget[1], y=widget[2])
             except IndexError:
                 pass
@@ -917,6 +1035,26 @@ class ui:
         # Update the team comp display to reflect any changes in counters
         self.updateTeamComp(forceReload=True)
 
+
+    # * Getters
+    def getHeroImage(self, heroId, backgroundColor):
+        cacheKey = (heroId, backgroundColor)
+
+        if cacheKey not in self.heroImageCache:
+            sourceImage = ImageTk.getimage(
+                portraits.HERO_4x4[heroId]
+            ).convert("RGBA")
+
+            backgroundImage = Image.new(
+                "RGBA",
+                sourceImage.size,
+                backgroundColor
+            )
+            backgroundImage.alpha_composite(sourceImage)
+
+            self.heroImageCache[cacheKey] = ImageTk.PhotoImage(backgroundImage)
+
+        return self.heroImageCache[cacheKey]
 
 if __name__ == "__main__":
     print("[!] This file is not ment to be run!\n\n")
