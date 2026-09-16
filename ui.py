@@ -509,10 +509,11 @@ class ui:
 
             slot = self.selectedHeroes.index(None)
             self.selectedHeroes[slot] = event.widget
-            event.widget.configure(
-                bg=self.Style.HeroButton.Selected.COLOR,
-                activebackground=self.Style.HeroButton.Selected.COLOR
-            )
+            # NOTE: I think this is safe to comment out as color now are handled by `self.updateHeroButtonHighlights`
+            # event.widget.configure(
+            #     bg=self.Style.HeroButton.Selected.COLOR,
+            #     activebackground=self.Style.HeroButton.Selected.COLOR
+            # )
             
 
             if not self.extendedLimits:
@@ -528,17 +529,17 @@ class ui:
                             btn["state"] = DISABLED
 
             self.root.after(0, self.updateTeamComp)
-            self.root.after(0, self.updateCounterHighlights)
+            self.root.after(0, self.updateHeroButtonHighlights)
             return "break"
 
         elif event.num == 3:
             if event.widget not in self.selectedHeroes: return "break"
 
             self.selectedHeroes[self.selectedHeroes.index(event.widget)] = None         # TODO: Fix: find by identity, not index
-            event.widget.configure(
-                bg=self.Style.HeroButton.COLOR,
-                activebackground=self.Style.HeroButton.COLOR
-            )
+            # event.widget.configure(
+            #     bg=self.Style.HeroButton.COLOR,
+            #     activebackground=self.Style.HeroButton.COLOR
+            # )
 
             if not self.extendedLimits:
                 self.slotsRemaining[heroButtonRole] += 1
@@ -549,7 +550,7 @@ class ui:
                     btn["state"] = NORMAL
 
             self.root.after(0, self.updateTeamComp)
-            self.root.after(0, self.updateCounterHighlights)
+            self.root.after(0, self.updateHeroButtonHighlights)
             return "break"
 
         # | DEBUG
@@ -581,7 +582,7 @@ class ui:
             self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
 
             self.updateTeamComp()
-            self.updateCounterHighlights()
+            self.updateHeroButtonHighlights()
 
             if not self.aiActive:
                 for button in self.fullbuttonList:
@@ -595,7 +596,7 @@ class ui:
             self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
 
             self.updateTeamComp()
-            self.updateCounterHighlights()
+            self.updateHeroButtonHighlights()
 
             if self.aiActive:
                 for button in self.fullbuttonList:
@@ -638,6 +639,7 @@ class ui:
                     self.selectedHeroes.append(None)
 
                 self.root.after(0, lambda: self.updateTeamComp(forceReload=True))       # ? Tkinter widgets should only be updated on the main thread
+                self.root.after(0, self.updateHeroButtonHighlights)                     # ? Tkinter widgets should only be updated on the main thread
                 self.ongoingKeybaordRequest = False
 
         def startRecognition():
@@ -820,7 +822,7 @@ class ui:
 
                     usedSlots[counterRole] += 1
 
-    def updateCounterHighlights(self):
+    def updateHeroButtonHighlights(self):
         selectedIds = {
             heroButton.winfo_name()
             for heroButton in self.selectedHeroes
@@ -860,14 +862,15 @@ class ui:
             buttonImage = self.getHeroImage(heroId, (
                 color
                 if not isSelected 
+                or self.aiActive
                 or (isSelected and counterScore > 0)
                 else self.Style.HeroButton.Selected.COLOR
             ))
 
             button.configure(
                 image=buttonImage,
-                bg=self.Style.HeroButton.Selected.COLOR if isSelected else color,
-                activebackground=self.Style.HeroButton.Selected.COLOR if isSelected else color
+                bg=self.Style.HeroButton.Selected.COLOR if (isSelected and not self.aiActive) else color,
+                activebackground=self.Style.HeroButton.Selected.COLOR if (isSelected and not self.aiActive) else color
             )
                     
     def animationFocus(self, event: Event):
