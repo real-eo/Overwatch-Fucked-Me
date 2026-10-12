@@ -16,5 +16,5 @@ if "%DEV_MODE%"=="true" (
 REM Otherwise, run the compiled EXE
 ) else (
     cd "%~dp0dist"
-    start "" "Overwatch Fucked Me.exe"
+    start "" "Overwatch-Fucked-Me.exe"
 )

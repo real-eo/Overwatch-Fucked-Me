@@ -42,5 +42,5 @@ if errorlevel 1 (
 )
 
 echo [5/5] Done.
-echo EXE created at: dist\Overwatch Fucked Me.exe
+echo EXE created at: dist\Overwatch-Fucked-Me.exe
 exit /b 0
