@@ -1843,6 +1843,20 @@
             "description": "Wuyang can kite Brigitte with mid-range attacks."
         }
     },
+    "doctrine": {
+        "illari": {
+            "rating": 8,
+            "description": "NOT ENOUGH DATA YET!"
+        },
+        "torbjorn": {
+            "rating": 7,
+            "description": "NOT ENOUGH DATA YET!"
+        },
+        "sombra": {
+            "rating": 7,
+            "description": "NOT ENOUGH DATA YET!"
+        }
+    },
     "illari": {
         "dva": {
             "rating": 7,
