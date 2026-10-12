@@ -1,38 +1,56 @@
 0 Ana
-1 Ashe
-2 Baptiste
-3 Bastion
-4 Brigitte
-5 Cassidy
-6 Doomfist
-7 Dva
-8 Echo
-9 Genji
-10 Hanzo
-11 Junker Queen
-12 Junkrat
-13 Kiriko
-14 Lucio
-15 Mei
-16 Mercy
-17 Moira
-18 Orisa
-19 Pharah
-20 Not selected
-21 Ramattra
-22 Reaper
-23 Reinhardt
-24 Roadhog
-25 Sigma
-26 Sojourn
-27 Soldier 76
-28 Sombra
-29 Symmetra
-30 Torbjorn
-31 Tracer
-32 Waiting
-33 Widowmaker
-34 Winston
-35 Wrecking Ball
-36 Zarya
-37 Zenyatta
+1 Anran
+2 Ashe
+3 Baptiste
+4 Bastion
+5 Brigitte
+6 Cassidy
+7 D.Mon
+8 D.Va
+9 Doctrine
+10 Domina
+11 Doomfist
+12 Echo
+13 Emre
+14 Freja
+15 Genji
+16 Hanzo
+17 Hazard
+18 Illari
+19 Jetpack Cat
+20 Junker Queen
+21 Junkrat
+22 Juno
+23 Kiriko
+24 Lifeweaver
+25 Lúcio
+26 Mauga
+27 Mei
+28 Mercy
+29 Mizuki
+30 Moira
+31 Orisa
+32 Pharah
+33 Player not selected
+34 Ramattra
+35 Reaper
+36 Reinhardt
+37 Roadhog
+38 Shion
+39 Sierra
+40 Sigma
+41 Sojourn
+42 Soldier_ 76
+43 Sombra
+44 Symmetra
+45 Torbjörn
+46 Tracer
+47 Vendetta
+48 Venture
+49 Waiting for player
+50 Widowmaker
+51 Winston
+52 Wrecking Ball
+53 Wuyang
+54 Zarya
+55 Zenyatta
