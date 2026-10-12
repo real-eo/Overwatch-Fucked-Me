@@ -41,16 +41,15 @@ class ui:
                 1: 5,
                 2: 5,
                 3: 5,
-                4: 4
+                4: 3
             },
 
             # Support
             ROLE_SUPPORT: {
-                0: 3,                                                                       
-                1: 3,
-                2: 3,
-                3: 3,
-                4: 2
+                0: 4,                                                                       
+                1: 4,
+                2: 4,
+                3: 4,
             }
         }
 
@@ -93,7 +92,16 @@ class ui:
         ROLE_FRAMES_HEIGHT: int = CHARACTER_BUTTON_ROWS * CHARACTER_BUTTON_SIZE         # ? Amount of rows * size of one button
 
         # * Globals
-        WINDOW_WIDTH: int = 850                                                         # TODO: I think this can be calculated
+        WINDOW_WIDTH: int = sum((
+            WINDOW_PADDING,
+            TANK_FRAME_WIDTH,
+            ROLE_FRAME_SEPERATOR_PADDING,
+            DPS_FRAME_WIDTH,
+            ROLE_FRAME_SEPERATOR_PADDING,
+            SUPPORT_FRAME_WIDTH,
+            ROLE_FRAME_SEPERATOR_PADDING,                                               # ? I have ZERO clue why it is uneven like this, all I know is that it 
+        ))                                                                              # ? is supposed to be like this, as symmetrical looks terrible. My guess
+                                                                                        # ? is that it is due to the button-expansion asymmetry in the role frames
         WINDOW_HEIGHT: int = sum((
             SELECTED_HERO_HEIGHT, 
             COUNTERS_AREA_HEIGHT, 
@@ -623,9 +631,7 @@ class ui:
                 for cls in returnedClasses:
                     classID, className, confidenceScore = cls[0].split(" ", 1) + [cls[1]]
 
-                    # ! NOTE:
-                    #   TODO: ADD COUNTERS AND LAYOUT SUPPORT FOR "Doctrine"
-                    if className not in ("Waiting for player", "Player not selected", "Doctrine"):
+                    if className not in ("Waiting for player", "Player not selected"):
                         try:
                             self.selectedHeroes.append(self.characterButtonsDictionary[className])
                             continue                                                    # ? A bit hacky, but we `continue` to avoid appending 
