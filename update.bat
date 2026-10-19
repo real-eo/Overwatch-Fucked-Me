@@ -1,5 +1,7 @@
 @echo off
+chcp 65001 >nul
 setlocal EnableExtensions
+for /F "delims=" %%E in ('echo prompt $E^| cmd') do set "ESC=%%E"
 cd /d "%~dp0"
 
 if not "%~2"=="" goto :usage
@@ -32,25 +34,35 @@ exit /b 0
 
 
 :counters
-echo Updating counters.json...
+echo %ESC%[36m[ ] Updating counters.json...%ESC%[0m
 
-rem Add your counters update commands here.
+echo %ESC%[36m[ ] Scraping all counters from counter data sources...%ESC%[0m
 python src/scrape/counters.py
+echo %ESC%[33m[§] Successfully scraped all counters to:%ESC%[0m "./out/scraped/*.json"
+
+rem create a backup of the existing counters.json file
+if exist "counters.json" (
+    copy /y "counters.json" ".old/counters.json" >nul
+    echo %ESC%[33m[§] Backed up existing "counters.json" to:%ESC%[0m ".old/counters.json"
+)
+
+echo %ESC%[36m[ ] Combining all counters into counters.json...%ESC%[0m
+python src/create/counters.py --confirm --verbose=false
 
 goto :done
 
 
 :portraits
-echo Updating hero portraits...
+echo %ESC%[36m[ ] Updating hero portraits...
 
 rem Add your hero portrait update commands here.
-echo [WIP] Not yet implemented!
+echo %ESC%[31m[!] (WIP) Not yet implemented!%ESC%[0m
 
 goto :done
 
 
 :done
-echo Update finished.
+echo %ESC%[32m[§] Update finished.%ESC%[0m
 pause
 exit /b 0
 

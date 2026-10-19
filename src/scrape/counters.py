@@ -75,5 +75,5 @@ def counters(heroID: str, saveDirectory: Path = None):
 if __name__ == "__main__":
     # Scrape counters for all heroes and save them to "out/scraped/" directory
     for heroID in ALL_HERO_IDS:
-        print(f"Scraping counters for {heroID}...")
+        print(f"    - Scraping counters for: {heroID}...")
         counters(heroID, saveDirectory=scrape.OUTPUT_DIRECTORY)

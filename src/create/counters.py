@@ -1,5 +1,6 @@
 # Global imports
 from pathlib import Path
+import argparse
 import json
 import sys
 import os
@@ -82,24 +83,56 @@ def addCounters(id: str) -> None:
 def saveCounters() -> None:
     with open(COUNTERS_FILE, "w") as jsonFile:
         json.dump(counters, jsonFile, indent=4)
-
-    print(f"[+] Counters saved to {COUNTERS_FILE}")
-
+        
+    print(f"\033[33m[+] Counters saved to:\033[0m \"{COUNTERS_FILE}\"")
 
 
 if __name__ == "__main__":
+    def parseBool(value: str) -> bool:
+        """Strict boolean parser for command-line options."""
+        value = value.strip().lower()
+
+        if value in ("false", "0", "no", "n"): return False
+        if value in ("true", "1", "yes", "y"): return True
+
+        raise argparse.ArgumentTypeError("Expected true or false.")
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--confirm",
+        action="store_true",
+        help="Skip the confirmation prompt before overwriting counters.json.",
+    )
+    parser.add_argument(
+        "--verbose",
+        type=parseBool,
+        default=True,
+        help="Print the generated counters dictionary. Use --verbose=false to disable.",
+    )
+
+    args = parser.parse_args()
+
+    
     # Add counters for all heroes in ALL_HERO_IDS
     for id in ALL_HERO_IDS:
         addCounters(id)
 
     # Preview the generated counters dictionary
-    print(json.dumps(counters, indent=4))
-    print("\n\n")
+    if args.verbose:
+        print(json.dumps(counters, indent=4))
+        print("\n\n")
+
 
     # Wait for user confirmation before continuing
-    confirmation = input("Splicing and creating a new `counters.json` complete. Do you want to apply the changes to the app directory (THIS WILL DESTROY THE OLD `counters.json`!)? (Y/n): ")
-    if not confirmation.lower() in ["y", "yes"]:
-        exit() 
+    if not args.confirm:
+        confirmation = input(
+            "Splicing and creating a new `counters.json` complete. "
+            "Do you want to apply the changes to the app directory "
+            "(THIS WILL DESTROY THE OLD `counters.json!`)? (Y/n): "
+        )
+
+        if confirmation.strip().lower() not in ("y", "yes"):
+            sys.exit(0)
 
     # Save the counters to the `counters.json` file
     saveCounters()
