@@ -35,6 +35,7 @@ exit /b 0
 echo Updating counters.json...
 
 rem Add your counters update commands here.
+python src/scrape/counters.py
 
 goto :done
 
@@ -43,6 +44,7 @@ goto :done
 echo Updating hero portraits...
 
 rem Add your hero portrait update commands here.
+echo [WIP] Not yet implemented!
 
 goto :done
 
