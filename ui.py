@@ -1,4 +1,4 @@
-from src.constants import DEBUG, HEROES, HERO_IDS, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT, HERO_ROLES, MAX_SLOTS_TANK, MAX_SLOTS_DPS, MAX_SLOTS_SUPPORT, ROLES, ROLE_COUNT, TOTAL_SLOTS_ALL, COUNTERS_FILE
+from src.constants import DEBUG, HERO_IDS, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT, HERO_ROLES, MAX_SLOTS_TANK, MAX_SLOTS_DPS, MAX_SLOTS_SUPPORT, ROLES, ROLE_COUNT, TOTAL_SLOTS_ALL, COUNTERS_FILE
 from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, PhotoImage, Event, NORMAL, DISABLED, W, E
 from src.resources.manager import prefer_local_resource, resource_path, ensure_configurable, IS_LOCAL 
 from src.resources import createPhotoImages, portraits
@@ -6,6 +6,7 @@ from src.constants.model import SPECIAL_CLASSES
 from PIL import Image, ImageTk, ImageOps
 from src.ui import HeroButton, Button
 from configparser import ConfigParser
+from src.constants import ui as UI
 from src.parse import translate
 from colorsys import hls_to_rgb
 from pynput import keyboard
@@ -16,165 +17,12 @@ import jsonData
 
 
 class ui:
-    class Layout:
-        # * Constants
-        # Padding
-        SMALL_PADDING: int = 2
-        ROLE_FRAME_SEPERATOR_PADDING: int = 5
-        WINDOW_PADDING: int = 10
-        
-        # Sizes
-        CHARACTER_BUTTON_SIZE: int = 75
-
-        # Character grid
-        GRID: dict[str, dict[int, int]] = {                                             # Number of buttons in each row
-            # Tank
-            ROLE_TANK: {                                                               
-                0: 3,                                                                       
-                1: 3,
-                2: 3,
-                3: 3,
-                4: 3
-            },
-
-            # DPS
-            ROLE_DPS: {                                                                  
-                0: 5,                                                                       
-                1: 5,
-                2: 5,
-                3: 5,
-                4: 3
-            },
-
-            # Support
-            ROLE_SUPPORT: {
-                0: 4,                                                                       
-                1: 4,
-                2: 4,
-                3: 4,
-            }
-        }
-
-        # * Selected hero & counters layout constexprs
-        SELECTED_HERO_HEIGHT: int = 83                                           
-        COUNTERS_AREA_HEIGHT: int = 125
-
-        MAX_COUNTERS_PER_ROLE: int = 7                                                  # TODO: Update this so we can support more counters, and
-                                                                                        #     : implement a solution which allows for infinite 
-                                                                                        #     : counters to show while retaining the quick and clean
-                                                                                        #     : overview the current implementation has
-
-        # * Switch- & icon layout constexprs 
-        INPUT_FRAME_HEIGHT: int = 35
-        ROLE_ICON_FRAME_HEIGHT: int = 35
-        
-        # * Hero selection layout constexprs
-        # Role button rows
-        TANK_BUTTON_ROWS: int = len(GRID[ROLE_TANK])
-        DPS_BUTTON_ROWS: int = len(GRID[ROLE_DPS])
-        SUPPORT_BUTTON_ROWS: int = len(GRID[ROLE_SUPPORT])
-
-        # Role button columns
-        TANK_BUTTON_COLUMNS: int = max(GRID[ROLE_TANK].values())
-        DPS_BUTTON_COLUMNS: int = max(GRID[ROLE_DPS].values())
-        SUPPORT_BUTTON_COLUMNS: int = max(GRID[ROLE_SUPPORT].values())
-
-        # Max button rows
-        CHARACTER_BUTTON_ROWS: int = max((
-            TANK_BUTTON_ROWS,
-            DPS_BUTTON_ROWS,
-            SUPPORT_BUTTON_ROWS
-        ))
-
-        # Frame dimensions
-        TANK_FRAME_WIDTH: int = TANK_BUTTON_COLUMNS * CHARACTER_BUTTON_SIZE             # ? Amount of columns * size of one button
-        DPS_FRAME_WIDTH: int = DPS_BUTTON_COLUMNS * CHARACTER_BUTTON_SIZE               # ? Amount of columns * size of one button
-        SUPPORT_FRAME_WIDTH: int = SUPPORT_BUTTON_COLUMNS * CHARACTER_BUTTON_SIZE       # ? Amount of columns * size of one button
-
-        ROLE_FRAMES_HEIGHT: int = CHARACTER_BUTTON_ROWS * CHARACTER_BUTTON_SIZE         # ? Amount of rows * size of one button
-
-        # * Globals
-        WINDOW_WIDTH: int = sum((
-            WINDOW_PADDING,
-            TANK_FRAME_WIDTH,
-            ROLE_FRAME_SEPERATOR_PADDING,
-            DPS_FRAME_WIDTH,
-            ROLE_FRAME_SEPERATOR_PADDING,
-            SUPPORT_FRAME_WIDTH,
-            ROLE_FRAME_SEPERATOR_PADDING,                                               # ? I have ZERO clue why it is uneven like this, all I know is that it 
-        ))                                                                              # ? is supposed to be like this, as symmetrical looks terrible. My guess
-                                                                                        # ? is that it is due to the button-expansion asymmetry in the role frames
-        WINDOW_HEIGHT: int = sum((
-            SELECTED_HERO_HEIGHT, 
-            COUNTERS_AREA_HEIGHT, 
-            INPUT_FRAME_HEIGHT,
-            SMALL_PADDING, 
-            ROLE_ICON_FRAME_HEIGHT,
-            ROLE_FRAMES_HEIGHT
-        ))
-
-        VIEWPORT_WIDTH: int = WINDOW_WIDTH - (2 * WINDOW_PADDING)
-        VIEWPORT_HEIGHT: int = WINDOW_HEIGHT - (2 * WINDOW_PADDING)
-
-        # * Positions
-        # Role frame positions
-        TANK_FRAME_X: int = 0 + WINDOW_PADDING                                                      # 0                     + window_padding
-        DPS_FRAME_X: int = (TANK_FRAME_X + TANK_FRAME_WIDTH) + ROLE_FRAME_SEPERATOR_PADDING         # 255 +   role_padding  + window_padding
-        SUPPORT_FRAME_X: int = (DPS_FRAME_X + DPS_FRAME_WIDTH) + ROLE_FRAME_SEPERATOR_PADDING       # 600 + 2*role_padding  + window_padding
-        
-        ROLE_FRAMES_Y: int = WINDOW_HEIGHT - ROLE_FRAMES_HEIGHT
-
-        # Switch- & icon positions
-        ROLE_ICON_Y: int = ROLE_FRAMES_Y - ROLE_ICON_FRAME_HEIGHT
-        INPUT_FRAME_Y: int = ROLE_ICON_Y - SMALL_PADDING - INPUT_FRAME_HEIGHT                       # ? Bottom-based layout (anchored to bottom)
-        # // INPUT_FRAME_Y: int = SELECTED_HERO_HEIGHT + COUNTERS_AREA_HEIGHT                       # ? Top-based layout (anchored to top)
-
-    class Style:
-        # * Defaults
-        BACKGROUND = "#3C3C3C"
-        
-        class Label:
-            class SelectedHero:
-                BACKGROUND = "#4C4C4C"
-
-            class Counter:
-                BACKGROUND = "#444444"
-
-
-        class ControlButton:
-            # * Defaults
-            COLOR = "SystemButtonFace"                                                  # SystemButtonFace: "#F0F0F0"
-
-            class Active:
-                COLOR = "Green"
-
-        class HeroButton:
-            # * Defaults
-            COLOR = "#FFFFFF"                                                           
-            WIDTH = 68
-            HEIGHT = 68
-            BORDERWIDTH = 0
-
-            class Selected:    
-                COLOR = "#0078D7"
-
-            class Hovered:
-                WIDTH = 72    
-                HEIGHT = 72
-
-            class Disabled:
-                PORTRAIT_OPACITY =  65                                                  # ? Represented in %. 100->0, 100 being fully opaque
-                GRAYSCALE_AMOUNT =  75                                                  # ? Represented in %. 100->0, 100 being pure grayscale
-
-        
-
-
     def __init__(self):
         self.root = Tk()
 
-        self.root.geometry(f"{self.Layout.WINDOW_WIDTH}x{self.Layout.WINDOW_HEIGHT}")
+        self.root.geometry(f"{UI.Layout.WINDOW_WIDTH}x{UI.Layout.WINDOW_HEIGHT}")
         self.root.title("Overwatch Fucked Me")
-        self.root.configure(background=self.Style.BACKGROUND)
+        self.root.configure(background=UI.Style.BACKGROUND)
         
         self.heroButtonsDictionary = {}
 
@@ -294,32 +142,32 @@ class ui:
         for i in range(TOTAL_SLOTS_ALL):
             characterFrame = Frame(
                 master=self.root, 
-                height=self.Layout.SELECTED_HERO_HEIGHT + self.Layout.COUNTERS_AREA_HEIGHT, 
-                width=(self.Layout.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL), 
-                background=self.Style.BACKGROUND, 
+                height=UI.Layout.SELECTED_HERO_HEIGHT + UI.Layout.COUNTERS_AREA_HEIGHT, 
+                width=(UI.Layout.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL), 
+                background=UI.Style.BACKGROUND, 
                 name=f"characterFrame{i}"
             )
 
             characterFrame.place(
-                x=((self.Layout.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL)*i + (TOTAL_SLOTS_ALL*i)), 
+                x=((UI.Layout.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL)*i + (TOTAL_SLOTS_ALL*i)), 
                 y=0
             )
             self.recommendedCharacterFrameList.append(characterFrame)
 
         # Character buttons
-        self.inputFrame = Frame(master=self.root, height=self.Layout.INPUT_FRAME_HEIGHT, width=self.Layout.WINDOW_WIDTH, background=self.Style.BACKGROUND, name="inputFrame")
-        self.roleInfoFrame = Frame(master=self.root, height=self.Layout.ROLE_ICON_FRAME_HEIGHT, width=self.Layout.WINDOW_WIDTH, background=self.Style.BACKGROUND, name="roleInfoFrame")
+        self.inputFrame = Frame(master=self.root, height=UI.Layout.INPUT_FRAME_HEIGHT, width=UI.Layout.WINDOW_WIDTH, background=UI.Style.BACKGROUND, name="inputFrame")
+        self.roleInfoFrame = Frame(master=self.root, height=UI.Layout.ROLE_ICON_FRAME_HEIGHT, width=UI.Layout.WINDOW_WIDTH, background=UI.Style.BACKGROUND, name="roleInfoFrame")
 
-        self.tankFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.TANK_FRAME_WIDTH, background=self.Style.BACKGROUND, name="tankFrame")
-        self.dpsFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.DPS_FRAME_WIDTH, background=self.Style.BACKGROUND, name="dpsFrame")
-        self.supportFrame = Frame(master=self.root, height=self.Layout.ROLE_FRAMES_HEIGHT, width=self.Layout.SUPPORT_FRAME_WIDTH, background=self.Style.BACKGROUND, name="supportFrame")
+        self.tankFrame = Frame(master=self.root, height=UI.Layout.ROLE_FRAMES_HEIGHT, width=UI.Layout.TANK_FRAME_WIDTH, background=UI.Style.BACKGROUND, name="tankFrame")
+        self.dpsFrame = Frame(master=self.root, height=UI.Layout.ROLE_FRAMES_HEIGHT, width=UI.Layout.DPS_FRAME_WIDTH, background=UI.Style.BACKGROUND, name="dpsFrame")
+        self.supportFrame = Frame(master=self.root, height=UI.Layout.ROLE_FRAMES_HEIGHT, width=UI.Layout.SUPPORT_FRAME_WIDTH, background=UI.Style.BACKGROUND, name="supportFrame")
 
-        self.inputFrame.place(x=0, y=self.Layout.INPUT_FRAME_Y)
-        self.roleInfoFrame.place(x=0 + self.Layout.WINDOW_PADDING, y=self.Layout.ROLE_ICON_Y)
+        self.inputFrame.place(x=0, y=UI.Layout.INPUT_FRAME_Y)
+        self.roleInfoFrame.place(x=0 + UI.Layout.WINDOW_PADDING, y=UI.Layout.ROLE_ICON_Y)
 
-        self.tankFrame.place(   x=self.Layout.TANK_FRAME_X,     y=self.Layout.ROLE_FRAMES_Y)
-        self.dpsFrame.place(    x=self.Layout.DPS_FRAME_X,      y=self.Layout.ROLE_FRAMES_Y)
-        self.supportFrame.place(x=self.Layout.SUPPORT_FRAME_X,  y=self.Layout.ROLE_FRAMES_Y)    
+        self.tankFrame.place(   x=UI.Layout.TANK_FRAME_X,     y=UI.Layout.ROLE_FRAMES_Y)
+        self.dpsFrame.place(    x=UI.Layout.DPS_FRAME_X,      y=UI.Layout.ROLE_FRAMES_Y)
+        self.supportFrame.place(x=UI.Layout.SUPPORT_FRAME_X,  y=UI.Layout.ROLE_FRAMES_Y)    
 
     def _labels(self):
         self.counterImagePlaceholders: list[dict[str, list[Label]]] = []                # 2D list of labels which get replaced with portraits of the counters (3x7)
@@ -328,10 +176,10 @@ class ui:
         for a, b in enumerate(self.recommendedCharacterFrameList):
             characterPlaceholder = Label(
                 b, 
-                height=(self.Layout.SELECTED_HERO_HEIGHT), 
-                width=(self.Layout.VIEWPORT_WIDTH/10), 
+                height=(UI.Layout.SELECTED_HERO_HEIGHT), 
+                width=(UI.Layout.VIEWPORT_WIDTH/10), 
                 image=portraits.HERO_3x3["blank"],
-                bg=self.Style.Label.SelectedHero.BACKGROUND, 
+                bg=UI.Style.Label.SelectedHero.BACKGROUND, 
                 name=f"placeholder@{a}characterLabel"
             )
 
@@ -343,21 +191,21 @@ class ui:
             placeholderDict: dict[str, list[Label]] = {}
 
             for roleIndex, role in enumerate(ROLES):
-                for counterIndex in range(self.Layout.MAX_COUNTERS_PER_ROLE):
+                for counterIndex in range(UI.Layout.MAX_COUNTERS_PER_ROLE):
                     # Object
                     counterPlaceholder = Label(
                         b, 
-                        height=((self.Layout.COUNTERS_AREA_HEIGHT / ROLE_COUNT)), 
-                        width=(self.Layout.VIEWPORT_WIDTH / TOTAL_SLOTS_ALL / self.Layout.MAX_COUNTERS_PER_ROLE), 
+                        height=((UI.Layout.COUNTERS_AREA_HEIGHT / ROLE_COUNT)), 
+                        width=(UI.Layout.VIEWPORT_WIDTH / TOTAL_SLOTS_ALL / UI.Layout.MAX_COUNTERS_PER_ROLE), 
                         image=portraits.HERO_3x3["blank"],
-                        bg=self.Style.Label.Counter.BACKGROUND,
+                        bg=UI.Style.Label.Counter.BACKGROUND,
                         name=f"placeholder@{a}-{counterIndex}-{roleIndex}Label"
                     )
 
                     # Location
                     counterPlaceholder.place(
-                        x=(((self.Layout.VIEWPORT_WIDTH / TOTAL_SLOTS_ALL / self.Layout.MAX_COUNTERS_PER_ROLE) * counterIndex)), 
-                        y=((self.Layout.COUNTERS_AREA_HEIGHT / ROLE_COUNT) * (roleIndex) + self.Layout.SELECTED_HERO_HEIGHT)
+                        x=(((UI.Layout.VIEWPORT_WIDTH / TOTAL_SLOTS_ALL / UI.Layout.MAX_COUNTERS_PER_ROLE) * counterIndex)), 
+                        y=((UI.Layout.COUNTERS_AREA_HEIGHT / ROLE_COUNT) * (roleIndex) + UI.Layout.SELECTED_HERO_HEIGHT)
                     )
 
                     # Data
@@ -378,16 +226,16 @@ class ui:
         self.roleIconList = [PhotoImage(file=resource_path("res", "icons", "role", f"{i}Icon.png")).subsample(4, 4) for i in ROLES]
 
         for x, i in enumerate(ROLES):
-            iconLabel = Label(self.roleInfoFrame, image=self.roleIconList[x], bg=self.Style.BACKGROUND, name=f"{i}IconLabel")
+            iconLabel = Label(self.roleInfoFrame, image=self.roleIconList[x], bg=UI.Style.BACKGROUND, name=f"{i}IconLabel")
             iconLabel.place(x=([-5, -5+225+5, -5+600+10][x]), y=-7)
 
     def _buttons(self):
         self.extendedLimitsButton = Button(master=self.inputFrame, text="Extended Limits", name="extendedLimitsButton")
-        self.extendedLimitsButton.place(x=5, y=self.Layout.INPUT_FRAME_HEIGHT / 2, anchor=W)
+        self.extendedLimitsButton.place(x=5, y=UI.Layout.INPUT_FRAME_HEIGHT / 2, anchor=W)
         self.extendedLimitsButton.bind("<Button>", self.mouseButton)
 
         self.aiActiveButton = Button(master=self.inputFrame, text="AI Recognition", name="aiActiveButton")
-        self.aiActiveButton.place(x=self.Layout.WINDOW_WIDTH - 5, y=self.Layout.INPUT_FRAME_HEIGHT / 2, anchor=E)
+        self.aiActiveButton.place(x=UI.Layout.WINDOW_WIDTH - 5, y=UI.Layout.INPUT_FRAME_HEIGHT / 2, anchor=E)
         self.aiActiveButton.bind("<Button>", self.mouseButton)
 
 
@@ -400,25 +248,25 @@ class ui:
         ]
 
         i = 0
-        for y in self.Layout.GRID[ROLE_TANK]:
-            for x in range(self.Layout.GRID[ROLE_TANK][y]):
+        for y in UI.Layout.GRID[ROLE_TANK]:
+            for x in range(UI.Layout.GRID[ROLE_TANK][y]):
                 tankButton: HeroButton = HeroButton(
                     self.tankFrame, 
                     heroId=HERO_IDS[ROLE_TANK][i],
                                         
                     image=self.tankPortraitList[i], 
-                    bg=self.Style.HeroButton.COLOR,
-                    borderwidth=self.Style.HeroButton.BORDERWIDTH,
-                    height=self.Style.HeroButton.HEIGHT, 
-                    width=self.Style.HeroButton.WIDTH
+                    bg=UI.Style.HeroButton.COLOR,
+                    borderwidth=UI.Style.HeroButton.BORDERWIDTH,
+                    height=UI.Style.HeroButton.HEIGHT, 
+                    width=UI.Style.HeroButton.WIDTH
                 )
 
                 tankButton.place(
                     x=(
-                        (x * self.Layout.CHARACTER_BUTTON_SIZE) 
-                        + ((self.Layout.CHARACTER_BUTTON_SIZE/2) * (self.Layout.TANK_BUTTON_COLUMNS - self.Layout.GRID[ROLE_TANK][y]))
+                        (x * UI.Layout.CHARACTER_BUTTON_SIZE) 
+                        + ((UI.Layout.CHARACTER_BUTTON_SIZE/2) * (UI.Layout.TANK_BUTTON_COLUMNS - UI.Layout.GRID[ROLE_TANK][y]))
                     ), 
-                    y=(y * self.Layout.CHARACTER_BUTTON_SIZE)
+                    y=(y * UI.Layout.CHARACTER_BUTTON_SIZE)
                 )
 
                 tankButton.bind("<Button>", self.mouseButtonCharacters)
@@ -439,25 +287,25 @@ class ui:
         ]
 
         i = 0
-        for y in self.Layout.GRID[ROLE_DPS]:
-            for x in range(self.Layout.GRID[ROLE_DPS][y]):
+        for y in UI.Layout.GRID[ROLE_DPS]:
+            for x in range(UI.Layout.GRID[ROLE_DPS][y]):
                 dpsButton: HeroButton = HeroButton(
                     self.dpsFrame, 
                     heroId=HERO_IDS[ROLE_DPS][i],
 
                     image=self.dpsPortraitList[i], 
-                    bg=self.Style.HeroButton.COLOR,
-                    borderwidth=self.Style.HeroButton.BORDERWIDTH,
-                    height=self.Style.HeroButton.HEIGHT, 
-                    width=self.Style.HeroButton.WIDTH
+                    bg=UI.Style.HeroButton.COLOR,
+                    borderwidth=UI.Style.HeroButton.BORDERWIDTH,
+                    height=UI.Style.HeroButton.HEIGHT, 
+                    width=UI.Style.HeroButton.WIDTH
                 )
 
                 dpsButton.place(
                     x=(
-                        (x * self.Layout.CHARACTER_BUTTON_SIZE) 
-                        + ((self.Layout.CHARACTER_BUTTON_SIZE/2) * (self.Layout.DPS_BUTTON_COLUMNS - self.Layout.GRID[ROLE_DPS][y]))
+                        (x * UI.Layout.CHARACTER_BUTTON_SIZE) 
+                        + ((UI.Layout.CHARACTER_BUTTON_SIZE/2) * (UI.Layout.DPS_BUTTON_COLUMNS - UI.Layout.GRID[ROLE_DPS][y]))
                     ), 
-                    y=(y * self.Layout.CHARACTER_BUTTON_SIZE)
+                    y=(y * UI.Layout.CHARACTER_BUTTON_SIZE)
                 )
 
                 dpsButton.bind("<Button>", self.mouseButtonCharacters)
@@ -478,25 +326,25 @@ class ui:
         ]
 
         i = 0
-        for y in self.Layout.GRID[ROLE_SUPPORT]:
-            for x in range(self.Layout.GRID[ROLE_SUPPORT][y]):
+        for y in UI.Layout.GRID[ROLE_SUPPORT]:
+            for x in range(UI.Layout.GRID[ROLE_SUPPORT][y]):
                 supportButton: HeroButton = HeroButton(
                     self.supportFrame, 
                     heroId=HERO_IDS[ROLE_SUPPORT][i],
                                         
                     image=self.supportPortraitList[i], 
-                    bg=self.Style.HeroButton.COLOR,
-                    borderwidth=self.Style.HeroButton.BORDERWIDTH,
-                    height=self.Style.HeroButton.HEIGHT, 
-                    width=self.Style.HeroButton.WIDTH
+                    bg=UI.Style.HeroButton.COLOR,
+                    borderwidth=UI.Style.HeroButton.BORDERWIDTH,
+                    height=UI.Style.HeroButton.HEIGHT, 
+                    width=UI.Style.HeroButton.WIDTH
                 )
                 
                 supportButton.place(
                     x=(
-                        (x * self.Layout.CHARACTER_BUTTON_SIZE) 
-                        + ((self.Layout.CHARACTER_BUTTON_SIZE/2) * (self.Layout.SUPPORT_BUTTON_COLUMNS - self.Layout.GRID[ROLE_SUPPORT][y]))
+                        (x * UI.Layout.CHARACTER_BUTTON_SIZE) 
+                        + ((UI.Layout.CHARACTER_BUTTON_SIZE/2) * (UI.Layout.SUPPORT_BUTTON_COLUMNS - UI.Layout.GRID[ROLE_SUPPORT][y]))
                     ), 
-                    y=(y * self.Layout.CHARACTER_BUTTON_SIZE)
+                    y=(y * UI.Layout.CHARACTER_BUTTON_SIZE)
                 )
                 
                 supportButton.bind("<Button>", self.mouseButtonCharacters)
@@ -583,14 +431,14 @@ class ui:
     def mouseButton(self, event: Event):
         if event.widget == self.extendedLimitsButton:
             self.extendedLimits = [True, False][self.extendedLimits]
-            self.extendedLimitsButton.configure(bg=[self.Style.ControlButton.COLOR, self.Style.ControlButton.Active.COLOR][self.extendedLimits])
+            self.extendedLimitsButton.configure(bg=[UI.Style.ControlButton.COLOR, UI.Style.ControlButton.Active.COLOR][self.extendedLimits])
 
             self.selectedHeroes = [None for _ in range(TOTAL_SLOTS_ALL)]
             self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
 
             if not self.aiActive:
                 for button in self.fullbuttonList:
-                    button.configure(bg=self.Style.HeroButton.COLOR)
+                    button.configure(bg=UI.Style.HeroButton.COLOR)
                     button.enable()
 
             self.updateTeamComp()
@@ -598,14 +446,14 @@ class ui:
         
         if event.widget == self.aiActiveButton:
             self.aiActive = [True, False][self.aiActive]
-            self.aiActiveButton.configure(bg=[self.Style.ControlButton.COLOR, self.Style.ControlButton.Active.COLOR][self.aiActive])
+            self.aiActiveButton.configure(bg=[UI.Style.ControlButton.COLOR, UI.Style.ControlButton.Active.COLOR][self.aiActive])
 
             self.selectedHeroes = [None for _ in range(TOTAL_SLOTS_ALL)]
             self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
 
             if self.aiActive:
                 for button in self.fullbuttonList:
-                    button.configure(bg=self.Style.HeroButton.COLOR)
+                    button.configure(bg=UI.Style.HeroButton.COLOR)
                     button.disable()
             else:
                 for button in self.fullbuttonList:
@@ -810,7 +658,7 @@ class ui:
 
                     # TODO: Fix this issue (somehow)
                     # Safety check to prevent index out of range errors 
-                    if usedSlots[counterRole] >= self.Layout.MAX_COUNTERS_PER_ROLE: 
+                    if usedSlots[counterRole] >= UI.Layout.MAX_COUNTERS_PER_ROLE: 
                         print(f"[!] Warning: Maximum counters reached for role " +  
                               f"{counterRole}. Counter \"{counterID}\" will be skipped.")
 
@@ -874,28 +722,28 @@ class ui:
                     if not isSelected 
                     or self.aiActive
                     or (isSelected and counterScore > 0)
-                    else self.Style.HeroButton.Selected.COLOR
+                    else UI.Style.HeroButton.Selected.COLOR
                 ),
                 inactive=not button.isInteractable
             )
 
             button.configure(
                 image=buttonImage,
-                bg=self.Style.HeroButton.Selected.COLOR if (isSelected and not self.aiActive) else color,
-                activebackground=self.Style.HeroButton.Selected.COLOR if (isSelected and not self.aiActive) else color
+                bg=UI.Style.HeroButton.Selected.COLOR if (isSelected and not self.aiActive) else color,
+                activebackground=UI.Style.HeroButton.Selected.COLOR if (isSelected and not self.aiActive) else color
             )
                     
     def animationFocus(self, event: Event):
         if event.widget.isInteractable:
             self.characterHighlightedRectList.append([event.widget, event.widget.winfo_x(), event.widget.winfo_y()])    
-            event.widget.configure(width=self.Style.HeroButton.Hovered.WIDTH, height=self.Style.HeroButton.Hovered.HEIGHT)
+            event.widget.configure(width=UI.Style.HeroButton.Hovered.WIDTH, height=UI.Style.HeroButton.Hovered.HEIGHT)
             event.widget.place(x=event.widget.winfo_x() - 2, y=event.widget.winfo_y() - 2)
 
     def animationDefocus(self, event: Event):
         if event.widget.isInteractable:
             try:
                 widget = self.characterHighlightedRectList.pop(0)
-                widget[0].configure(width=self.Style.HeroButton.WIDTH, height=self.Style.HeroButton.HEIGHT)
+                widget[0].configure(width=UI.Style.HeroButton.WIDTH, height=UI.Style.HeroButton.HEIGHT)
                 widget[0].place(x=widget[1], y=widget[2])
             except IndexError:
                 pass
@@ -1065,10 +913,10 @@ class ui:
                 ).convert("RGBA")
 
                 # 50% original color + 50% grayscale
-                sourceImage = Image.blend(sourceImage, grayImage, ui.Style.HeroButton.Disabled.GRAYSCALE_AMOUNT/100)
+                sourceImage = Image.blend(sourceImage, grayImage, UI.Style.HeroButton.Disabled.GRAYSCALE_AMOUNT/100)
 
                 # 75% opacity
-                sourceImage.putalpha(alpha.point(lambda value: value * ui.Style.HeroButton.Disabled.PORTRAIT_OPACITY // 100))
+                sourceImage.putalpha(alpha.point(lambda value: value * UI.Style.HeroButton.Disabled.PORTRAIT_OPACITY // 100))
 
 
             backgroundImage = Image.new(

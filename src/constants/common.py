@@ -24,22 +24,22 @@ ROLE_ALL = "all";           TOTAL_SLOTS_ALL = 5                                 
 ROLES = [ROLE_TANK, ROLE_DPS, ROLE_SUPPORT]
 ROLE_COUNT = len(ROLES)
 
-HEROES = {
+[DeprecationWarning("`__HEROES` is deprecated, refrain from using! `HERO_IDS` is the new alternative!")]
+__HEROES = {
     ROLE_TANK: ['D.Mon', 'D.Va', 'Domina', 'Doomfist', 'Hazard', 'Junker Queen', 'Mauga', 'Orisa', 'Ramattra', 'Reinhardt', 'Roadhog', 'Sigma', 'Winston', 'Wrecking Ball', 'Zarya'],
     ROLE_DPS: ['Anran', 'Ashe', 'Bastion', 'Cassidy', 'Echo', 'Emre', 'Freja', 'Genji', 'Hanzo', 'Junkrat', 'Mei', 'Pharah', 'Reaper', 'Shion', 'Sierra', 'Sojourn', 'Soldier_ 76', 'Symmetra', 'Torbjörn', 'Tracer', 'Vendetta', 'Venture', 'Widowmaker'],
     ROLE_SUPPORT: ['Ana', 'Baptiste', 'Brigitte', 'Doctrine', 'Illari', 'Jetpack Cat', 'Juno', 'Kiriko', 'Lifeweaver', 'Lúcio', 'Mercy', 'Mizuki', 'Moira', 'Sombra', 'Wuyang', 'Zenyatta']
 }
 
 HERO_IDS = {
-    ROLE_TANK: [heroID(char) for char in HEROES[ROLE_TANK]],
-    ROLE_DPS: [heroID(char) for char in HEROES[ROLE_DPS]],
-    ROLE_SUPPORT: [heroID(char) for char in HEROES[ROLE_SUPPORT]]
+    ROLE_TANK: [heroID(char) for char in __HEROES[ROLE_TANK]],
+    ROLE_DPS: [heroID(char) for char in __HEROES[ROLE_DPS]],
+    ROLE_SUPPORT: [heroID(char) for char in __HEROES[ROLE_SUPPORT]]
 }
 
 
-ALL_HEROES = HEROES[ROLE_TANK] + HEROES[ROLE_DPS] + HEROES[ROLE_SUPPORT]
+ALL_HEROES = __HEROES[ROLE_TANK] + __HEROES[ROLE_DPS] + __HEROES[ROLE_SUPPORT]
 ALL_HERO_IDS = HERO_IDS[ROLE_TANK] + HERO_IDS[ROLE_DPS] + HERO_IDS[ROLE_SUPPORT]
-
 
 # ? This will eventually be how we store the heroes, and replace either "HEROES" or "HERO_IDS". But for now, we just assing a new constant
 HERO_ROLES = {
@@ -47,3 +47,9 @@ HERO_ROLES = {
     for role, heroList in HERO_IDS.items()                                              # Loop through each role
     for hero in heroList                                                                # Loop through each list of heroes for that role
 } 
+
+HERO_COUNTS = {
+    ROLE_TANK: len(HERO_IDS[ROLE_TANK]),
+    ROLE_DPS: len(HERO_IDS[ROLE_DPS]),
+    ROLE_SUPPORT: len(HERO_IDS[ROLE_SUPPORT])
+}
