@@ -2,6 +2,7 @@ from src.constants import DEBUG, HEROES, HERO_IDS, ROLE_TANK, ROLE_DPS, ROLE_SUP
 from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, PhotoImage, Event, NORMAL, DISABLED, W, E
 from src.resources.manager import prefer_local_resource, resource_path, ensure_configurable, IS_LOCAL 
 from src.resources import createPhotoImages, portraits
+from src.constants.model import SPECIAL_CLASSES
 from PIL import Image, ImageTk, ImageOps
 from src.ui import HeroButton, Button
 from configparser import ConfigParser
@@ -175,7 +176,7 @@ class ui:
         self.root.title("Overwatch Fucked Me")
         self.root.configure(background=self.Style.BACKGROUND)
         
-        self.characterButtonsDictionary = {}
+        self.heroButtonsDictionary = {}
 
         self.buttonList: dict[str, list] = {}
 
@@ -424,7 +425,7 @@ class ui:
                 tankButton.bind("<Enter>", self.animationFocus)
                 tankButton.bind("<Leave>", self.animationDefocus)
 
-                self.characterButtonsDictionary[HEROES[ROLE_TANK][i]] = tankButton
+                self.heroButtonsDictionary[HERO_IDS[ROLE_TANK][i]] = tankButton
                 tankButtonList.append(tankButton)
                 i += 1
 
@@ -463,7 +464,7 @@ class ui:
                 dpsButton.bind("<Enter>", self.animationFocus)
                 dpsButton.bind("<Leave>", self.animationDefocus)
 
-                self.characterButtonsDictionary[HEROES[ROLE_DPS][i]] = dpsButton
+                self.heroButtonsDictionary[HERO_IDS[ROLE_DPS][i]] = dpsButton
                 dpsButtonList.append(dpsButton)
                 i += 1
         
@@ -502,7 +503,7 @@ class ui:
                 supportButton.bind("<Enter>", self.animationFocus)
                 supportButton.bind("<Leave>", self.animationDefocus)
 
-                self.characterButtonsDictionary[HEROES[ROLE_SUPPORT][i]] = supportButton
+                self.heroButtonsDictionary[HERO_IDS[ROLE_SUPPORT][i]] = supportButton
                 supportButtonList.append(supportButton)
                 
                 i += 1
@@ -525,12 +526,6 @@ class ui:
 
             slot = self.selectedHeroes.index(None)
             self.selectedHeroes[slot] = event.widget
-            # NOTE: I think this is safe to comment out as color now are handled by `self.updateHeroButtonHighlights`
-            # event.widget.configure(
-            #     bg=self.Style.HeroButton.Selected.COLOR,
-            #     activebackground=self.Style.HeroButton.Selected.COLOR
-            # )
-            
 
             if not self.extendedLimits:
                 self.slotsRemaining[heroButtonRole] -= 1
@@ -552,10 +547,6 @@ class ui:
             if event.widget not in self.selectedHeroes: return "break"
 
             self.selectedHeroes[self.selectedHeroes.index(event.widget)] = None         # TODO: Fix: find by identity, not index
-            # event.widget.configure(
-            #     bg=self.Style.HeroButton.COLOR,
-            #     activebackground=self.Style.HeroButton.COLOR
-            # )
 
             if not self.extendedLimits:
                 self.slotsRemaining[heroButtonRole] += 1
@@ -571,9 +562,9 @@ class ui:
 
         # | DEBUG
         elif event.num == 2 and DEBUG:
-            button = event.widget
+            button: HeroButton = event.widget
 
-            print(f"\n[D] Hero button: \"{button.winfo_name()}\"")
+            print(f"\n[D] Hero button: \"{button.HERO_ID}\"")
 
             # Tkinter configuration options and current values
             for option, details in button.configure().items():
@@ -587,7 +578,7 @@ class ui:
             print(f"[-]   winfo_width: {button.winfo_width()}")
             print(f"[-]   winfo_height: {button.winfo_height()}")
             print(f"[-]   bindtags: {button.bindtags()}")
-            print(f"[-]   state: {button.cget('state')}")
+            print(f"[-]   isInteractable: {button.isInteractable}")
 
     def mouseButton(self, event: Event):
         if event.widget == self.extendedLimitsButton:
@@ -597,22 +588,20 @@ class ui:
             self.selectedHeroes = [None for _ in range(TOTAL_SLOTS_ALL)]
             self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
 
-            self.updateTeamComp()
-            self.updateHeroButtonHighlights()
-
             if not self.aiActive:
                 for button in self.fullbuttonList:
                     button.configure(bg=self.Style.HeroButton.COLOR)
                     button.enable()
+
+            self.updateTeamComp()
+            self.updateHeroButtonHighlights()
+        
         if event.widget == self.aiActiveButton:
             self.aiActive = [True, False][self.aiActive]
             self.aiActiveButton.configure(bg=[self.Style.ControlButton.COLOR, self.Style.ControlButton.Active.COLOR][self.aiActive])
 
             self.selectedHeroes = [None for _ in range(TOTAL_SLOTS_ALL)]
             self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
-
-            self.updateTeamComp()
-            self.updateHeroButtonHighlights()
 
             if self.aiActive:
                 for button in self.fullbuttonList:
@@ -621,6 +610,10 @@ class ui:
             else:
                 for button in self.fullbuttonList:
                     button.enable()
+
+            self.updateTeamComp()
+            self.updateHeroButtonHighlights()
+
         return "break"
 
     def keyListener(self):
@@ -634,23 +627,24 @@ class ui:
                 self.selectedHeroes = []
 
                 recognize.capture_image()
-                returnedClasses = recognize.recognize()
+                returnedClasses = recognize.recognize(extendedLimits=self.extendedLimits)
 
                 for cls in returnedClasses:
-                    classID, className, confidenceScore = cls[0].split(" ", 1) + [cls[1]]
+                    recognizedHeroId, confidenceScore = cls
 
-                    if className not in ("Waiting for player", "Player not selected"):
-                        try:
-                            self.selectedHeroes.append(self.characterButtonsDictionary[className])
-                            continue                                                    # ? A bit hacky, but we `continue` to avoid appending 
-                                                                                        # ? `None` to selectedHeroes in two separate places
-                        except KeyError:
-                            print(f"[!] ERROR: Coun't find recognized character \"{className}\" in `self.characterButtonsDictionary`!")
+                    # Incase one of the enemies got classified as not a hero 
+                    if recognizedHeroId in SPECIAL_CLASSES:
+                        self.selectedHeroes.append(None)
+                        continue                                                        # ? Skip to next iteration
 
-                    # ? This is kinda a bad fix, but for every case where we don't add a character
-                    # ? classification, we add `None`. This SHOULD always make the for-loop iterate 
-                    # ? 5 times regardless, but it's not programmed explicitly, so there can be some bugs here
-                    self.selectedHeroes.append(None)
+                    # Sanity check - shouldn't happen
+                    if recognizedHeroId not in self.heroButtonsDictionary:
+                        print(f"[!] ERROR: Coun't find recognized character \"{recognizedHeroId}\" in `self.heroButtonsDictionary`!")
+                        self.selectedHeroes.append(None)
+                        continue
+
+                    self.selectedHeroes.append(self.heroButtonsDictionary[recognizedHeroId])
+              
 
                 self.root.after(0, lambda: self.updateTeamComp(forceReload=True))       # ? Tkinter widgets should only be updated on the main thread
                 self.root.after(0, self.updateHeroButtonHighlights)                     # ? Tkinter widgets should only be updated on the main thread
