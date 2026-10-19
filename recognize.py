@@ -1,8 +1,8 @@
-from src.resources.manager import resource_path, writable_path
+from src.constants.model import MODEL, MODEL_IDS, MODEL_LABELS, SPECIAL_CLASSES, EXPECTED_ROLE_ORDER
+from src.resources.manager import writable_path
+from src.constants import TOTAL_SLOTS_ALL, HERO_ROLES
 from PIL import Image, ImageGrab, ImageOps
-from src.constants import TOTAL_SLOTS_ALL
-from keras.models import load_model
-from keras import Model
+
 import numpy as np
 import random
 import os
@@ -121,19 +121,15 @@ def capture_image(persistPortraits: bool = False):
     return 0
  
  
-def recognize() -> list[tuple[str, float]]:
-    np.set_printoptions(suppress=True)
-
-    model: Model = load_model(resource_path("model", "keras_model.h5"), compile=False)
-    classNames = open(resource_path("model", "labels.txt"), 'r', encoding="utf-8").readlines()
-
+def recognize(extendedLimits: bool) -> tuple[tuple[str, float]]:
     data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
     size = (224, 224)
 
     classesReturned = []
+    chosenHeroes = set()
 
-    for i in range(TOTAL_SLOTS_ALL):
-        image = Image.open(writable_path("out", "state", f"e{i}.png")).convert('RGB')
+    for enemyIndex in range(TOTAL_SLOTS_ALL):
+        image = Image.open(writable_path("out", "state", f"e{enemyIndex}.png")).convert('RGB')
         image = ImageOps.fit(image, size, Image.Resampling.LANCZOS)
 
         imageArray = np.asarray(image)
@@ -141,17 +137,41 @@ def recognize() -> list[tuple[str, float]]:
         normalizedImageArray = (imageArray.astype(np.float32) / 127.0) - 1
         data[0] = normalizedImageArray
 
-        prediction = model.predict(data, verbose=0)
-        index = np.argmax(prediction)
-        className = classNames[index]
-        confidenceScore = prediction[0][index]
+        prediction = MODEL.predict(data, verbose=0)[0]
 
-        print('[§] Class:', className, end='')
-        print('[§] Confidence score:', confidenceScore)
+        if extendedLimits:
+            selectedIndex = int(np.argmax(prediction))
+        else:
+            rankedIndices = np.argsort(prediction)[::-1]
 
-        classesReturned.append([className.strip(), confidenceScore])
+            for candidateIndex in rankedIndices:
+                candidateHeroId = MODEL_IDS[candidateIndex]
+
+                if candidateHeroId in SPECIAL_CLASSES:
+                    selectedIndex = int(candidateIndex)
+                    break
+
+                if HERO_ROLES.get(candidateHeroId) != EXPECTED_ROLE_ORDER[enemyIndex]:
+                    continue
+
+                if candidateHeroId in chosenHeroes:
+                    continue
+
+                selectedIndex = int(candidateIndex)
+                chosenHeroes.add(candidateHeroId)                                       # ? We can safely do this as long as we 
+                break                                                                   # ? break when checking for special cases
+
+        # ? Since the special cases are ALWAYS valid, regardless of how far down 
+        # ? the list they are, `selectedIndex` will always be valid. 
+        recognizedHeroId = MODEL_IDS[selectedIndex]
+        confidenceScore = float(prediction[selectedIndex])
+
+        print("[§] Class:", MODEL_LABELS[selectedIndex])
+        print("[§] Confidence score:", confidenceScore)
+
+        classesReturned.append((recognizedHeroId, confidenceScore))
     
-    return classesReturned
+    return tuple(classesReturned)
 
 
 if __name__ == "__main__":

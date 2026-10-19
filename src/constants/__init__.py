@@ -12,3 +12,7 @@ except ImportError: from src.constants  import scrape, counterpickgg
 try:                                    import create
 except ImportError: from src.constants  import create
 
+# Model specific constants
+try:                                    import model
+except ImportError: from src.constants  import model
+
