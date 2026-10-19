@@ -425,7 +425,7 @@ class ui:
                 tankButton.bind("<Enter>", self.animationFocus)
                 tankButton.bind("<Leave>", self.animationDefocus)
 
-                self.heroButtonsDictionary[HEROES[ROLE_TANK][i]] = tankButton
+                self.heroButtonsDictionary[HERO_IDS[ROLE_TANK][i]] = tankButton
                 tankButtonList.append(tankButton)
                 i += 1
 
@@ -464,7 +464,7 @@ class ui:
                 dpsButton.bind("<Enter>", self.animationFocus)
                 dpsButton.bind("<Leave>", self.animationDefocus)
 
-                self.heroButtonsDictionary[HEROES[ROLE_DPS][i]] = dpsButton
+                self.heroButtonsDictionary[HERO_IDS[ROLE_DPS][i]] = dpsButton
                 dpsButtonList.append(dpsButton)
                 i += 1
         
@@ -503,7 +503,7 @@ class ui:
                 supportButton.bind("<Enter>", self.animationFocus)
                 supportButton.bind("<Leave>", self.animationDefocus)
 
-                self.heroButtonsDictionary[HEROES[ROLE_SUPPORT][i]] = supportButton
+                self.heroButtonsDictionary[HERO_IDS[ROLE_SUPPORT][i]] = supportButton
                 supportButtonList.append(supportButton)
                 
                 i += 1
@@ -526,12 +526,6 @@ class ui:
 
             slot = self.selectedHeroes.index(None)
             self.selectedHeroes[slot] = event.widget
-            # NOTE: I think this is safe to comment out as color now are handled by `self.updateHeroButtonHighlights`
-            # event.widget.configure(
-            #     bg=self.Style.HeroButton.Selected.COLOR,
-            #     activebackground=self.Style.HeroButton.Selected.COLOR
-            # )
-            
 
             if not self.extendedLimits:
                 self.slotsRemaining[heroButtonRole] -= 1
@@ -553,10 +547,6 @@ class ui:
             if event.widget not in self.selectedHeroes: return "break"
 
             self.selectedHeroes[self.selectedHeroes.index(event.widget)] = None         # TODO: Fix: find by identity, not index
-            # event.widget.configure(
-            #     bg=self.Style.HeroButton.COLOR,
-            #     activebackground=self.Style.HeroButton.COLOR
-            # )
 
             if not self.extendedLimits:
                 self.slotsRemaining[heroButtonRole] += 1
@@ -572,9 +562,9 @@ class ui:
 
         # | DEBUG
         elif event.num == 2 and DEBUG:
-            button = event.widget
+            button: HeroButton = event.widget
 
-            print(f"\n[D] Hero button: \"{button.winfo_name()}\"")
+            print(f"\n[D] Hero button: \"{button.HERO_ID}\"")
 
             # Tkinter configuration options and current values
             for option, details in button.configure().items():
@@ -588,7 +578,7 @@ class ui:
             print(f"[-]   winfo_width: {button.winfo_width()}")
             print(f"[-]   winfo_height: {button.winfo_height()}")
             print(f"[-]   bindtags: {button.bindtags()}")
-            print(f"[-]   state: {button.cget('state')}")
+            print(f"[-]   isInteractable: {button.isInteractable}")
 
     def mouseButton(self, event: Event):
         if event.widget == self.extendedLimitsButton:
@@ -598,22 +588,20 @@ class ui:
             self.selectedHeroes = [None for _ in range(TOTAL_SLOTS_ALL)]
             self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
 
-            self.updateTeamComp()
-            self.updateHeroButtonHighlights()
-
             if not self.aiActive:
                 for button in self.fullbuttonList:
                     button.configure(bg=self.Style.HeroButton.COLOR)
                     button.enable()
+
+            self.updateTeamComp()
+            self.updateHeroButtonHighlights()
+        
         if event.widget == self.aiActiveButton:
             self.aiActive = [True, False][self.aiActive]
             self.aiActiveButton.configure(bg=[self.Style.ControlButton.COLOR, self.Style.ControlButton.Active.COLOR][self.aiActive])
 
             self.selectedHeroes = [None for _ in range(TOTAL_SLOTS_ALL)]
             self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
-
-            self.updateTeamComp()
-            self.updateHeroButtonHighlights()
 
             if self.aiActive:
                 for button in self.fullbuttonList:
@@ -622,6 +610,10 @@ class ui:
             else:
                 for button in self.fullbuttonList:
                     button.enable()
+
+            self.updateTeamComp()
+            self.updateHeroButtonHighlights()
+
         return "break"
 
     def keyListener(self):
