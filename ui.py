@@ -1,11 +1,12 @@
 from src.constants import DEBUG, HEROES, HERO_IDS, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT, HERO_ROLES, MAX_SLOTS_TANK, MAX_SLOTS_DPS, MAX_SLOTS_SUPPORT, ROLES, ROLE_COUNT, TOTAL_SLOTS_ALL, COUNTERS_FILE
-from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, Button, PhotoImage, Event, NORMAL, DISABLED, W, E
+from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, PhotoImage, Event, NORMAL, DISABLED, W, E
 from src.resources.manager import prefer_local_resource, resource_path, ensure_configurable, IS_LOCAL 
 from src.resources import createPhotoImages, portraits
+from PIL import Image, ImageTk, ImageOps
+from src.ui import HeroButton, Button
 from configparser import ConfigParser
 from src.parse import translate
 from colorsys import hls_to_rgb
-from PIL import Image, ImageTk
 from pynput import keyboard
 from os import startfile
 import recognize
@@ -158,7 +159,11 @@ class ui:
 
             class Hovered:
                 WIDTH = 72    
-                HEIGHT = 72    
+                HEIGHT = 72
+
+            class Disabled:
+                PORTRAIT_OPACITY =  65                                                  # ? Represented in %. 100->0, 100 being fully opaque
+                GRAYSCALE_AMOUNT =  75                                                  # ? Represented in %. 100->0, 100 being pure grayscale
 
         
 
@@ -174,7 +179,7 @@ class ui:
 
         self.buttonList: dict[str, list] = {}
 
-        self.selectedHeroes: list[Button | None] = [None for _ in range(TOTAL_SLOTS_ALL)] 
+        self.selectedHeroes: list[HeroButton | None] = [None for _ in range(TOTAL_SLOTS_ALL)] 
         self.slotsRemaining = {ROLE_TANK: MAX_SLOTS_TANK, ROLE_DPS: MAX_SLOTS_DPS, ROLE_SUPPORT: MAX_SLOTS_SUPPORT}
         self.roleFrameDict = {".tankFrame": ROLE_TANK, ".dpsFrame": ROLE_DPS, ".supportFrame": ROLE_SUPPORT}
         
@@ -186,7 +191,7 @@ class ui:
 
         self.initializeWindow()
 
-        self.fullbuttonList = []
+        self.fullbuttonList: list[HeroButton] = []
         for i in self.buttonList.values():
             self.fullbuttonList.extend(i)
 
@@ -396,10 +401,11 @@ class ui:
         i = 0
         for y in self.Layout.GRID[ROLE_TANK]:
             for x in range(self.Layout.GRID[ROLE_TANK][y]):
-                tankButton: Button = Button(
+                tankButton: HeroButton = HeroButton(
                     self.tankFrame, 
+                    heroId=HERO_IDS[ROLE_TANK][i],
+                                        
                     image=self.tankPortraitList[i], 
-                    name=HERO_IDS[ROLE_TANK][i],
                     bg=self.Style.HeroButton.COLOR,
                     borderwidth=self.Style.HeroButton.BORDERWIDTH,
                     height=self.Style.HeroButton.HEIGHT, 
@@ -434,10 +440,11 @@ class ui:
         i = 0
         for y in self.Layout.GRID[ROLE_DPS]:
             for x in range(self.Layout.GRID[ROLE_DPS][y]):
-                dpsButton = Button(
+                dpsButton: HeroButton = HeroButton(
                     self.dpsFrame, 
+                    heroId=HERO_IDS[ROLE_DPS][i],
+
                     image=self.dpsPortraitList[i], 
-                    name=HERO_IDS[ROLE_DPS][i],
                     bg=self.Style.HeroButton.COLOR,
                     borderwidth=self.Style.HeroButton.BORDERWIDTH,
                     height=self.Style.HeroButton.HEIGHT, 
@@ -472,10 +479,11 @@ class ui:
         i = 0
         for y in self.Layout.GRID[ROLE_SUPPORT]:
             for x in range(self.Layout.GRID[ROLE_SUPPORT][y]):
-                supportButton = Button(
+                supportButton: HeroButton = HeroButton(
                     self.supportFrame, 
+                    heroId=HERO_IDS[ROLE_SUPPORT][i],
+                                        
                     image=self.supportPortraitList[i], 
-                    name=HERO_IDS[ROLE_SUPPORT][i],
                     bg=self.Style.HeroButton.COLOR,
                     borderwidth=self.Style.HeroButton.BORDERWIDTH,
                     height=self.Style.HeroButton.HEIGHT, 
@@ -509,7 +517,7 @@ class ui:
 
         if event.num == 1:
             canSelect = (
-                event.widget["state"] == NORMAL
+                event.widget.isInteractable
                 and event.widget not in self.selectedHeroes
                 and (self.slotsRemaining[heroButtonRole] > 0 if not self.extendedLimits else selectedCount < TOTAL_SLOTS_ALL)
             )
@@ -529,12 +537,12 @@ class ui:
                 if self.slotsRemaining[heroButtonRole] == 0:
                     for btn in self.buttonList[heroButtonRole]:
                         if btn not in self.selectedHeroes:
-                            btn["state"] = DISABLED
+                            btn.disable()
             else:
                 if selectedCount + 1 >= TOTAL_SLOTS_ALL:
                     for btn in self.fullbuttonList:
                         if btn not in self.selectedHeroes:
-                            btn["state"] = DISABLED
+                            btn.disable()
 
             self.root.after(0, self.updateTeamComp)
             self.root.after(0, self.updateHeroButtonHighlights)
@@ -552,10 +560,10 @@ class ui:
             if not self.extendedLimits:
                 self.slotsRemaining[heroButtonRole] += 1
                 for btn in self.buttonList[heroButtonRole]:
-                    btn["state"] = NORMAL
+                    btn.enable()
             else:
                 for btn in self.fullbuttonList:
-                    btn["state"] = NORMAL
+                    btn.enable()
 
             self.root.after(0, self.updateTeamComp)
             self.root.after(0, self.updateHeroButtonHighlights)
@@ -595,7 +603,7 @@ class ui:
             if not self.aiActive:
                 for button in self.fullbuttonList:
                     button.configure(bg=self.Style.HeroButton.COLOR)
-                    button["state"] = NORMAL
+                    button.enable()
         if event.widget == self.aiActiveButton:
             self.aiActive = [True, False][self.aiActive]
             self.aiActiveButton.configure(bg=[self.Style.ControlButton.COLOR, self.Style.ControlButton.Active.COLOR][self.aiActive])
@@ -609,10 +617,10 @@ class ui:
             if self.aiActive:
                 for button in self.fullbuttonList:
                     button.configure(bg=self.Style.HeroButton.COLOR)
-                    button["state"] = DISABLED
+                    button.disable()
             else:
                 for button in self.fullbuttonList:
-                    button["state"] = NORMAL
+                    button.enable()
         return "break"
 
     def keyListener(self):
@@ -865,13 +873,17 @@ class ui:
                 f"{round(blue * 255):02X}"
             )
             
-            buttonImage = self.getHeroImage(heroId, (
-                color
-                if not isSelected 
-                or self.aiActive
-                or (isSelected and counterScore > 0)
-                else self.Style.HeroButton.Selected.COLOR
-            ))
+            buttonImage = self.getHeroImage(
+                heroId, 
+                (
+                    color
+                    if not isSelected 
+                    or self.aiActive
+                    or (isSelected and counterScore > 0)
+                    else self.Style.HeroButton.Selected.COLOR
+                ),
+                inactive=not button.isInteractable
+            )
 
             button.configure(
                 image=buttonImage,
@@ -880,13 +892,13 @@ class ui:
             )
                     
     def animationFocus(self, event: Event):
-        if event.widget["state"] == NORMAL:
+        if event.widget.isInteractable:
             self.characterHighlightedRectList.append([event.widget, event.widget.winfo_x(), event.widget.winfo_y()])    
             event.widget.configure(width=self.Style.HeroButton.Hovered.WIDTH, height=self.Style.HeroButton.Hovered.HEIGHT)
             event.widget.place(x=event.widget.winfo_x() - 2, y=event.widget.winfo_y() - 2)
 
     def animationDefocus(self, event: Event):
-        if event.widget["state"] == NORMAL:
+        if event.widget.isInteractable:
             try:
                 widget = self.characterHighlightedRectList.pop(0)
                 widget[0].configure(width=self.Style.HeroButton.WIDTH, height=self.Style.HeroButton.HEIGHT)
@@ -1043,13 +1055,27 @@ class ui:
 
 
     # * Getters
-    def getHeroImage(self, heroId, backgroundColor):
-        cacheKey = (heroId, backgroundColor)
+    def getHeroImage(self, heroId, backgroundColor, inactive):
+        cacheKey = (heroId, backgroundColor, inactive)
 
         if cacheKey not in self.heroImageCache:
             sourceImage = ImageTk.getimage(
                 portraits.HERO_4x4[heroId]
             ).convert("RGBA")
+
+            if inactive:
+                alpha = sourceImage.getchannel("A")
+
+                grayImage = ImageOps.grayscale(
+                    sourceImage.convert("RGB")
+                ).convert("RGBA")
+
+                # 50% original color + 50% grayscale
+                sourceImage = Image.blend(sourceImage, grayImage, ui.Style.HeroButton.Disabled.GRAYSCALE_AMOUNT/100)
+
+                # 75% opacity
+                sourceImage.putalpha(alpha.point(lambda value: value * ui.Style.HeroButton.Disabled.PORTRAIT_OPACITY // 100))
+
 
             backgroundImage = Image.new(
                 "RGBA",
