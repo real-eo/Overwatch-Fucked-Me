@@ -50,7 +50,6 @@ goto :done
 
 
 :done
-echo.
 echo Update finished.
 pause
 exit /b 0
