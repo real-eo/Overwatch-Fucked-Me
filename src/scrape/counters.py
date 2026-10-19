@@ -26,7 +26,7 @@ def counters(heroID: str, saveDirectory: Path = None):
     )        
     
     # Replace all instances of counterpickgg's inconsistencies with the standardized variants
-    standardizedResponse = response.text
+    standardizedResponse = response.content.decode("utf-8")
     for args in SPECIAL_CASE_REPLACE_PARAMETERS:
         standardizedResponse = standardizedResponse.replace(*args)
 
