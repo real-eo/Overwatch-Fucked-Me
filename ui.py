@@ -1,7 +1,7 @@
 from src.constants import ROLE, DEBUG, HERO_IDS, HERO_ROLE_MAP, HERO_COUNTS, MAX_SLOTS_TANK, MAX_SLOTS_DPS, MAX_SLOTS_SUPPORT, HERO_ROLES, ROLE_COUNT, TOTAL_SLOTS_ALL, COUNTERS_FILE
 from tkinter import StringVar, Tk, Toplevel, Menu, Frame, Label, PhotoImage, Event, NORMAL, DISABLED, W, E
 from src.resources.manager import prefer_local_resource, resource_path, ensure_configurable, IS_LOCAL 
-from src.ui import HeroButton, Button, Layout, Resolution
+from src.ui import HeroButton, CounterLabel, Button, Layout, Resolution
 from src.resources import createPhotoImages, portraits
 from src.constants.model import SPECIAL_CLASSES
 from PIL import Image, ImageTk, ImageOps
@@ -227,7 +227,7 @@ class ui:
         # // self.supportFrame.place(x=UI.LAYOUT.SUPPORT_FRAME_X,  y=UI.LAYOUT.ROLE_FRAMES_Y)    
 
     def createLabels(self):
-        self.counterImagePlaceholders: list[dict[ROLE, list[Label]]] = []               # 2D list of labels which get replaced with portraits of the counters (3x7)
+        self.counterImagePlaceholders: list[dict[ROLE, list[CounterLabel]]] = []        # 2D list of labels which get replaced with portraits of the counters (3x7)
         self.characterImagePlaceholders: list[Label] = []                               # List of labels which get replaced with portraits of the selected heroes (5)
 
         for slotIndex, slotFrame in enumerate(self.recommendedHeroFrameList):
@@ -285,7 +285,7 @@ class ui:
                     # //     bg=UI.STYLE.Label.Counter.BACKGROUND,
                     # //     name=f"placeholder@{a}-{counterIndex}-{roleIndex}Label"
                     # // )
-                    counterPlaceholder = Label(
+                    counterPlaceholder = CounterLabel(
                         countersFrame,
                         image=portraits.HERO_3x3["blank"],
                         bg=UI.STYLE.Label.Counter.BACKGROUND,
@@ -304,7 +304,7 @@ class ui:
 
                     # Data
                     counterPlaceholder.counterData = None
-                    counterPlaceholder.counterID = None
+                    counterPlaceholder.counterId = None
 
                     # Functionality
                     counterPlaceholder.bind("<Enter>", self.showCounterTooltip)
@@ -714,7 +714,7 @@ class ui:
                 # Clear the counter placeholders' data for this slot
                 for role in HERO_ROLES:
                     for counterPlaceholder in self.counterImagePlaceholders[index][role]:
-                        counterPlaceholder.counterID = None
+                        counterPlaceholder.counterId = None
                         counterPlaceholder.counterData = None
                         counterPlaceholder.configure(image=portraits.HERO_6x6["blank"])
 
@@ -739,42 +739,42 @@ class ui:
                     # Clear the counter placeholders' data for this slot
                     for role in HERO_ROLES:
                         for counterPlaceholder in self.counterImagePlaceholders[index][role]:
-                            counterPlaceholder.counterID = None
+                            counterPlaceholder.counterId = None
                             counterPlaceholder.counterData = None
                             counterPlaceholder.configure(image=portraits.HERO_6x6["blank"])
 
                 # * Character
                 # Create the portrait for the selected hero
-                characterPortrait = portraits.HERO_3x3[heroButton.winfo_name()]
+                characterPortrait = portraits.HERO_3x3[heroButton.HERO_ID]
             
                 # and set it on the corresponding placeholder label
                 self.characterImagePlaceholders[index].configure(image=characterPortrait)
 
 
                 # * Counters
-                heroCounters = jsonData.counters[heroButton.winfo_name()]
+                heroCounters: dict[str, str] = jsonData.counters[heroButton.HERO_ID]
                 usedSlots = {ROLE.TANK: 0, ROLE.DPS: 0, ROLE.SUPPORT: 0}                # To keep track of how many counter slots we have used for each role, so we know where to place the next counter portrait
 
-                for counterID, data in heroCounters.items():                            # TODO: Use the `data` for something
-                    counterRole = HERO_ROLE_MAP[counterID]
+                for counterId, data in heroCounters.items():                            # TODO: Use the `data` for something
+                    counterRole = HERO_ROLE_MAP[counterId]
 
                     # TODO: Fix this issue (somehow)
                     # Safety check to prevent index out of range errors 
                     if usedSlots[counterRole] >= UI.LAYOUT.MAX_COUNTERS_PER_ROLE: 
                         print(f"[!] Warning: Maximum counters reached for role " +  
-                              f"{counterRole}. Counter \"{counterID}\" will be skipped.")
+                              f"{counterRole}. Counter \"{counterId}\" will be skipped.")
 
                         continue                                                        # Skip this counter if we've already used all available slots for its role
 
                     # Update the counters' data and portrait
-                    portrait = portraits.HERO_6x6[counterID]
+                    portrait = portraits.HERO_6x6[counterId]
                     # self.counterImagePlaceholders[index][counterRole][usedSlots[counterRole]].configure(image=portrait)
 
                     counterPlaceholder = (
                         self.counterImagePlaceholders[index][counterRole][usedSlots[counterRole]]
                     )
                                         
-                    counterPlaceholder.counterID = counterID
+                    counterPlaceholder.counterId = counterId
                     counterPlaceholder.counterData = data
                     counterPlaceholder.configure(image=portrait)
 
@@ -782,7 +782,7 @@ class ui:
 
     def updateHeroButtonHighlights(self):
         selectedIds = {
-            heroButton.winfo_name()
+            heroButton.HERO_ID
             for heroButton in self.selectedHeroes
             if heroButton is not None
         }
