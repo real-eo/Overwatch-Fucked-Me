@@ -109,7 +109,7 @@ def capture_image(persistPortraits: bool = False):
     
 
     # * 4) Split image into one image per enemy and save them
-    # Character image size is: 64x64
+    # Hero image size is: 64x64
     # Role icon image size is: 27x64
     # Border size is: 2x2
     _crop_image(enemyLeaderboardImage, 93, 64, randomName=persistPortraits)

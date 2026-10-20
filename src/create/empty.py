@@ -19,8 +19,8 @@ from src.constants import ALL_HERO_IDS, COUNTERS_FILE
 
 # Generate the empty dictionary for the counters
 counters = {
-    character: {} 
-    for character in ALL_HERO_IDS
+    hero: {} 
+    for hero in ALL_HERO_IDS
 }
 
 # Use json.dump to write the dictionary to a file

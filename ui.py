@@ -47,8 +47,8 @@ class ui:
         for i in self.buttonList.values():
             self.fullbuttonList.extend(i)
 
-        self.characterHighlighted = ""
-        self.characterHighlightedRectList = []
+        self.heroHighlighted = ""
+        self.heroHighlightedRectList = []
 
         # Load config
         self.configPath, self.configIsLocal = prefer_local_resource("config.ini")
@@ -180,23 +180,23 @@ class ui:
         # Portraits
         # // self.recommendedHeroFrameList = []
         # // for i in range(TOTAL_SLOTS_ALL):
-        # //     characterFrame = Frame(
+        # //     heroFrame = Frame(
         # //         master=self.root, 
         # //         height=UI.LAYOUT.SELECTED_HERO_HEIGHT + UI.LAYOUT.COUNTERS_AREA_HEIGHT, 
         # //         width=(UI.LAYOUT.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL), 
         # //         background=UI.STYLE.BACKGROUND, 
-        # //         name=f"characterFrame{i}"
+        # //         name=f"heroFrame{i}"
         # //     )
 
-        # //     characterFrame.place(
+        # //     heroFrame.place(
         # //         x=((UI.LAYOUT.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL)*i + (TOTAL_SLOTS_ALL*i)), 
         # //         y=0
         # //     )
-        # //     self.recommendedHeroFrameList.append(characterFrame)
+        # //     self.recommendedHeroFrameList.append(heroFrame)
         self.recommendedHeroFrameList = [
             Frame(
                 self.root,
-                name=f"characterFrame{i}",
+                name=f"heroFrame{i}",
                 background=UI.STYLE.BACKGROUND,
             )
             for i in range(TOTAL_SLOTS_ALL)
@@ -228,7 +228,7 @@ class ui:
 
     def createLabels(self):
         self.counterImagePlaceholders: list[dict[ROLE, list[CounterLabel]]] = []        # 2D list of labels which get replaced with portraits of the counters (3x7)
-        self.characterImagePlaceholders: list[Label] = []                               # List of labels which get replaced with portraits of the selected heroes (5)
+        self.heroImagePlaceholders: list[Label] = []                                    # List of labels which get replaced with portraits of the selected heroes (5)
 
         for slotIndex, slotFrame in enumerate(self.recommendedHeroFrameList):
             # * Selected hero
@@ -238,26 +238,26 @@ class ui:
             slotFrame.grid_columnconfigure(0, weight=1)
 
             # Selected hero label
-            # // characterPlaceholder = Label(
+            # // heroPlaceholder = Label(
             # //     b, 
             # //     height=(UI.LAYOUT.SELECTED_HERO_HEIGHT), 
             # //     width=(UI.LAYOUT.VIEWPORT_WIDTH/10), 
             # //     image=portraits.HERO_3x3["blank"],
             # //     bg=UI.STYLE.Label.SelectedHero.BACKGROUND, 
-            # //     name=f"placeholder@{a}characterLabel"
+            # //     name=f"placeholder@{a}heroLabel"
             # // )
             selectedHeroPlaceholder = Label(
                 slotFrame,
                 image=portraits.HERO_3x3["blank"],
                 bg=UI.STYLE.Label.SelectedHero.BACKGROUND,
-                name=f"placeholder@{slotIndex}characterLabel",
+                name=f"placeholder@{slotIndex}heroLabel",
             )
 
-            # // characterPlaceholder.place(x=0, y=0)
+            # // heroPlaceholder.place(x=0, y=0)
             selectedHeroPlaceholder.grid(row=0, column=0, sticky="nsew")
 
-            # // self.characterImagePlaceholders.append(characterPlaceholder)
-            self.characterImagePlaceholders.append(selectedHeroPlaceholder)
+            # // self.heroImagePlaceholders.append(heroPlaceholder)
+            self.heroImagePlaceholders.append(selectedHeroPlaceholder)
 
             # * Hero's counters
             # Counters slots frame
@@ -361,7 +361,7 @@ class ui:
                 width=UI.STYLE.HeroButton.WIDTH
             )
 
-            button.bind("<Button>", self.mouseButtonCharacters)
+            button.bind("<Button>", self.mouseButtonHeros)
             button.bind("<Enter>", self.animationFocus)
             button.bind("<Leave>", self.animationDefocus)
 
@@ -436,7 +436,7 @@ class ui:
 
   
     # * Event handlers
-    def mouseButtonCharacters(self, event: Event):
+    def mouseButtonHeros(self, event: Event):
         heroButtonRole = self.roleFrameDict[str(event.widget.master)]
         selectedCount = sum(1 for h in self.selectedHeroes if h is not None)
 
@@ -563,7 +563,7 @@ class ui:
 
                     # Sanity check - shouldn't happen
                     if recognizedHeroId not in self.heroButtonsDictionary:
-                        print(f"[!] ERROR: Coun't find recognized character \"{recognizedHeroId}\" in `self.heroButtonsDictionary`!")
+                        print(f"[!] ERROR: Coun't find recognized hero \"{recognizedHeroId}\" in `self.heroButtonsDictionary`!")
                         self.selectedHeroes.append(None)
                         continue
 
@@ -709,7 +709,7 @@ class ui:
         for index, heroButton in enumerate(self.selectedHeroes):                        # ? Enumerate so we can use the index for updating the placeholder label
             if heroButton is None:                                                      # No hero selected in this slot
                 # Clear the portrait placeholder for this slot
-                self.characterImagePlaceholders[index].configure(image=portraits.HERO_3x3["blank"])
+                self.heroImagePlaceholders[index].configure(image=portraits.HERO_3x3["blank"])
                 
                 # Clear the counter placeholders' data for this slot
                 for role in HERO_ROLES:
@@ -743,12 +743,12 @@ class ui:
                             counterPlaceholder.counterData = None
                             counterPlaceholder.configure(image=portraits.HERO_6x6["blank"])
 
-                # * Character
+                # * Hero
                 # Create the portrait for the selected hero
-                characterPortrait = portraits.HERO_3x3[heroButton.HERO_ID]
+                heroPortrait = portraits.HERO_3x3[heroButton.HERO_ID]
             
                 # and set it on the corresponding placeholder label
-                self.characterImagePlaceholders[index].configure(image=characterPortrait)
+                self.heroImagePlaceholders[index].configure(image=heroPortrait)
 
 
                 # * Counters
@@ -837,14 +837,14 @@ class ui:
                     
     def animationFocus(self, event: Event):
         if event.widget.isInteractable:
-            self.characterHighlightedRectList.append([event.widget, event.widget.winfo_x(), event.widget.winfo_y()])    
+            self.heroHighlightedRectList.append([event.widget, event.widget.winfo_x(), event.widget.winfo_y()])    
             event.widget.configure(width=UI.STYLE.HeroButton.Hovered.WIDTH, height=UI.STYLE.HeroButton.Hovered.HEIGHT)
             event.widget.place(x=event.widget.winfo_x() - 2, y=event.widget.winfo_y() - 2)
 
     def animationDefocus(self, event: Event):
         if event.widget.isInteractable:
             try:
-                widget = self.characterHighlightedRectList.pop(0)
+                widget = self.heroHighlightedRectList.pop(0)
                 widget[0].configure(width=UI.STYLE.HeroButton.WIDTH, height=UI.STYLE.HeroButton.HEIGHT)
                 widget[0].place(x=widget[1], y=widget[2])
             except IndexError:
