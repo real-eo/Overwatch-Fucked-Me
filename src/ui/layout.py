@@ -1,20 +1,184 @@
 # Global imports
+from dataclasses import dataclass
+from math import ceil, log
+from typing import Literal
 from pathlib import Path
-from math import ceil
+import typing
 import sys
 
 # Same level imports
 try:                from constants.common       import HERO_COUNTS
 except ImportError: from src.constants.common   import HERO_COUNTS
 
+try:                from constants.ui           import LAYOUT
+except ImportError: from src.constants.ui       import LAYOUT
+
 # Super level imports
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path: sys.path.insert(0, str(PROJECT_ROOT))
 
 
+# * Dataclasses & typedefs
+@dataclass(frozen=True, slots=True)
+class Resolution:
+    """
+    Represents a monitor's resolution.
+    """
+    width: int
+    height: int
 
 
-def bestLayout(columns: int, A: tuple[int, int, int] = HERO_COUNTS.values()):
+@dataclass(frozen=True, slots=True)
+class WindowGeometry:
+    """
+    Represents the geometry of a window.
+
+    Attributes:
+        width (int): The width of the window.
+        height (int): The height of the window.
+    """
+
+    width: int
+    height: int
+
+    def __str__(self) -> str: return f"{self.width}x{self.height}"
+
+
+@dataclass(frozen=True)
+class HeroLayout:
+    """
+    Represents the layout of heroes in the UI.
+    """
+    
+    mode: Literal["landscape", "portrait"]
+    columns: int
+    rows: int
+    widths: tuple[int, int, int]
+    heights: tuple[int, int, int]
+    pixels: tuple[int, int]
+
+
+RequiresResizing = bool
+
+
+# * Layout calculation functions
+def minColumnsForRows(rows: int, A: tuple[int, int, int] = HERO_COUNTS.values()):
+    """Smallest layout in which every group is at most `rows` rows tall.
+
+    A group with n icons and width `w` needs `ceil(n / w)` rows, so it fits
+    in `rows` rows exactly when `w >= ceil(n / rows)`. Using that minimum width for
+    each group gives the fewest columns that can reach height `rows`.
+
+    Returns
+    -------
+    tuple[int, tuple[int, int, int], list[int]]
+        (columns_needed, widths, heights). Heights are <= `rows`; a group can
+        come out shorter than `rows` when its width is rounded up.
+    """
+    widths = tuple(ceil(n / rows) for n in A)
+    heights = [ceil(n / w) for n, w in zip(A, widths)]
+    return sum(widths), widths, heights
+
+
+def _allLayouts(A: tuple[int, int, int]):
+    """Every exact-fit layout for icon counts `A`, in both orientations.
+
+    landscape: groups side by side; one layout per row count `rows`, from
+               `minColumnsForRows(rows)`. Its box is (sum of widths, tallest group).
+    portrait:  groups stacked, each as wide as the window; one layout per
+               width `C`, with `rows = sum(ceil(n / C))`.
+
+    A layout is dropped if another layout of the same mode is no wider
+    and no taller (it can never be the better choice).
+    """
+    found = {}
+
+    for rows in range(1, max(A) + 1):
+        cols, widths, heights = minColumnsForRows(rows, A)
+        found.setdefault(("landscape", cols, max(heights)), dict(
+            mode="landscape", columns=cols, rows=max(heights),
+            widths=widths, heights=heights))
+
+    for C in range(1, max(A) + 1):
+        heights = [ceil(n / C) for n in A]
+        found.setdefault(("portrait", C, sum(heights)), dict(
+            mode="portrait", columns=C, rows=sum(heights),
+            widths=(C, C, C), heights=heights))
+
+    layouts = list(found.values())
+
+    return [
+        L 
+        for L in layouts if not any(
+            o["mode"] == L["mode"] 
+            and o is not L
+            and o["columns"] <= L["columns"] 
+            and o["rows"] <= L["rows"]
+            for o in layouts
+        )
+    ]
+
+
+def calculateOptimalHeroLayout(
+    availableWidth: int, 
+    availableHeight: int, 
+    screenWidth: int, 
+    screenHeight: int, 
+    A: tuple[int, int, int] = HERO_COUNTS.values()
+) -> HeroLayout:
+    """Pick the tightest-packing layout for a dragged window size.
+
+    All pixel arguments are for the tiling area only (gaps/UI already
+    subtracted; add them back when sizing the real window).
+
+    Parameters
+    ----------
+    availableWidth, availableHeight : int   Tiling area the user dragged to, in px.
+    screenWidth, screenHeight : int Largest tiling area the screen allows, in px.
+    A : tuple[int, int, int] | None
+        Icons per group (tank, damage, support). Defaults to HERO_COUNTS.
+
+    Returns
+    -------
+    HeroLayout: mode ("landscape" or "portrait"), columns, rows, widths, heights, pixels (width, height of the exact-fit window).
+
+    Rule
+    ----
+    1. Landscape first. Sort layouts by (tiles to grow, window area,
+       closeness to 11:5) and take the best. Layouts that fit the dragged
+       size cost no growth, so among those the smallest area (tightest
+       packing) wins.
+    2. If that overruns the screen, take the best portrait layout that
+       fits the screen (same sort, ratio target 5:11).
+    3. If no portrait layout fits either, keep the landscape one.
+    """
+    c0 = max(1, availableWidth // LAYOUT.HERO_BUTTON_SIZE)                              # whole tiles the drag gives us
+    r0 = max(1, availableHeight // LAYOUT.HERO_BUTTON_SIZE)
+    layouts = _allLayouts(A)
+
+    def key(L):
+        growth = max(0, L["columns"] - c0) + max(0, L["rows"] - r0)
+        area = L["columns"] * L["rows"]
+        ratio = abs(log(L["columns"] / L["rows"]) - log(LAYOUT.DEFAULT_RATIO[L["mode"]]))
+        return (growth, area, ratio)
+
+    def fitsScreen(L):
+        return L["columns"] * LAYOUT.HERO_BUTTON_SIZE <= screenWidth and L["rows"] * LAYOUT.HERO_BUTTON_SIZE <= screenHeight
+
+    best = min((L for L in layouts if L["mode"] == "landscape"), key=key)
+    if not fitsScreen(best):
+        pool = [L for L in layouts if L["mode"] == "portrait" and fitsScreen(L)]
+
+        if pool: best = min(pool, key=key)
+
+    return HeroLayout(
+        **best, 
+        pixels=(best["columns"] * LAYOUT.HERO_BUTTON_SIZE, best["rows"] * LAYOUT.HERO_BUTTON_SIZE))
+
+
+# This function is currently superceeded by the above window sizing logic
+@DeprecationWarning
+def layoutFromColumns(columns: int, A: tuple[int, int, int] = HERO_COUNTS.values()):
     """Choose column widths for three hero groups so their grids come out
     as short and as equal in height as possible.
 
@@ -22,7 +186,7 @@ def bestLayout(columns: int, A: tuple[int, int, int] = HERO_COUNTS.values()):
     ----------
     Each hero role (tank, damage, support) is shown as a block of square
     icons that wraps like text: a group that is `w` icons wide and has `n`
-    icons needs ceil(n / w) rows. The last row may be partly filled.
+    icons needs `ceil(n / w)` rows. The last row may be partly filled.
     The three blocks sit side by side, so together they can use at most
     `columns` columns. This function brute-forces every way of splitting those
     columns into three widths and returns the best split.
@@ -127,110 +291,110 @@ def bestLayout(columns: int, A: tuple[int, int, int] = HERO_COUNTS.values()):
     return best  # (score, widths, heights)
 
 
-def minColumnsForRows(H: int, A: tuple[int, int, int] = HERO_COUNTS.values()):
-    """Smallest layout in which every group is at most H rows tall.
 
-    A group with n icons and width w needs ceil(n / w) rows, so it fits
-    in H rows exactly when w >= ceil(n / H). Using that minimum width for
-    each group gives the fewest columns that can reach height H.
+# * Layout class
+class Layout:
+    def __init__(self, screen: Resolution):
+        self.__screen: Resolution = screen
 
-    Returns
-    -------
-    tuple[int, tuple[int, int, int], list[int]]
-        (columns_needed, widths, heights). Heights are <= H; a group can
-        come out shorter than H when its width is rounded up.
-    """
-    widths = tuple(ceil(n / H) for n in A)
-    heights = [ceil(n / w) for n, w in zip(A, widths)]
-    return sum(widths), widths, heights
+        self.__geometry: WindowGeometry                                                 # ? Placeholder. Assigned: self.__updateGeometry()
+        self.__heroLayout: HeroLayout                                                   # ? Placeholder. Assigned: self.recalculate()
+
+        # External state
+        self.__activeResizeJob: typing.Optional[str] = None                             # ? Store the ID of the scheduled recalculation job
+        self.__isWindowResizing: bool = False                                           # ? Prevent recursive calls to self.recalculate() when resizing the window
+
+        # Calculate layout
+        # NOTE: Safe to call here as we only use it when initializing the application   # TODO: Implement storing of the window size between sessions so 
+        self.recalculate(LAYOUT.Default.WINDOW_WIDTH, LAYOUT.Default.WINDOW_HEIGHT)     #     : the program doesn't just start with the default window size.
+
+    # * State
+    def __updateGeometry(self):
+        """
+        Calculate the window geometry
+        """
+        self.__geometry = WindowGeometry(
+            width  = self.__heroLayout.pixels[LAYOUT.X] + LAYOUT.NON_HERO_BUTTON_WIDTH,
+            height = self.__heroLayout.pixels[LAYOUT.Y] + LAYOUT.NON_HERO_BUTTON_HEIGHT
+        )
+
+    def __updateHeroLayout(self, windowWidth: int, windowHeight: int):
+        """
+        Calculate the hero layout
+        """
+        self.__heroLayout = calculateOptimalHeroLayout(
+            availableWidth = windowWidth - LAYOUT.NON_HERO_BUTTON_WIDTH,
+            availableHeight= windowHeight - LAYOUT.NON_HERO_BUTTON_HEIGHT,
+            monitorWidth = self.__screen.width,
+            monitorHeight= self.__screen.height
+        )
+
+    # * Calculation
+    def recalculate(self, windowWidth: int, windowHeight: int):
+        """
+        Recalculate the layout based on new window size.
+
+        Steps:
+        1. Calculate the hero layout budget using the fixed sized UI elements, and finding the optimal hero layout   
+        2. Calculate the non-const non-hero grid UI elements' sides based on the hero grid
+        3. Recalculate and update the window geometry to reflect the new layout size
+
+        NOTE: The caller is responsible for actually resizing the window and flexing the UI elements!
+
+        Parameters
+        ----------
+        windowWidth : int
+            The new width of the window in pixels.
+        
+        windowHeight : int
+            The new height of the window in pixels.
+        """
+
+        # Calculate the hero layout budget using the fixed sized UI elements, and finding the optimal hero layout
+        self.__updateHeroLayout(windowWidth, windowHeight)
+
+        # Calculate the non-hero grid, non-const, UI elements based on the hero grid
+        # TODO: Implement
+
+        # Update the window geometry
+        self.__updateGeometry()
 
 
 
-# ! NEWEST VERSION:
 
-from math import ceil, log
-
-TILE = 75
-DEFAULT_RATIO = {"landscape": 11 / 5, "portrait": 5 / 11}   # tie-breaker only
-
-
-def _allLayouts(A):
-    """Every exact-fit layout for icon counts A, in both orientations.
-
-    landscape: groups side by side; one layout per row count H, from
-               minColumnsForRows(H). Its box is (sum of widths, tallest group).
-    portrait:  groups stacked, each as wide as the window; one layout per
-               width C, with rows = sum(ceil(n / C)).
-
-    A layout is dropped if another layout of the same mode is no wider
-    and no taller (it can never be the better choice).
-    """
-    found = {}
-    for H in range(1, max(A) + 1):
-        cols, widths, heights = minColumnsForRows(H, A)
-        found.setdefault(("landscape", cols, max(heights)), dict(
-            mode="landscape", columns=cols, rows=max(heights),
-            widths=widths, heights=heights))
-    for C in range(1, max(A) + 1):
-        heights = [ceil(n / C) for n in A]
-        found.setdefault(("portrait", C, sum(heights)), dict(
-            mode="portrait", columns=C, rows=sum(heights),
-            widths=(C, C, C), heights=heights))
-    layouts = list(found.values())
-    return [L for L in layouts if not any(
-        o["mode"] == L["mode"] and o is not L
-        and o["columns"] <= L["columns"] and o["rows"] <= L["rows"]
-        for o in layouts)]
+    # * Getters
+    @property
+    def screen(self) -> Resolution: return self.__screen
+    @property
+    def geometry(self) -> WindowGeometry: return self.__geometry
+    
+    @property
+    def activeResizeJob(self) -> typing.Optional[str]: return self.__activeResizeJob
+    @property
+    def isWindowResizing(self) -> bool: return self.__isWindowResizing
 
 
-def snapWindow(avail_w, avail_h, screen_w, screen_h, A=None):
-    """Pick the tightest-packing layout for a dragged window size.
+    # * Setters
+    @activeResizeJob.setter
+    def activeResizeJob(self, job: typing.Optional[str]): self.__activeResizeJob = job
+    @isWindowResizing.setter
+    def isWindowResizing(self, isResizing: bool): self.__isWindowResizing = isResizing
 
-    All pixel arguments are for the tiling area only (gaps/UI already
-    subtracted; add them back when sizing the real window).
+    def monitorResolutionChanged(self, screen: Resolution) -> RequiresResizing:
+        """
+        Only called when the screen size changes. This check must happen before this method is called
 
-    Parameters
-    ----------
-    avail_w, avail_h : int   Tiling area the user dragged to, in px.
-    screen_w, screen_h : int Largest tiling area the screen allows, in px.
-    A : tuple[int, int, int] | None
-        Icons per group (tank, damage, support). Defaults to HERO_COUNTS.
+        ```
+        if (width, height) != (self.layout.monitor.width, self.layout.monitor.height):
+            self.layout(Resolution(width, height))
+        ```
+        """
+        self.__screen = screen
 
-    Returns
-    -------
-    dict: mode ("landscape" or "portrait"), columns, rows, widths,
-          heights, pixels (width, height of the exact-fit window).
-
-    Rule
-    ----
-    1. Landscape first. Sort layouts by (tiles to grow, window area,
-       closeness to 11:5) and take the best. Layouts that fit the dragged
-       size cost no growth, so among those the smallest area (tightest
-       packing) wins.
-    2. If that overruns the screen, take the best portrait layout that
-       fits the screen (same sort, ratio target 5:11).
-    3. If no portrait layout fits either, keep the landscape one.
-    """
-    if A is None:
-        A = tuple(HERO_COUNTS.values())
-
-    c0 = max(1, avail_w // TILE)     # whole tiles the drag gives us
-    r0 = max(1, avail_h // TILE)
-    layouts = _allLayouts(A)
-
-    def key(L):
-        growth = max(0, L["columns"] - c0) + max(0, L["rows"] - r0)
-        area = L["columns"] * L["rows"]
-        ratio = abs(log(L["columns"] / L["rows"]) - log(DEFAULT_RATIO[L["mode"]]))
-        return (growth, area, ratio)
-
-    def fitsScreen(L):
-        return L["columns"] * TILE <= screen_w and L["rows"] * TILE <= screen_h
-
-    best = min((L for L in layouts if L["mode"] == "landscape"), key=key)
-    if not fitsScreen(best):
-        pool = [L for L in layouts if L["mode"] == "portrait" and fitsScreen(L)]
-        if pool:
-            best = min(pool, key=key)
-
-    return dict(best, pixels=(best["columns"] * TILE, best["rows"] * TILE))
+        # ? Return True if the current window size is larger 
+        # ? than the new screen size; otherwise, return False
+        return (
+            (self.__screen.width < self.__geometry.width) or
+            (self.__screen.height < self.__geometry.height)
+        )
+    
