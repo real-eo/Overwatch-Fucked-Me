@@ -67,6 +67,9 @@ class LAYOUT:
     INPUT_FRAME_HEIGHT: int = 35
     ROLE_ICON_FRAME_HEIGHT: int = 35
     
+    ROLE_ICON_X_OFFSET: int = -5
+    ROLE_ICON_Y_OFFSET: int = -7
+    
     # * Constexprs
     # Hero grid
     NON_HERO_BUTTON_WIDTH: int = sum((
@@ -157,7 +160,7 @@ class LAYOUT:
         #     : as i didn't find another place where it seemed fit.
         WINDOW_WIDTH: int = 930
         WINDOW_HEIGHT: int = 660
-        
+
         ASPECT_RATIO: float = 11/5                                                      # ? Tie-breaker for window size snapping
 
 

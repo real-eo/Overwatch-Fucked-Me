@@ -205,22 +205,22 @@ class ui:
 
         # Buttons
         # // self.inputFrame = Frame(master=self.root, height=UI.LAYOUT.INPUT_FRAME_HEIGHT, width=UI.LAYOUT.WINDOW_WIDTH, background=UI.STYLE.BACKGROUND, name="inputFrame")
-        # // self.roleInfoFrame = Frame(master=self.root, height=UI.LAYOUT.ROLE_ICON_FRAME_HEIGHT, width=UI.LAYOUT.WINDOW_WIDTH, background=UI.STYLE.BACKGROUND, name="roleInfoFrame")
+        # // self.roleIconFrame = Frame(master=self.root, height=UI.LAYOUT.ROLE_ICON_FRAME_HEIGHT, width=UI.LAYOUT.WINDOW_WIDTH, background=UI.STYLE.BACKGROUND, name="roleIconFrame")
         self.inputFrame = Frame(self.root, name="inputFrame", background=UI.STYLE.BACKGROUND)
-        self.roleInfoFrame = Frame(self.root, name="roleInfoFrame", background=UI.STYLE.BACKGROUND)
+        self.roleIconFrame = Frame(self.root, name="roleIconFrame", background=UI.STYLE.BACKGROUND)
 
         # // self.tankFrame = Frame(master=self.root, height=UI.LAYOUT.ROLE_FRAMES_HEIGHT, width=UI.LAYOUT.TANK_FRAME_WIDTH, background=UI.STYLE.BACKGROUND, name="tankFrame")
         # // self.dpsFrame = Frame(master=self.root, height=UI.LAYOUT.ROLE_FRAMES_HEIGHT, width=UI.LAYOUT.DPS_FRAME_WIDTH, background=UI.STYLE.BACKGROUND, name="dpsFrame")
         # // self.supportFrame = Frame(master=self.root, height=UI.LAYOUT.ROLE_FRAMES_HEIGHT, width=UI.LAYOUT.SUPPORT_FRAME_WIDTH, background=UI.STYLE.BACKGROUND, name="supportFrame")
 
-        self.tankFrame = Frame(self.root, name="tankFrame")
-        self.dpsFrame = Frame(self.root, name="dpsFrame")
-        self.supportFrame = Frame(self.root, name="supportFrame")
+        self.tankFrame = Frame(self.root, background=UI.STYLE.BACKGROUND, name="tankFrame")
+        self.dpsFrame = Frame(self.root, background=UI.STYLE.BACKGROUND, name="dpsFrame")
+        self.supportFrame = Frame(self.root, background=UI.STYLE.BACKGROUND, name="supportFrame")
 
         self.__roleFrames = (self.tankFrame, self.dpsFrame, self.supportFrame)
 
         # // self.inputFrame.place(x=0, y=UI.LAYOUT.INPUT_FRAME_Y)
-        # // self.roleInfoFrame.place(x=0 + UI.LAYOUT.WINDOW_PADDING, y=UI.LAYOUT.ROLE_ICON_Y)
+        # // self.roleIconFrame.place(x=0 + UI.LAYOUT.WINDOW_PADDING, y=UI.LAYOUT.ROLE_ICON_Y)
 
         # // self.tankFrame.place(   x=UI.LAYOUT.TANK_FRAME_X,     y=UI.LAYOUT.ROLE_FRAMES_Y)
         # // self.dpsFrame.place(    x=UI.LAYOUT.DPS_FRAME_X,      y=UI.LAYOUT.ROLE_FRAMES_Y)
@@ -321,13 +321,29 @@ class ui:
         # Role icons
         self.roleIconList = [PhotoImage(file=resource_path("res", "icons", "role", f"{role.name.lower()}Icon.png")).subsample(4, 4) for role in HERO_ROLES]
 
-        for column, role in enumerate(HERO_ROLES):
-            self.roleInfoFrame.grid_columnconfigure(column, weight=1)
+        # for column, role in enumerate(HERO_ROLES):
+        #     self.roleIconFrame.grid_columnconfigure(column, weight=1)
             
-            iconLabel = Label(self.roleInfoFrame, image=self.roleIconList[column], bg=UI.STYLE.BACKGROUND, name=f"{role}IconLabel")
+        #     iconLabel = Label(self.roleIconFrame, image=self.roleIconList[column], bg=UI.STYLE.BACKGROUND, name=f"{role}IconLabel")
             
-            # // iconLabel.place(x=([-5, -5+225+5, -5+600+10][column]), y=-7)
-            iconLabel.grid(row=0, column=column, sticky="nsew")
+        #     # // iconLabel.place(
+        #     # //     x=([
+        #     # //         UI.LAYOUT.ROLE_ICON_X_OFFSET, 
+        #     # //         UI.LAYOUT.ROLE_ICON_X_OFFSET + 225 + UI.LAYOUT.ROLE_FRAME_SEPERATOR_PADDING, 
+        #     # //         UI.LAYOUT.ROLE_ICON_X_OFFSET + 600 + 2*UI.LAYOUT.ROLE_FRAME_SEPERATOR_PADDING
+        #     # //     ][column]), 
+        #     # //     y=UI.LAYOUT.ROLE_ICON_Y_OFFSET
+        #     # // )
+        #     iconLabel.grid(row=0, column=column, sticky="nsew")
+        self.roleIconLabels = tuple(
+            Label(
+                self.roleIconFrame,
+                image=self.roleIconList[column],
+                bg=UI.STYLE.BACKGROUND,
+                name=f"{role}IconLabel",
+            )
+            for column, role in enumerate(HERO_ROLES)
+        )
 
     def createNonHeroButtons(self):
         self.extendedLimitsButton = Button(master=self.inputFrame, text="Extended Limits", name="extendedLimitsButton")
@@ -388,21 +404,28 @@ class ui:
             height=UI.LAYOUT.INPUT_FRAME_HEIGHT,
         )
 
-        # Role info frame
-        self.roleInfoFrame.place_configure(
+        # Role icon frame
+        self.roleIconFrame.place_configure(
             x=UI.LAYOUT.WINDOW_PADDING,
             y=self.layout.roleIconY,
-            width=self.layout.geometry.width - 2 * UI.LAYOUT.WINDOW_PADDING,
+            width=self.layout.geometry.width - 2*UI.LAYOUT.WINDOW_PADDING,
             height=UI.LAYOUT.ROLE_ICON_FRAME_HEIGHT,
         )
 
-        # Recommended hero frames
+        # Role icons
+        for iconLabel, rect in zip(self.roleIconLabels, self.layout.roleFrameRects):
+            iconLabel.place_configure(
+                x=(UI.LAYOUT.ROLE_ICON_X_OFFSET + (rect.x - UI.LAYOUT.WINDOW_PADDING)),
+                y=UI.LAYOUT.ROLE_ICON_Y_OFFSET
+            )
+
+        # Recommended hero & counters' frames
         for index, frame in enumerate(self.recommendedHeroFrameList):
             frame.place_configure(
-                x=(self.layout.geometry.width/TOTAL_SLOTS_ALL)*index,
-                y=0,
-                width=self.layout.geometry.width/(2*TOTAL_SLOTS_ALL),                   # ? 2*TOTAL_SLOTS_ALL to do every other 1/10
-                height=UI.LAYOUT.SELECTED_HERO_HEIGHT,
+                x=self.layout.geometry.width / TOTAL_SLOTS_ALL * index,
+                y=-7,
+                width=(self.layout.geometry.width - 2*UI.LAYOUT.WINDOW_PADDING)/TOTAL_SLOTS_ALL,
+                height=UI.LAYOUT.SELECTED_HERO_HEIGHT + UI.LAYOUT.COUNTERS_AREA_HEIGHT,
             )
 
         # Hero buttons
@@ -669,7 +692,7 @@ class ui:
 
     def configureLayout(self, event: Event):
         # Only react to the root window's own Configure events; child
-        # widgets also deliver Configure events here via their bindtags.
+        # 1widgets also deliver Configure events here via their bindtags.
         if event.widget is not self.root:
             return
 

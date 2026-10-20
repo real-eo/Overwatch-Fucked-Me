@@ -151,28 +151,6 @@ def calculateOptimalHeroLayout(
     requestedRows = max(1, availableHeight // LAYOUT.HERO_BUTTON_SIZE)
     layouts = _allLayouts(A)
 
-    # ! VERSION 1.0 - Doesn't work, collapses into the one really tall size after first snapping to other sizes
-    # def key(L):
-    #     growth = max(0, L["columns"] - requestedColumns) + max(0, L["rows"] - requestedRows)
-    #     area = L["columns"] * L["rows"]
-    #     ratio = abs(log(L["columns"] / L["rows"]) - log(LAYOUT.DEFAULT_RATIO[L["mode"]]))
-    #     return (growth, area, ratio)
-
-    # ! VERSION 2.0 - Doesn't work, collapses into the one really tall size after first snapping to other sizes
-    # def key(layout):
-    #     distance = (abs(layout["columns"] - requestedColumns)
-    #               + abs(layout["rows"] - requestedRows))
-    #     ratio = abs(log(layout["columns"] / layout["rows"])
-    #               - log(LAYOUT.DEFAULT_RATIO[layout["mode"]]))
-    #     return distance, ratio
-
-    # ! VERSION 3.0 - Doesn't work, collapses into the one really tall size after first snapping to other sizes
-    # def key(layout):
-    #     growth = max(0, layout["columns"] - requestedColumns) + max(0, layout["rows"] - requestedRows)
-    #     shrink = max(0, requestedColumns - layout["columns"]) + max(0, requestedRows - layout["rows"])
-    #     return growth, shrink, layout["columns"] * layout["rows"]
-
-    # ! VERSION 4.0
     def key(layout):
         sizeError = (abs(layout["columns"] - requestedColumns) + abs(layout["rows"] - requestedRows))
         ratioError = abs((layout["columns"] / layout["rows"]) - LAYOUT.Default.ASPECT_RATIO)
