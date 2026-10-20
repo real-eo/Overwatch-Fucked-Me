@@ -325,8 +325,8 @@ class Layout:
         self.__heroLayout = calculateOptimalHeroLayout(
             availableWidth = windowWidth - LAYOUT.NON_HERO_BUTTON_WIDTH,
             availableHeight= windowHeight - LAYOUT.NON_HERO_BUTTON_HEIGHT,
-            monitorWidth = self.__screen.width,
-            monitorHeight= self.__screen.height
+            screenWidth = self.__screen.width,
+            screenHeight= self.__screen.height
         )
 
     # * Calculation
