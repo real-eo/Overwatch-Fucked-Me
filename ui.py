@@ -321,20 +321,6 @@ class ui:
         # Role icons
         self.roleIconList = [PhotoImage(file=resource_path("res", "icons", "role", f"{role.name.lower()}Icon.png")).subsample(4, 4) for role in HERO_ROLES]
 
-        # for column, role in enumerate(HERO_ROLES):
-        #     self.roleIconFrame.grid_columnconfigure(column, weight=1)
-            
-        #     iconLabel = Label(self.roleIconFrame, image=self.roleIconList[column], bg=UI.STYLE.BACKGROUND, name=f"{role}IconLabel")
-            
-        #     # // iconLabel.place(
-        #     # //     x=([
-        #     # //         UI.LAYOUT.ROLE_ICON_X_OFFSET, 
-        #     # //         UI.LAYOUT.ROLE_ICON_X_OFFSET + 225 + UI.LAYOUT.ROLE_FRAME_SEPERATOR_PADDING, 
-        #     # //         UI.LAYOUT.ROLE_ICON_X_OFFSET + 600 + 2*UI.LAYOUT.ROLE_FRAME_SEPERATOR_PADDING
-        #     # //     ][column]), 
-        #     # //     y=UI.LAYOUT.ROLE_ICON_Y_OFFSET
-        #     # // )
-        #     iconLabel.grid(row=0, column=column, sticky="nsew")
         self.roleIconLabels = tuple(
             Label(
                 self.roleIconFrame,
