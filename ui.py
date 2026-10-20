@@ -374,7 +374,7 @@ class ui:
     # Placement
     def reorganizeInterface(self) -> None:
         # Role frames
-        for frame, rect in zip(self.__roleFrames, self.layout.roleFrameRects):          # ? `roleFrames` is defined in `createFrames()` 
+        for frame, rect in zip(self.__roleFrames, self.layout.roleFrameRects):          # ? `self.__roleFrames` is defined in `self.createFrames()` 
             frame.place_configure(
                 x=rect.x,
                 y=rect.y,
@@ -409,7 +409,7 @@ class ui:
         for index, frame in enumerate(self.recommendedHeroFrameList):
             frame.place_configure(
                 x=self.layout.geometry.width / TOTAL_SLOTS_ALL * index,
-                y=-7,
+                y=0,
                 width=(self.layout.geometry.width - 2*UI.LAYOUT.WINDOW_PADDING)/TOTAL_SLOTS_ALL,
                 height=UI.LAYOUT.SELECTED_HERO_HEIGHT + UI.LAYOUT.COUNTERS_AREA_HEIGHT,
             )
