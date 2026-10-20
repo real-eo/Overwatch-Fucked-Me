@@ -26,11 +26,6 @@ class LAYOUT:
     ROLE_ICON_FRAME_HEIGHT: int = 35
 
     # Hero grid
-    DEFAULT_RATIO: ClassVar[dict[str, float]] = {                                       # ? Tie-breaker for window size snapping
-        "landscape": 11 / 5, 
-        "portrait": 5 / 11
-    }     
-
     # GRID: dict[str, dict[int, int]] = {                                             # Number of buttons in each row
     #     # Tank
     #     ROLE.TANK: {                                                               
@@ -162,6 +157,8 @@ class LAYOUT:
         #     : as i didn't find another place where it seemed fit.
         WINDOW_WIDTH: int = 930
         WINDOW_HEIGHT: int = 660
+        
+        ASPECT_RATIO: float = 11/5                                                      # ? Tie-breaker for window size snapping
 
 
 class STYLE:

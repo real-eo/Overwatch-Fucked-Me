@@ -399,9 +399,9 @@ class ui:
         # Recommended hero frames
         for index, frame in enumerate(self.recommendedHeroFrameList):
             frame.place_configure(
-                x=0,
+                x=(self.layout.geometry.width/TOTAL_SLOTS_ALL)*index,
                 y=0,
-                width=self.layout.geometry.width/10,
+                width=self.layout.geometry.width/(2*TOTAL_SLOTS_ALL),                   # ? 2*TOTAL_SLOTS_ALL to do every other 1/10
                 height=UI.LAYOUT.SELECTED_HERO_HEIGHT,
             )
 
@@ -424,128 +424,8 @@ class ui:
                 x=int((column + offset) * UI.LAYOUT.HERO_BUTTON_SIZE),
                 y=row * UI.LAYOUT.HERO_BUTTON_SIZE,
             )
+
   
-
-    # ! ----- OLD CODE ----- !
-    def createTankButtons(self):
-        tankButtonList = []
-        self.tankPortraitList = [
-            portraits.HERO_4x4[heroID]
-            for heroID in HERO_IDS[ROLE.TANK]
-        ]
-
-        i = 0
-        for y in UI.LAYOUT.GRID[ROLE.TANK]:
-            for x in range(UI.LAYOUT.GRID[ROLE.TANK][y]):
-                tankButton: HeroButton = HeroButton(
-                    self.tankFrame, 
-                    heroId=HERO_IDS[ROLE.TANK][i],
-                                        
-                    image=self.tankPortraitList[i], 
-                    bg=UI.STYLE.HeroButton.COLOR,
-                    borderwidth=UI.STYLE.HeroButton.BORDERWIDTH,
-                    height=UI.STYLE.HeroButton.HEIGHT, 
-                    width=UI.STYLE.HeroButton.WIDTH
-                )
-
-                tankButton.place(
-                    x=(
-                        (x * UI.LAYOUT.HERO_BUTTON_SIZE) 
-                        + ((UI.LAYOUT.HERO_BUTTON_SIZE/2) * (UI.LAYOUT.TANK_BUTTON_COLUMNS - UI.LAYOUT.GRID[ROLE.TANK][y]))
-                    ), 
-                    y=(y * UI.LAYOUT.HERO_BUTTON_SIZE)
-                )
-
-                tankButton.bind("<Button>", self.mouseButtonCharacters)
-                tankButton.bind("<Enter>", self.animationFocus)
-                tankButton.bind("<Leave>", self.animationDefocus)
-
-                self.heroButtonsDictionary[HERO_IDS[ROLE.TANK][i]] = tankButton
-                tankButtonList.append(tankButton)
-                i += 1
-
-        self.buttonList[ROLE.TANK] = tankButtonList
-
-    def createDpsButtons(self):
-        dpsButtonList = []
-        self.dpsPortraitList = [
-            portraits.HERO_4x4[heroID]
-            for heroID in HERO_IDS[ROLE.DPS]
-        ]
-
-        i = 0
-        for y in UI.LAYOUT.GRID[ROLE.DPS]:
-            for x in range(UI.LAYOUT.GRID[ROLE.DPS][y]):
-                dpsButton: HeroButton = HeroButton(
-                    self.dpsFrame, 
-                    heroId=HERO_IDS[ROLE.DPS][i],
-
-                    image=self.dpsPortraitList[i], 
-                    bg=UI.STYLE.HeroButton.COLOR,
-                    borderwidth=UI.STYLE.HeroButton.BORDERWIDTH,
-                    height=UI.STYLE.HeroButton.HEIGHT, 
-                    width=UI.STYLE.HeroButton.WIDTH
-                )
-
-                dpsButton.place(
-                    x=(
-                        (x * UI.LAYOUT.HERO_BUTTON_SIZE) 
-                        + ((UI.LAYOUT.HERO_BUTTON_SIZE/2) * (UI.LAYOUT.DPS_BUTTON_COLUMNS - UI.LAYOUT.GRID[ROLE.DPS][y]))
-                    ), 
-                    y=(y * UI.LAYOUT.HERO_BUTTON_SIZE)
-                )
-
-                dpsButton.bind("<Button>", self.mouseButtonCharacters)
-                dpsButton.bind("<Enter>", self.animationFocus)
-                dpsButton.bind("<Leave>", self.animationDefocus)
-
-                self.heroButtonsDictionary[HERO_IDS[ROLE.DPS][i]] = dpsButton
-                dpsButtonList.append(dpsButton)
-                i += 1
-        
-        self.buttonList[ROLE.DPS] = dpsButtonList
-
-    def createSupportButtons(self):
-        supportButtonList = []
-        self.supportPortraitList = [
-            portraits.HERO_4x4[heroID]
-            for heroID in HERO_IDS[ROLE.SUPPORT]
-        ]
-
-        i = 0
-        for y in UI.LAYOUT.GRID[ROLE.SUPPORT]:
-            for x in range(UI.LAYOUT.GRID[ROLE.SUPPORT][y]):
-                supportButton: HeroButton = HeroButton(
-                    self.supportFrame, 
-                    heroId=HERO_IDS[ROLE.SUPPORT][i],
-                                        
-                    image=self.supportPortraitList[i], 
-                    bg=UI.STYLE.HeroButton.COLOR,
-                    borderwidth=UI.STYLE.HeroButton.BORDERWIDTH,
-                    height=UI.STYLE.HeroButton.HEIGHT, 
-                    width=UI.STYLE.HeroButton.WIDTH
-                )
-                
-                supportButton.place(
-                    x=(
-                        (x * UI.LAYOUT.HERO_BUTTON_SIZE) 
-                        + ((UI.LAYOUT.HERO_BUTTON_SIZE/2) * (UI.LAYOUT.SUPPORT_BUTTON_COLUMNS - UI.LAYOUT.GRID[ROLE.SUPPORT][y]))
-                    ), 
-                    y=(y * UI.LAYOUT.HERO_BUTTON_SIZE)
-                )
-                
-                supportButton.bind("<Button>", self.mouseButtonCharacters)
-                supportButton.bind("<Enter>", self.animationFocus)
-                supportButton.bind("<Leave>", self.animationDefocus)
-
-                self.heroButtonsDictionary[HERO_IDS[ROLE.SUPPORT][i]] = supportButton
-                supportButtonList.append(supportButton)
-                
-                i += 1
-
-        self.buttonList[ROLE.SUPPORT] = supportButtonList
-    # ! -------------------- !
-
     # * Event handlers
     def mouseButtonCharacters(self, event: Event):
         heroButtonRole = self.roleFrameDict[str(event.widget.master)]
@@ -788,10 +668,11 @@ class ui:
             self.counterTooltip = None
 
     def configureLayout(self, event: Event):
-        # ? Additional sanity check if needed
-        # if event.widget is not self.root:
-        #     print(f"[!] Warning: Received <Configure> event from unexpected widget: {event.widget}. Ignoring.")
-        #     return
+        # Only react to the root window's own Configure events; child
+        # widgets also deliver Configure events here via their bindtags.
+        if event.widget is not self.root:
+            return
+
 
         # ? If the window moved to a screen with a different resolution
         if (self.root.winfo_screenwidth(), self.root.winfo_screenheight()) != (self.layout.screen.width, self.layout.screen.height):
