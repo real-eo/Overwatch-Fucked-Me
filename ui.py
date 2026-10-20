@@ -178,7 +178,7 @@ class ui:
 
     def createFrames(self):
         # Portraits
-        # // self.recommendedCharacterFrameList = []
+        # // self.recommendedHeroFrameList = []
         # // for i in range(TOTAL_SLOTS_ALL):
         # //     characterFrame = Frame(
         # //         master=self.root, 
@@ -192,8 +192,8 @@ class ui:
         # //         x=((UI.LAYOUT.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL)*i + (TOTAL_SLOTS_ALL*i)), 
         # //         y=0
         # //     )
-        # //     self.recommendedCharacterFrameList.append(characterFrame)
-        self.recommendedCharacterFrameList = [
+        # //     self.recommendedHeroFrameList.append(characterFrame)
+        self.recommendedHeroFrameList = [
             Frame(
                 self.root,
                 name=f"characterFrame{i}",
@@ -230,7 +230,7 @@ class ui:
         self.counterImagePlaceholders: list[dict[ROLE, list[Label]]] = []               # 2D list of labels which get replaced with portraits of the counters (3x7)
         self.characterImagePlaceholders: list[Label] = []                               # List of labels which get replaced with portraits of the selected heroes (5)
 
-        for slotIndex, slotFrame in enumerate(self.recommendedCharacterFrameList):
+        for slotIndex, slotFrame in enumerate(self.recommendedHeroFrameList):
             # * Selected hero
             # Configure slot frame
             slotFrame.grid_rowconfigure(0, weight=0, minsize=UI.LAYOUT.SELECTED_HERO_HEIGHT)
@@ -319,14 +319,15 @@ class ui:
             self.counterImagePlaceholders.append(placeholderDict)
 
         # Role icons
-        # // self.roleIconList = [PhotoImage(file=resource_path("res", "icons", "role", f"{i}Icon.png")).subsample(4, 4) for i in HERO_ROLES]
+        self.roleIconList = [PhotoImage(file=resource_path("res", "icons", "role", f"{i}Icon.png")).subsample(4, 4) for i in HERO_ROLES]
 
-        # // for column, role in enumerate(HERO_ROLES):
-        for column in range(len(HERO_ROLES)):
-            # // iconLabel = Label(self.roleInfoFrame, image=self.roleIconList[column], bg=UI.STYLE.BACKGROUND, name=f"{role}IconLabel")
-            # // iconLabel.place(x=([-5, -5+225+5, -5+600+10][column]), y=-7)
-            # // iconLabel.grid(row=0, column=column, sticky="nsew")
+        for column, role in enumerate(HERO_ROLES):
             self.roleInfoFrame.grid_columnconfigure(column, weight=1)
+            
+            iconLabel = Label(self.roleInfoFrame, image=self.roleIconList[column], bg=UI.STYLE.BACKGROUND, name=f"{role}IconLabel")
+            
+            # // iconLabel.place(x=([-5, -5+225+5, -5+600+10][column]), y=-7)
+            iconLabel.grid(row=0, column=column, sticky="nsew")
 
     def createNonHeroButtons(self):
         self.extendedLimitsButton = Button(master=self.inputFrame, text="Extended Limits", name="extendedLimitsButton")
@@ -370,15 +371,42 @@ class ui:
             
     # Placement
     def reorganizeInterface(self) -> None:
-            for frame, rect in zip(self.__roleFrames, self.layout.roleFrameRects):          # ? `roleFrames` is defined in `createFrames()` 
-                frame.place_configure(
-                    x=rect.x,
-                    y=rect.y,
-                    width=rect.width,
-                    height=rect.height,
-                )
-    
-            for role in HERO_ROLES: self.placeHeroButtons(role)
+        # Role frames
+        for frame, rect in zip(self.__roleFrames, self.layout.roleFrameRects):          # ? `roleFrames` is defined in `createFrames()` 
+            frame.place_configure(
+                x=rect.x,
+                y=rect.y,
+                width=rect.width,
+                height=rect.height,
+            )
+
+        # Switch-input frame
+        self.inputFrame.place_configure(
+            x=0,
+            y=self.layout.inputFrameY,
+            width=self.layout.geometry.width,
+            height=UI.LAYOUT.INPUT_FRAME_HEIGHT,
+        )
+
+        # Role info frame
+        self.roleInfoFrame.place_configure(
+            x=UI.LAYOUT.WINDOW_PADDING,
+            y=self.layout.roleIconY,
+            width=self.layout.geometry.width - 2 * UI.LAYOUT.WINDOW_PADDING,
+            height=UI.LAYOUT.ROLE_ICON_FRAME_HEIGHT,
+        )
+
+        # Recommended hero frames
+        for index, frame in enumerate(self.recommendedHeroFrameList):
+            frame.place_configure(
+                x=0,
+                y=0,
+                width=self.layout.geometry.width/10,
+                height=UI.LAYOUT.SELECTED_HERO_HEIGHT,
+            )
+
+        # Hero buttons
+        for role in HERO_ROLES: self.placeHeroButtons(role)
 
     def placeHeroButtons(self, role: ROLE, centerIncompleteRows: bool = True) -> None:
         columns = self.layout.heroLayout.widths[role]

@@ -384,7 +384,6 @@ class Layout:
     @property
     def isWindowResizing(self) -> bool: return self.__isWindowResizing
 
-    # TODO: See which of these are still needed, and which can be discarded
     # ? Derived attributes
     # Frame dimensions
     @property
@@ -409,8 +408,8 @@ class Layout:
     # Switch- & icon positions
     @property
     def roleIconY(self) -> int: return self.roleFramesY - LAYOUT.ROLE_ICON_FRAME_HEIGHT
-    # // @property
-    # // def inputFrameY(self) -> int: return self.roleIconY - LAYOUT.SMALL_PADDING - LAYOUT.INPUT_FRAME_HEIGHT
+    @property
+    def inputFrameY(self) -> int: return self.roleIconY - LAYOUT.SMALL_PADDING - LAYOUT.INPUT_FRAME_HEIGHT
 
     # Rectangles
     @property
