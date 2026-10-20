@@ -98,7 +98,6 @@ def capture_image(persistPortraits: bool = False):
 
 
     # * 3) Grab screenshot based on the number of upgrades and team size
-    # // region = (310, 610, 1160, 920)
     region = (leaderboardX1, 595, 1100, 925)
     enemyLeaderboardImage = ImageGrab.grab(region)    
 

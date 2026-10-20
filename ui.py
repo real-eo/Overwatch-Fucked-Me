@@ -27,7 +27,7 @@ class ui:
         self.layout = Layout(screen=Resolution(self.root.winfo_screenwidth(), self.root.winfo_screenheight()))
         self.root.geometry(str(self.layout.geometry))
         
-        self.heroButtonsDictionary = {}
+        self.heroButtonsDictionary: dict[str, HeroButton] = {}
 
         self.buttonList: dict[str, list[HeroButton]] = {}
 
@@ -35,8 +35,7 @@ class ui:
         self.slotsRemaining = {ROLE.TANK: MAX_SLOTS_TANK, ROLE.DPS: MAX_SLOTS_DPS, ROLE.SUPPORT: MAX_SLOTS_SUPPORT}
         self.roleFrameDict = {".tankFrame": ROLE.TANK, ".dpsFrame": ROLE.DPS, ".supportFrame": ROLE.SUPPORT}
         
-        self.activeCounters = {}
-        self.heroImageCache = {}
+        self.heroImageCache: dict[tuple[str, str, bool], ImageTk.PhotoImage] = {}
 
         self.extendedLimits = False
         self.aiActive = False
@@ -47,8 +46,7 @@ class ui:
         for i in self.buttonList.values():
             self.fullbuttonList.extend(i)
 
-        self.heroHighlighted = ""
-        self.heroHighlightedRectList = []
+        self.heroHighlightedRectList: list[tuple[HeroButton, int, int]] = []
 
         # Load config
         self.configPath, self.configIsLocal = prefer_local_resource("config.ini")
@@ -76,9 +74,6 @@ class ui:
         self.createLabels()
         self.createNonHeroButtons()
         
-        # ! self.createTankButtons()
-        # ! self.createDpsButtons()
-        # ! self.createSupportButtons()
         for role, frame in zip(HERO_ROLES, self.__roleFrames):
             self.createHeroButtons(role, frame)
 
@@ -114,8 +109,8 @@ class ui:
         Steps:
          1.  Recalculate the layout
          2.  Resize the window to the new layout dimensions
-        (3.) Relayout the hero grid based on the new layout
-        (4.) Re-flex the UI elements to fit the new layout
+        (3.) Relayout the hero grid based on the new layout (Done in `reorganizeInterface()` now)
+        (4.) Re-flex the UI elements to fit the new layout (Done in `reorganizeInterface()` now)
         """
         # ? Prevent recursive calls to this function when resizing the window
         if self.layout.isWindowResizing:         return
@@ -130,13 +125,6 @@ class ui:
             self.reorganizeInterface()
         finally:    
             self.layout.isWindowResizing = False
-
-        # ? Now done in `reorganizeInterface()` 
-        # Relayout the hero grid based on the new layout
-        # // for role in HERO_ROLES:  self.placeHeroButtons(role, centerIncompleteRows=True)
-
-        # Re-flex the UI elements to fit the new layout
-        # TODO: Implement a method to re-flex the UI elements to fit the new layout
 
 
     # * UI elements
@@ -178,21 +166,6 @@ class ui:
 
     def createFrames(self):
         # Portraits
-        # // self.recommendedHeroFrameList = []
-        # // for i in range(TOTAL_SLOTS_ALL):
-        # //     heroFrame = Frame(
-        # //         master=self.root, 
-        # //         height=UI.LAYOUT.SELECTED_HERO_HEIGHT + UI.LAYOUT.COUNTERS_AREA_HEIGHT, 
-        # //         width=(UI.LAYOUT.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL), 
-        # //         background=UI.STYLE.BACKGROUND, 
-        # //         name=f"heroFrame{i}"
-        # //     )
-
-        # //     heroFrame.place(
-        # //         x=((UI.LAYOUT.VIEWPORT_WIDTH/TOTAL_SLOTS_ALL)*i + (TOTAL_SLOTS_ALL*i)), 
-        # //         y=0
-        # //     )
-        # //     self.recommendedHeroFrameList.append(heroFrame)
         self.recommendedHeroFrameList = [
             Frame(
                 self.root,
@@ -204,27 +177,14 @@ class ui:
 
 
         # Buttons
-        # // self.inputFrame = Frame(master=self.root, height=UI.LAYOUT.INPUT_FRAME_HEIGHT, width=UI.LAYOUT.WINDOW_WIDTH, background=UI.STYLE.BACKGROUND, name="inputFrame")
-        # // self.roleIconFrame = Frame(master=self.root, height=UI.LAYOUT.ROLE_ICON_FRAME_HEIGHT, width=UI.LAYOUT.WINDOW_WIDTH, background=UI.STYLE.BACKGROUND, name="roleIconFrame")
         self.inputFrame = Frame(self.root, name="inputFrame", background=UI.STYLE.BACKGROUND)
         self.roleIconFrame = Frame(self.root, name="roleIconFrame", background=UI.STYLE.BACKGROUND)
-
-        # // self.tankFrame = Frame(master=self.root, height=UI.LAYOUT.ROLE_FRAMES_HEIGHT, width=UI.LAYOUT.TANK_FRAME_WIDTH, background=UI.STYLE.BACKGROUND, name="tankFrame")
-        # // self.dpsFrame = Frame(master=self.root, height=UI.LAYOUT.ROLE_FRAMES_HEIGHT, width=UI.LAYOUT.DPS_FRAME_WIDTH, background=UI.STYLE.BACKGROUND, name="dpsFrame")
-        # // self.supportFrame = Frame(master=self.root, height=UI.LAYOUT.ROLE_FRAMES_HEIGHT, width=UI.LAYOUT.SUPPORT_FRAME_WIDTH, background=UI.STYLE.BACKGROUND, name="supportFrame")
 
         self.tankFrame = Frame(self.root, background=UI.STYLE.BACKGROUND, name="tankFrame")
         self.dpsFrame = Frame(self.root, background=UI.STYLE.BACKGROUND, name="dpsFrame")
         self.supportFrame = Frame(self.root, background=UI.STYLE.BACKGROUND, name="supportFrame")
 
         self.__roleFrames = (self.tankFrame, self.dpsFrame, self.supportFrame)
-
-        # // self.inputFrame.place(x=0, y=UI.LAYOUT.INPUT_FRAME_Y)
-        # // self.roleIconFrame.place(x=0 + UI.LAYOUT.WINDOW_PADDING, y=UI.LAYOUT.ROLE_ICON_Y)
-
-        # // self.tankFrame.place(   x=UI.LAYOUT.TANK_FRAME_X,     y=UI.LAYOUT.ROLE_FRAMES_Y)
-        # // self.dpsFrame.place(    x=UI.LAYOUT.DPS_FRAME_X,      y=UI.LAYOUT.ROLE_FRAMES_Y)
-        # // self.supportFrame.place(x=UI.LAYOUT.SUPPORT_FRAME_X,  y=UI.LAYOUT.ROLE_FRAMES_Y)    
 
     def createLabels(self):
         self.counterImagePlaceholders: list[dict[ROLE, list[CounterLabel]]] = []        # 2D list of labels which get replaced with portraits of the counters (3x7)
@@ -238,14 +198,6 @@ class ui:
             slotFrame.grid_columnconfigure(0, weight=1)
 
             # Selected hero label
-            # // heroPlaceholder = Label(
-            # //     b, 
-            # //     height=(UI.LAYOUT.SELECTED_HERO_HEIGHT), 
-            # //     width=(UI.LAYOUT.VIEWPORT_WIDTH/10), 
-            # //     image=portraits.HERO_3x3["blank"],
-            # //     bg=UI.STYLE.Label.SelectedHero.BACKGROUND, 
-            # //     name=f"placeholder@{a}heroLabel"
-            # // )
             selectedHeroPlaceholder = Label(
                 slotFrame,
                 image=portraits.HERO_3x3["blank"],
@@ -253,10 +205,8 @@ class ui:
                 name=f"placeholder@{slotIndex}heroLabel",
             )
 
-            # // heroPlaceholder.place(x=0, y=0)
             selectedHeroPlaceholder.grid(row=0, column=0, sticky="nw")
 
-            # // self.heroImagePlaceholders.append(heroPlaceholder)
             self.heroImagePlaceholders.append(selectedHeroPlaceholder)
 
             # * Hero's counters
@@ -268,7 +218,6 @@ class ui:
             # Hero's counters labels
             placeholderDict: dict[ROLE, list[Label]] = {}
 
-            # // for roleIndex, role in enumerate(HERO_ROLES):
             for roleIndex, role in enumerate(HERO_ROLES):
                 countersFrame.grid_rowconfigure(roleIndex, weight=1)
                 placeholderDict[role] = []
@@ -278,14 +227,6 @@ class ui:
                     countersFrame.grid_columnconfigure(counterIndex, weight=1, uniform=f"counters{slotIndex}")
 
                     # Object
-                    # // counterPlaceholder = Label(
-                    # //     b, 
-                    # //     height=((UI.LAYOUT.COUNTERS_AREA_HEIGHT / ROLE_COUNT)), 
-                    # //     width=(UI.LAYOUT.VIEWPORT_WIDTH / TOTAL_SLOTS_ALL / UI.LAYOUT.MAX_COUNTERS_PER_ROLE), 
-                    # //     image=portraits.HERO_3x3["blank"],
-                    # //     bg=UI.STYLE.Label.Counter.BACKGROUND,
-                    # //     name=f"placeholder@{a}-{counterIndex}-{roleIndex}Label"
-                    # // )
                     counterPlaceholder = CounterLabel(
                         countersFrame,
                         image=portraits.HERO_6x6["blank"],
@@ -297,10 +238,6 @@ class ui:
                     )
 
                     # Location
-                    # // counterPlaceholder.place(
-                    # //     x=(((UI.LAYOUT.VIEWPORT_WIDTH / TOTAL_SLOTS_ALL / UI.LAYOUT.MAX_COUNTERS_PER_ROLE) * counterIndex)), 
-                    # //     y=((UI.LAYOUT.COUNTERS_AREA_HEIGHT / ROLE_COUNT) * (roleIndex) + UI.LAYOUT.SELECTED_HERO_HEIGHT)
-                    # // )
                     counterPlaceholder.grid(row=roleIndex, column=counterIndex, sticky="nsew")
 
                     # Data
@@ -312,10 +249,6 @@ class ui:
                     counterPlaceholder.bind("<Leave>", self.hideCounterTooltip)
 
                     # Storage
-                    # // placeholderDict.setdefault(
-                    # //     role,                                                           # Get the list of placeholders for the current role (tank/dps/support)
-                    # //     []                                                              # If it doesn't exist, create a new empty list
-                    # // ).append(counterPlaceholder)
                     placeholderDict[role].append(counterPlaceholder)
             self.counterImagePlaceholders.append(placeholderDict)
 
@@ -334,21 +267,15 @@ class ui:
 
     def createNonHeroButtons(self):
         self.extendedLimitsButton = Button(master=self.inputFrame, text="Extended Limits", name="extendedLimitsButton")
-        # // self.extendedLimitsButton.place(x=5, y=UI.LAYOUT.INPUT_FRAME_HEIGHT / 2, anchor=W)
         self.extendedLimitsButton.pack(side="left", padx=5)
         self.extendedLimitsButton.bind("<Button>", self.mouseButton)
 
         self.aiActiveButton = Button(master=self.inputFrame, text="AI Recognition", name="aiActiveButton")
-        # // self.aiActiveButton.place(x=UI.LAYOUT.WINDOW_WIDTH - 5, y=UI.LAYOUT.INPUT_FRAME_HEIGHT / 2, anchor=E)
         self.aiActiveButton.pack(side="right", padx=5)
         self.aiActiveButton.bind("<Button>", self.mouseButton)
 
     def createHeroButtons(self, role: ROLE, parentFrame: Frame):
         buttons = []
-        # self.tankPortraitList = [
-            # portraits.HERO_4x4[heroId]
-            # for heroId in HERO_IDS[ROLE.TANK]
-        # ]
 
         for heroId in HERO_IDS[role]:
             button = HeroButton(
@@ -1011,7 +938,7 @@ class ui:
 
 
     # * Getters
-    def getHeroImage(self, heroId, backgroundColor, inactive):
+    def getHeroImage(self, heroId: str, backgroundColor: str, inactive: bool):
         cacheKey = (heroId, backgroundColor, inactive)
 
         if cacheKey not in self.heroImageCache:

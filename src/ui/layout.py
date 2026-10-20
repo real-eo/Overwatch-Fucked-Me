@@ -116,8 +116,8 @@ def _allLayouts(A: tuple[int, int, int]):
 def calculateOptimalHeroLayout(
     availableWidth: int, 
     availableHeight: int, 
-    screenWidth: int, 
-    screenHeight: int, 
+    adjustedScreenWidth: int, 
+    adjustedScreenHeight: int, 
     A: tuple[int, int, int] = HERO_COUNTS.values()
 ) -> HeroLayout:
     """
@@ -252,8 +252,6 @@ class Layout:
     def tankFrameWidth(self) -> int: return self.__heroLayout.widths[ROLE.TANK] * LAYOUT.HERO_BUTTON_SIZE
     @property
     def dpsFrameWidth(self) -> int: return self.__heroLayout.widths[ROLE.DPS] * LAYOUT.HERO_BUTTON_SIZE
-    # // @property
-    # // def supportFrameWidth(self) -> int: return self.__heroLayout.widths[ROLE.SUPPORT] * LAYOUT.HERO_BUTTON_SIZE
     @property
     def roleFramesHeight(self) -> int: return self.__heroLayout.rows * LAYOUT.HERO_BUTTON_SIZE
 
@@ -262,8 +260,6 @@ class Layout:
     def tankFrameX(self) -> int: return 0 + LAYOUT.WINDOW_PADDING
     @property
     def dpsFrameX(self) -> int: return self.tankFrameX + self.tankFrameWidth + LAYOUT.ROLE_FRAME_SEPERATOR_PADDING
-    # // @property
-    # // def supportFrameX(self) -> int: return self.dpsFrameX + self.dpsFrameWidth + LAYOUT.ROLE_FRAME_SEPERATOR_PADDING
     @property
     def roleFramesY(self) -> int: return self.__geometry.height - self.roleFramesHeight
 

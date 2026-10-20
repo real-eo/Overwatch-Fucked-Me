@@ -23,11 +23,6 @@ class ROLE(IntEnum):
     SUPPORT = 2
     ALL = 3
 
-# // ROLE_TANK = "tank";         
-# // ROLE_DPS = "dps";           
-# // ROLE_SUPPORT = "support";   
-# // ROLE_ALL = "all"; 
-  
 
 MAX_SLOTS_TANK = 1                                          # TODO: This implementation has to be reworked once we implement 6v6
 MAX_SLOTS_DPS = 2                                           # TODO: This implementation has to be reworked once we implement 6v6
