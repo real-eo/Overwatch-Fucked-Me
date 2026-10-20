@@ -6,8 +6,8 @@ import typing
 import sys
 
 # Same level imports
-try:                from constants.common       import ROLE, HERO_COUNTS
-except ImportError: from src.constants.common   import ROLE, HERO_COUNTS
+try:                from constants.common       import ROLE, HERO_COUNTS, TOTAL_SLOTS_ALL
+except ImportError: from src.constants.common   import ROLE, HERO_COUNTS, TOTAL_SLOTS_ALL
 
 try:                from constants.ui           import LAYOUT
 except ImportError: from src.constants.ui       import LAYOUT
@@ -273,17 +273,15 @@ class Layout:
     @property
     def inputFrameY(self) -> int: return self.roleIconY - LAYOUT.SMALL_PADDING - LAYOUT.INPUT_FRAME_HEIGHT
 
-    # Rectangles
+    # Extras
     @property
-    def roleFrameRects(self) -> tuple[Rect, Rect, Rect]:
+    def roleFrameRectangles(self) -> tuple[Rect, Rect, Rect]:
         rectangles = []
+
         x = LAYOUT.WINDOW_PADDING
         y = self.roleFramesY
 
-        for width, height in zip(
-            self.heroLayout.widths,
-            self.heroLayout.heights,
-        ):
+        for width, height in zip(self.heroLayout.widths, self.heroLayout.heights):
             pixelWidth = width * LAYOUT.HERO_BUTTON_SIZE
             pixelHeight = height * LAYOUT.HERO_BUTTON_SIZE
 
@@ -299,6 +297,10 @@ class Layout:
             x += pixelWidth + LAYOUT.ROLE_FRAME_SEPERATOR_PADDING
 
         return tuple(rectangles)
+    
+    @property
+    def recommendedHeroFrameWidth(self) -> int: 
+        return (self.__geometry.width - (TOTAL_SLOTS_ALL - 1) * LAYOUT.SELECTED_HERO_COUNTERS_PADDING) / TOTAL_SLOTS_ALL
 
 
     # * Setters

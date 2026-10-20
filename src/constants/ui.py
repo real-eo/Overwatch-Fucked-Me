@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from typing import ClassVar
 
 # Same level imports
-try:                from common                 import ROLE
-except ImportError: from src.constants.common   import ROLE 
+try:                from common                 import ROLE, ROLE_COUNT, TOTAL_SLOTS_ALL
+except ImportError: from src.constants.common   import ROLE, ROLE_COUNT, TOTAL_SLOTS_ALL
 
 
 
@@ -18,6 +18,7 @@ class LAYOUT:
     # Padding
     SMALL_PADDING: int = 2
     ROLE_FRAME_SEPERATOR_PADDING: int = 5
+    SELECTED_HERO_COUNTERS_PADDING: int = 5
     WINDOW_PADDING: int = 10
     
     # Sizes
@@ -55,8 +56,9 @@ class LAYOUT:
     # }
 
     # Selected hero & counters layout
-    SELECTED_HERO_HEIGHT: int = 83                                           
-    COUNTERS_AREA_HEIGHT: int = 125
+    SELECTED_HERO_HEIGHT: int = 83
+    COUNTER_CELL_HEIGHT: int = 42                                                   # ? Actual HERO_6x6 image height                                        
+    COUNTERS_AREA_HEIGHT: int = COUNTER_CELL_HEIGHT * ROLE_COUNT
 
     MAX_COUNTERS_PER_ROLE: int = 7                                                  # TODO: Update this so we can support more counters, and
                                                                                     #     : implement a solution which allows for infinite 

@@ -254,7 +254,7 @@ class ui:
             )
 
             # // heroPlaceholder.place(x=0, y=0)
-            selectedHeroPlaceholder.grid(row=0, column=0, sticky="nsew")
+            selectedHeroPlaceholder.grid(row=0, column=0, sticky="nw")
 
             # // self.heroImagePlaceholders.append(heroPlaceholder)
             self.heroImagePlaceholders.append(selectedHeroPlaceholder)
@@ -263,6 +263,7 @@ class ui:
             # Counters slots frame
             countersFrame = Frame(slotFrame, bg=UI.STYLE.BACKGROUND, name=f"countersFrame{slotIndex}")
             countersFrame.grid(row=1, column=0, sticky="nsew")
+            countersFrame.grid_propagate(False)
  
             # Hero's counters labels
             placeholderDict: dict[ROLE, list[Label]] = {}
@@ -287,7 +288,7 @@ class ui:
                     # // )
                     counterPlaceholder = CounterLabel(
                         countersFrame,
-                        image=portraits.HERO_3x3["blank"],
+                        image=portraits.HERO_6x6["blank"],
                         bg=UI.STYLE.Label.Counter.BACKGROUND,
                         name=(
                             f"placeholder@{slotIndex}-"
@@ -374,7 +375,7 @@ class ui:
     # Placement
     def reorganizeInterface(self) -> None:
         # Role frames
-        for frame, rect in zip(self.__roleFrames, self.layout.roleFrameRects):          # ? `self.__roleFrames` is defined in `self.createFrames()` 
+        for frame, rect in zip(self.__roleFrames, self.layout.roleFrameRectangles):          # ? `self.__roleFrames` is defined in `self.createFrames()` 
             frame.place_configure(
                 x=rect.x,
                 y=rect.y,
@@ -399,7 +400,7 @@ class ui:
         )
 
         # Role icons
-        for iconLabel, rect in zip(self.roleIconLabels, self.layout.roleFrameRects):
+        for iconLabel, rect in zip(self.roleIconLabels, self.layout.roleFrameRectangles):
             iconLabel.place_configure(
                 x=(UI.LAYOUT.ROLE_ICON_X_OFFSET + (rect.x - UI.LAYOUT.WINDOW_PADDING)),
                 y=UI.LAYOUT.ROLE_ICON_Y_OFFSET
@@ -408,9 +409,9 @@ class ui:
         # Recommended hero & counters' frames
         for index, frame in enumerate(self.recommendedHeroFrameList):
             frame.place_configure(
-                x=self.layout.geometry.width / TOTAL_SLOTS_ALL * index,
+                x=(index * (self.layout.recommendedHeroFrameWidth + UI.LAYOUT.SELECTED_HERO_COUNTERS_PADDING)),
                 y=0,
-                width=(self.layout.geometry.width - 2*UI.LAYOUT.WINDOW_PADDING)/TOTAL_SLOTS_ALL,
+                width=self.layout.recommendedHeroFrameWidth,
                 height=UI.LAYOUT.SELECTED_HERO_HEIGHT + UI.LAYOUT.COUNTERS_AREA_HEIGHT,
             )
 
