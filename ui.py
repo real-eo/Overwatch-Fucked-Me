@@ -319,7 +319,7 @@ class ui:
             self.counterImagePlaceholders.append(placeholderDict)
 
         # Role icons
-        self.roleIconList = [PhotoImage(file=resource_path("res", "icons", "role", f"{i}Icon.png")).subsample(4, 4) for i in HERO_ROLES]
+        self.roleIconList = [PhotoImage(file=resource_path("res", "icons", "role", f"{role.name.lower()}Icon.png")).subsample(4, 4) for role in HERO_ROLES]
 
         for column, role in enumerate(HERO_ROLES):
             self.roleInfoFrame.grid_columnconfigure(column, weight=1)
