@@ -11,7 +11,7 @@ except ImportError: from src.extract.resolve        import Path, shortcut
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path: sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.constants import HERO_IDS, ROLE_ALL, ROLE_TANK, ROLE_DPS, ROLE_SUPPORT, ROLES
+from src.constants import HERO_IDS, ROLE
 from src.parse.translate import heroID
 
 
@@ -78,14 +78,14 @@ if not confirmation.lower() in ["y", "yes"]:
     exit() 
 
 # Create the portrait directories if they don't exist
-for role in ROLES + [ROLE_ALL]:
-    (PORTRAIT_DIRECTORY / role).mkdir(parents=True, exist_ok=True)
+for role in ROLE:
+    (PORTRAIT_DIRECTORY / role.name.lower()).mkdir(parents=True, exist_ok=True)
 
 # Copy the images into the app directory
-for image in SAVE_DIRECTORY_3D.iterdir():       shutil.copy2(image, PORTRAIT_DIRECTORY / ROLE_ALL / image.name)
-for tank in HERO_IDS[ROLE_TANK]:                shutil.copy2(SAVE_DIRECTORY_3D / f"{tank}.png", PORTRAIT_DIRECTORY / ROLE_TANK / f"{tank}.png")
-for dps in HERO_IDS[ROLE_DPS]:                  shutil.copy2(SAVE_DIRECTORY_3D / f"{dps}.png", PORTRAIT_DIRECTORY / ROLE_DPS / f"{dps}.png")
-for support in HERO_IDS[ROLE_SUPPORT]:          shutil.copy2(SAVE_DIRECTORY_3D / f"{support}.png", PORTRAIT_DIRECTORY / ROLE_SUPPORT / f"{support}.png")
+for image in SAVE_DIRECTORY_3D.iterdir():       shutil.copy2(image, PORTRAIT_DIRECTORY / ROLE.ALL.name.lower() / image.name)
+for tank in HERO_IDS[ROLE.TANK]:                shutil.copy2(SAVE_DIRECTORY_3D / f"{tank}.png", PORTRAIT_DIRECTORY / ROLE.TANK.name.lower() / f"{tank}.png")
+for dps in HERO_IDS[ROLE.DPS]:                  shutil.copy2(SAVE_DIRECTORY_3D / f"{dps}.png", PORTRAIT_DIRECTORY / ROLE.DPS.name.lower() / f"{dps}.png")
+for support in HERO_IDS[ROLE.SUPPORT]:          shutil.copy2(SAVE_DIRECTORY_3D / f"{support}.png", PORTRAIT_DIRECTORY / ROLE.SUPPORT.name.lower() / f"{support}.png")
 
 
 # Log completion

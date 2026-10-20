@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from typing import ClassVar
 
 # Same level imports
-try:                from common                 import ROLE_TANK, ROLE_DPS, ROLE_SUPPORT
-except ImportError: from src.constants.common   import ROLE_TANK, ROLE_DPS, ROLE_SUPPORT 
+try:                from common                 import ROLE
+except ImportError: from src.constants.common   import ROLE 
 
 
 
@@ -33,7 +33,7 @@ class LAYOUT:
 
     # GRID: dict[str, dict[int, int]] = {                                             # Number of buttons in each row
     #     # Tank
-    #     ROLE_TANK: {                                                               
+    #     ROLE.TANK: {                                                               
     #         0: 3,                                                                       
     #         1: 3,
     #         2: 3,
@@ -42,7 +42,7 @@ class LAYOUT:
     #     },
     # 
     #     # DPS
-    #     ROLE_DPS: {                                                                  
+    #     ROLE.DPS: {                                                                  
     #         0: 5,                                                                       
     #         1: 5,
     #         2: 5,
@@ -51,7 +51,7 @@ class LAYOUT:
     #     },
     # 
     #     # Support
-    #     ROLE_SUPPORT: {
+    #     ROLE.SUPPORT: {
     #         0: 4,                                                                       
     #         1: 4,
     #         2: 4,
@@ -91,14 +91,14 @@ class LAYOUT:
 
     # ! HANDLED BY src.layout.Layout() class
     # // Role button rows
-    # TANK_BUTTON_ROWS: int = len(GRID[ROLE_TANK])
-    # DPS_BUTTON_ROWS: int = len(GRID[ROLE_DPS])
-    # SUPPORT_BUTTON_ROWS: int = len(GRID[ROLE_SUPPORT])
+    # TANK_BUTTON_ROWS: int = len(GRID[ROLE.TANK])
+    # DPS_BUTTON_ROWS: int = len(GRID[ROLE.DPS])
+    # SUPPORT_BUTTON_ROWS: int = len(GRID[ROLE.SUPPORT])
 
     # Role button columns
-    # TANK_BUTTON_COLUMNS: int = max(GRID[ROLE_TANK].values())
-    # DPS_BUTTON_COLUMNS: int = max(GRID[ROLE_DPS].values())
-    # SUPPORT_BUTTON_COLUMNS: int = max(GRID[ROLE_SUPPORT].values())
+    # TANK_BUTTON_COLUMNS: int = max(GRID[ROLE.TANK].values())
+    # DPS_BUTTON_COLUMNS: int = max(GRID[ROLE.DPS].values())
+    # SUPPORT_BUTTON_COLUMNS: int = max(GRID[ROLE.SUPPORT].values())
 
     # ! HANDLED BY src.layout.Layout() class
     # // Max button rows

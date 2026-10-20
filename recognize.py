@@ -1,6 +1,6 @@
 from src.constants.model import MODEL, MODEL_IDS, MODEL_LABELS, SPECIAL_CLASSES, EXPECTED_ROLE_ORDER
+from src.constants import TOTAL_SLOTS_ALL, HERO_ROLE_MAP
 from src.resources.manager import writable_path
-from src.constants import TOTAL_SLOTS_ALL, HERO_ROLES
 from PIL import Image, ImageGrab, ImageOps
 
 import numpy as np
@@ -151,7 +151,7 @@ def recognize(extendedLimits: bool) -> tuple[tuple[str, float]]:
                     selectedIndex = int(candidateIndex)
                     break
 
-                if HERO_ROLES.get(candidateHeroId) != EXPECTED_ROLE_ORDER[enemyIndex]:
+                if HERO_ROLE_MAP.get(candidateHeroId) != EXPECTED_ROLE_ORDER[enemyIndex]:
                     continue
 
                 if candidateHeroId in chosenHeroes:

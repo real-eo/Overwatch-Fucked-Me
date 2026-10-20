@@ -7,8 +7,8 @@ import typing
 import sys
 
 # Same level imports
-try:                from constants.common       import HERO_COUNTS
-except ImportError: from src.constants.common   import HERO_COUNTS
+try:                from constants.common       import ROLE, HERO_COUNTS
+except ImportError: from src.constants.common   import ROLE, HERO_COUNTS
 
 try:                from constants.ui           import LAYOUT
 except ImportError: from src.constants.ui       import LAYOUT
@@ -56,6 +56,14 @@ class HeroLayout:
     widths: tuple[int, int, int]
     heights: tuple[int, int, int]
     pixels: tuple[int, int]
+
+
+@dataclass(frozen=True, slots=True)
+class Rect:
+    x: int
+    y: int
+    width: int
+    height: int
 
 
 RequiresResizing = bool
@@ -336,7 +344,7 @@ class Layout:
 
         Steps:
         1. Calculate the hero layout budget using the fixed sized UI elements, and finding the optimal hero layout   
-        2. Calculate the non-const non-hero grid UI elements' sides based on the hero grid
+        2. Calculate the non-const non-hero layout UI elements' sides based on the hero layout
         3. Recalculate and update the window geometry to reflect the new layout size
 
         NOTE: The caller is responsible for actually resizing the window and flexing the UI elements!
@@ -353,7 +361,7 @@ class Layout:
         # Calculate the hero layout budget using the fixed sized UI elements, and finding the optimal hero layout
         self.__updateHeroLayout(windowWidth, windowHeight)
 
-        # Calculate the non-hero grid, non-const, UI elements based on the hero grid
+        # Calculate the non-hero layout, non-const, UI elements based on the hero layout
         # TODO: Implement
 
         # Update the window geometry
@@ -363,15 +371,84 @@ class Layout:
 
 
     # * Getters
+    # Actual attributes
     @property
     def screen(self) -> Resolution: return self.__screen
     @property
     def geometry(self) -> WindowGeometry: return self.__geometry
+    @property
+    def heroLayout(self) -> HeroLayout: return self.__heroLayout
     
     @property
     def activeResizeJob(self) -> typing.Optional[str]: return self.__activeResizeJob
     @property
     def isWindowResizing(self) -> bool: return self.__isWindowResizing
+
+    # TODO: See which of these are still needed, and which can be discarded
+    # ? Derived attributes
+    # Frame dimensions
+    @property
+    def tankFrameWidth(self) -> int: return self.__heroLayout.widths[ROLE.TANK] * LAYOUT.HERO_BUTTON_SIZE
+    @property
+    def dpsFrameWidth(self) -> int: return self.__heroLayout.widths[ROLE.DPS] * LAYOUT.HERO_BUTTON_SIZE
+    # // @property
+    # // def supportFrameWidth(self) -> int: return self.__heroLayout.widths[ROLE.SUPPORT] * LAYOUT.HERO_BUTTON_SIZE
+    @property
+    def roleFramesHeight(self) -> int: return self.__heroLayout.rows * LAYOUT.HERO_BUTTON_SIZE
+
+    # Positions
+    @property
+    def tankFrameX(self) -> int: return 0 + LAYOUT.WINDOW_PADDING
+    @property
+    def dpsFrameX(self) -> int: return self.tankFrameX + self.tankFrameWidth + LAYOUT.ROLE_FRAME_SEPERATOR_PADDING
+    # // @property
+    # // def supportFrameX(self) -> int: return self.dpsFrameX + self.dpsFrameWidth + LAYOUT.ROLE_FRAME_SEPERATOR_PADDING
+    @property
+    def roleFramesY(self) -> int: return self.__geometry.height - self.roleFramesHeight
+
+    # Switch- & icon positions
+    @property
+    def roleIconY(self) -> int: return self.roleFramesY - LAYOUT.ROLE_ICON_FRAME_HEIGHT
+    # // @property
+    # // def inputFrameY(self) -> int: return self.roleIconY - LAYOUT.SMALL_PADDING - LAYOUT.INPUT_FRAME_HEIGHT
+
+    # Rectangles
+    @property
+    def roleFrameRects(self) -> tuple[Rect, Rect, Rect]:
+        rectangles = []
+
+        if self.heroLayout.mode == "landscape":
+            x = LAYOUT.WINDOW_PADDING
+            y = self.roleFramesY
+
+            for width in self.heroLayout.widths:
+                pixelWidth = width * LAYOUT.HERO_BUTTON_SIZE
+                rectangles.append(
+                    Rect(
+                        x=x,
+                        y=y,
+                        width=pixelWidth,
+                        height=self.heroLayout.heights[0] * LAYOUT.HERO_BUTTON_SIZE,
+                    )
+                )
+                x += pixelWidth + LAYOUT.ROLE_FRAME_SEPERATOR_PADDING
+
+        else:
+            y = self.roleFramesY
+
+            for height in self.heroLayout.heights:
+                pixelHeight = height * LAYOUT.HERO_BUTTON_SIZE
+                rectangles.append(
+                    Rect(
+                        x=LAYOUT.WINDOW_PADDING,
+                        y=y,
+                        width=self.heroLayout.widths[0] * LAYOUT.HERO_BUTTON_SIZE,
+                        height=pixelHeight,
+                    )
+                )
+                y += pixelHeight + LAYOUT.ROLE_FRAME_SEPERATOR_PADDING
+
+        return tuple(rectangles)
 
 
     # * Setters

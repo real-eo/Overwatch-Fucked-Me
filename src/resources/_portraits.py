@@ -11,7 +11,7 @@ except ImportError: from src.resources.manager      import resource_path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path: sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.constants import ALL_HERO_IDS, ROLE_ALL
+from src.constants import ALL_HERO_IDS, ROLE
 
 
 # ? We need to keep a reference to the portraits we set on the
@@ -23,7 +23,7 @@ HERO_3x3 = {
         file=resource_path(
             "res", 
             "portraits", 
-            "" if hero == "blank" else ROLE_ALL, 
+            "" if hero == "blank" else ROLE.ALL.name.lower(), 
             f"{hero}.png"
         )
     ).subsample(3, 3)
@@ -35,7 +35,7 @@ HERO_4x4 = {
         file=resource_path(
             "res", 
             "portraits", 
-            "" if hero == "blank" else ROLE_ALL, 
+            "" if hero == "blank" else ROLE.ALL.name.lower(), 
             f"{hero}.png"
         )
     ).subsample(4, 4)
@@ -47,7 +47,7 @@ HERO_6x6 = {
         file=resource_path(
             "res", 
             "portraits", 
-            "" if hero == "blank" else ROLE_ALL, 
+            "" if hero == "blank" else ROLE.ALL.name.lower(), 
             f"{hero}.png"
         )
     ).subsample(6, 6)

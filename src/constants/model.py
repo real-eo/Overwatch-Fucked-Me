@@ -8,8 +8,8 @@ import sys
 numpy.set_printoptions(suppress=True)
 
 # Same level imports
-try:                from common                 import ROLE_TANK, ROLE_DPS, ROLE_SUPPORT, ALL_HERO_IDS
-except ImportError: from src.constants.common   import ROLE_TANK, ROLE_DPS, ROLE_SUPPORT, ALL_HERO_IDS
+try:                from common                 import ROLE, ALL_HERO_IDS
+except ImportError: from src.constants.common   import ROLE, ALL_HERO_IDS
 
 try:                from parse.translate        import heroID
 except ImportError: from src.parse.translate    import heroID
@@ -46,10 +46,10 @@ MODEL_LABELS = tuple(                                                           
 # * Enemy leaderboard order
 ASSUME_REGULAR_ENEMY_ORDER = True
 EXPECTED_ROLE_ORDER = (
-    ROLE_TANK,
-    ROLE_DPS,
-    ROLE_DPS,
-    ROLE_SUPPORT,
-    ROLE_SUPPORT,
+    ROLE.TANK,
+    ROLE.DPS,
+    ROLE.DPS,
+    ROLE.SUPPORT,
+    ROLE.SUPPORT,
 )
 
