@@ -1,6 +1,6 @@
 from src.constants.model import MODEL, MODEL_IDS, MODEL_LABELS, SPECIAL_CLASSES, EXPECTED_ROLE_ORDER
+from src.constants import TOTAL_SLOTS_ALL, HERO_ROLE_MAP
 from src.resources.manager import writable_path
-from src.constants import TOTAL_SLOTS_ALL, HERO_ROLES
 from PIL import Image, ImageGrab, ImageOps
 
 import numpy as np
@@ -98,7 +98,6 @@ def capture_image(persistPortraits: bool = False):
 
 
     # * 3) Grab screenshot based on the number of upgrades and team size
-    # // region = (310, 610, 1160, 920)
     region = (leaderboardX1, 595, 1100, 925)
     enemyLeaderboardImage = ImageGrab.grab(region)    
 
@@ -109,7 +108,7 @@ def capture_image(persistPortraits: bool = False):
     
 
     # * 4) Split image into one image per enemy and save them
-    # Character image size is: 64x64
+    # Hero image size is: 64x64
     # Role icon image size is: 27x64
     # Border size is: 2x2
     _crop_image(enemyLeaderboardImage, 93, 64, randomName=persistPortraits)
@@ -151,7 +150,7 @@ def recognize(extendedLimits: bool) -> tuple[tuple[str, float]]:
                     selectedIndex = int(candidateIndex)
                     break
 
-                if HERO_ROLES.get(candidateHeroId) != EXPECTED_ROLE_ORDER[enemyIndex]:
+                if HERO_ROLE_MAP.get(candidateHeroId) != EXPECTED_ROLE_ORDER[enemyIndex]:
                     continue
 
                 if candidateHeroId in chosenHeroes:

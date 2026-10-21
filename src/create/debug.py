@@ -12,7 +12,7 @@ import os
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path: sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.constants import HERO_ROLES, ROLE_DPS, ROLE_SUPPORT, ROLE_TANK
+from src.constants import HERO_ROLE_MAP, ROLE
 import jsonData
 import json
 
@@ -22,10 +22,10 @@ matrix = []
 
 # Display the amount of counters for each hero based on roles
 for heroID, heroCounters in jsonData.counters.items():
-    counterRolesCounter = {ROLE_TANK: 0, ROLE_DPS: 0, ROLE_SUPPORT: 0}
+    counterRolesCounter = {ROLE.TANK: 0, ROLE.DPS: 0, ROLE.SUPPORT: 0}
 
     for counterID, data in heroCounters.items():
-        counterRole = HERO_ROLES[counterID]
+        counterRole = HERO_ROLE_MAP[counterID]
         counterRolesCounter[counterRole] += 1
 
     print(f"{heroID}:", end=" ")
