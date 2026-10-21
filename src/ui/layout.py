@@ -121,32 +121,46 @@ def calculateOptimalHeroLayout(
     A: tuple[int, int, int] = HERO_COUNTS.values()
 ) -> HeroLayout:
     """
-    Pick the tightest-packing layout for a dragged window size.
+    Pick the hero layout whose tile grid best matches the window size the user dragged to.
 
-    All pixel arguments are for the tiling area only (gaps/UI already
-    subtracted; add them back when sizing the real window).
+    All pixel arguments describe the *tiling area only*: the fixed non-hero UI
+    (`LAYOUT.NON_HERO_BUTTON_WIDTH`/`LAYOUT.NON_HERO_BUTTON_HEIGHT`) must already
+    be subtracted from the window/screen dimensions by the caller.
 
     Parameters
     ----------
-    availableWidth, availableHeight : int   Tiling area the user dragged to, in px.
-    screenWidth, screenHeight : int Largest tiling area the screen allows, in px.
-    A : tuple[int, int, int] | None
-        Icons per group (tank, damage, support). Defaults to HERO_COUNTS.
+    availableWidth, availableHeight : int
+        Tiling area the user dragged to, in px.
+    adjustedScreenWidth, adjustedScreenHeight : int
+        Largest tiling area the screen allows, in px
+        (screen size minus `NON_HERO_BUTTON_WIDTH`/`NON_HERO_BUTTON_HEIGHT`).
+    A : tuple[int, int, int]
+        Icons per group (tank, dps, support). Defaults to `HERO_COUNTS`.
 
     Returns
     -------
-    HeroLayout: mode ("landscape" or "portrait"), columns, rows, widths, heights, pixels (width, height of the exact-fit window).
+    HeroLayout
+        columns, rows, per-group widths/heights, and `pixels`: the exact-fit
+        tiling size `(columns * HERO_BUTTON_SIZE, rows * HERO_BUTTON_SIZE)`.
 
-    Rule
-    ----
-    1. Landscape first. Sort layouts by (tiles to grow, window area,
-       closeness to 11:5) and take the best. Layouts that fit the dragged
-       size cost no growth, so among those the smallest area (tightest
-       packing) wins.
-    2. If that overruns the screen, take the best portrait layout that
-       fits the screen (same sort, ratio target 5:11).
-    3. If no portrait layout fits either, keep the landscape one.
-    """                                                                                 # ! <-- NEEDS REWRITE 
+    Selection
+    ---------
+    1. Every candidate layout from `_allLayouts()` is scored by
+       `(sizeError, ratioError)`:
+           `sizeError  = |columns - requestedColumns| + |rows - requestedRows|`
+           `ratioError = |columns / rows - 11:5|`
+       The lowest score wins; `sizeError` dominates, `ratioError` only breaks ties.
+       Layouts that fit the dragged size cost no `sizeError`, so among those the
+       tightest packing (smallest tile count) wins.
+    2. Screen clamp: the winner must fit inside the adjusted screen area.
+       - If it is too wide, the best layout that fits the width is chosen
+         instead, which is necessarily a taller one.
+       - If it is too tall, the best layout that fits the height is chosen
+         instead, which is necessarily a wider one.
+    3. If no candidate layout fits the screen at all (the hero grid cannot
+       get small enough), the unconstrained winner from step 1 is returned
+       as-is, as if the screen check did not exist.
+    """
     requestedColumns = max(1, availableWidth // LAYOUT.HERO_BUTTON_SIZE)                # whole tiles the drag gives us
     requestedRows = max(1, availableHeight // LAYOUT.HERO_BUTTON_SIZE)
     layouts = _allLayouts(A)
@@ -156,10 +170,36 @@ def calculateOptimalHeroLayout(
         ratioError = abs((layout["columns"] / layout["rows"]) - LAYOUT.Default.ASPECT_RATIO)
         return sizeError, ratioError
 
+    def pixels(layout) -> tuple[int, int]:
+        return (
+            layout["columns"] * LAYOUT.HERO_BUTTON_SIZE,
+            layout["rows"] * LAYOUT.HERO_BUTTON_SIZE,
+        )
+
     best = min(layouts, key=key)
-    return HeroLayout(
-        **best, 
-        pixels=(best["columns"] * LAYOUT.HERO_BUTTON_SIZE, best["rows"] * LAYOUT.HERO_BUTTON_SIZE))
+
+    # ? Screen clamp: only kick in when the unconstrained winner overflows the screen
+    maxWidth  = adjustedScreenWidth  - LAYOUT.NON_HERO_BUTTON_WIDTH
+    maxHeight = adjustedScreenHeight - LAYOUT.NON_HERO_BUTTON_HEIGHT
+
+    if pixels(best)[LAYOUT.X] <= maxWidth and pixels(best)[LAYOUT.Y] <= maxHeight:
+        return HeroLayout(**best, pixels=pixels(best))
+
+    # ? Winner overflows: prefer the best layout that actually fits the screen.
+    # ?   Constraining by width forces a taller layout; constraining by height
+    # ?   forces a wider one. The `key` naturally picks the closest fit.
+    fitting = [
+        layout for layout in layouts
+        if pixels(layout)[LAYOUT.X] <= maxWidth and pixels(layout)[LAYOUT.Y] <= maxHeight
+    ]
+
+    # ? Nothing fits: the entire hero layout is bigger than the screen.
+    # ?   Fall back to the unconstrained winner.
+    if not fitting:
+        return HeroLayout(**best, pixels=pixels(best))
+
+    clamped = min(fitting, key=key)
+    return HeroLayout(**clamped, pixels=pixels(clamped))
 
 
 # * Layout class
@@ -193,10 +233,10 @@ class Layout:
         Calculate the hero layout
         """
         self.__heroLayout = calculateOptimalHeroLayout(
-            availableWidth = windowWidth - LAYOUT.NON_HERO_BUTTON_WIDTH,
-            availableHeight= windowHeight - LAYOUT.NON_HERO_BUTTON_HEIGHT,
-            screenWidth = self.__screen.width,
-            screenHeight= self.__screen.height
+            availableWidth = windowWidth  - LAYOUT.NON_HERO_BUTTON_WIDTH,               # TODO: Maybe move these 
+            availableHeight= windowHeight - LAYOUT.NON_HERO_BUTTON_HEIGHT,              #     : subtractions
+            adjustedScreenWidth = self.__screen.width  - LAYOUT.NON_HERO_BUTTON_WIDTH,  #     : inside the function
+            adjustedScreenHeight= self.__screen.height - LAYOUT.NON_HERO_BUTTON_HEIGHT  #     : to prevent bugs...
         )
 
     # * Calculation
