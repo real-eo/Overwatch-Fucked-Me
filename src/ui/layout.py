@@ -68,7 +68,8 @@ RequiresResizing = bool
 
 # * Layout calculation functions
 def minColumnsForRows(rows: int, A: tuple[int, int, int] = HERO_COUNTS.values()):
-    """Smallest layout in which every group is at most `rows` rows tall.
+    """
+    Smallest layout in which every group is at most `rows` rows tall.
 
     A group with n icons and width `w` needs `ceil(n / w)` rows, so it fits
     in `rows` rows exactly when `w >= ceil(n / rows)`. Using that minimum width for
@@ -86,16 +87,33 @@ def minColumnsForRows(rows: int, A: tuple[int, int, int] = HERO_COUNTS.values())
 
 
 def _allLayouts(A: tuple[int, int, int]):
-    """Every exact-fit layout for icon counts `A`, in both orientations.
+    """
+    Generate the candidate hero layouts for icon counts `A`.
 
-    landscape: groups side by side; one layout per row count `rows`, from
-               `minColumnsForRows(rows)`. Its box is (sum of widths, tallest group).
-    portrait:  groups stacked, each as wide as the window; one layout per
-               width `C`, with `rows = sum(ceil(n / C))`.
+    Produces one layout per possible row count, from 1 row up to `max(A)`
+    rows (the tallest possible single-group stack). For each row count,
+    `minColumnsForRows()` computes the narrowest layout in which every
+    group fits within that many rows: each group gets the minimum width
+    `ceil(n / rows)`, so the total column count is as small as possible
+    while the tallest group's height stays <= `rows`.
 
-    A layout is dropped if another layout of the same mode is no wider
-    and no taller (it can never be the better choice).
-    """                                                                                 # ! <-- NEEDS REWRITE 
+    Results are deduplicated by their `(columns, rows)` box: when two row
+    counts produce the same box (e.g. a group rounds up and comes out
+    shorter than requested), only the first is kept.
+
+    Returns
+    -------
+    list[dict]
+        One dict per candidate layout with keys:
+        - "columns": total columns across all groups (sum of widths)
+        - "rows":    height of the tallest group
+        - "widths":  per-group column counts, tuple[int, int, int]
+        - "heights": per-group row counts, tuple[int, int, int]
+
+        The list is ordered by increasing row count, which is also
+        (approximately) increasing width - the property that gives window
+        snapping its monotonic behavior.
+    """
     found = {}
 
     for rows in range(1, max(A) + 1):
