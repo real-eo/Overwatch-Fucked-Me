@@ -116,8 +116,8 @@ def _allLayouts(A: tuple[int, int, int]):
 def calculateOptimalHeroLayout(
     availableWidth: int, 
     availableHeight: int, 
-    adjustedScreenWidth: int, 
-    adjustedScreenHeight: int, 
+    screenWidth: int, 
+    screenHeight: int, 
     A: tuple[int, int, int] = HERO_COUNTS.values()
 ) -> HeroLayout:
     """
@@ -131,9 +131,10 @@ def calculateOptimalHeroLayout(
     ----------
     availableWidth, availableHeight : int
         Tiling area the user dragged to, in px.
-    adjustedScreenWidth, adjustedScreenHeight : int
-        Largest tiling area the screen allows, in px
-        (screen size minus `NON_HERO_BUTTON_WIDTH`/`NON_HERO_BUTTON_HEIGHT`).
+    screenWidth, screenHeight : int
+        Current monitor resolution. Used to calculate Largest tiling area 
+        the screen allows, in px (screen size minus `NON_HERO_BUTTON_WIDTH`
+        /`NON_HERO_BUTTON_HEIGHT`).
     A : tuple[int, int, int]
         Icons per group (tank, dps, support). Defaults to `HERO_COUNTS`.
 
@@ -161,7 +162,7 @@ def calculateOptimalHeroLayout(
        get small enough), the unconstrained winner from step 1 is returned
        as-is, as if the screen check did not exist.
     """
-    requestedColumns = max(1, availableWidth // LAYOUT.HERO_BUTTON_SIZE)                # whole tiles the drag gives us
+    requestedColumns = max(1, availableWidth // LAYOUT.HERO_BUTTON_SIZE)
     requestedRows = max(1, availableHeight // LAYOUT.HERO_BUTTON_SIZE)
     layouts = _allLayouts(A)
 
@@ -179,11 +180,11 @@ def calculateOptimalHeroLayout(
     best = min(layouts, key=key)
 
     # ? Screen clamp: only kick in when the unconstrained winner overflows the screen
-    maxWidth  = adjustedScreenWidth  - LAYOUT.NON_HERO_BUTTON_WIDTH
-    maxHeight = adjustedScreenHeight - LAYOUT.NON_HERO_BUTTON_HEIGHT
+    maxWidth  = screenWidth  - LAYOUT.NON_HERO_BUTTON_WIDTH
+    maxHeight = screenHeight - LAYOUT.NON_HERO_BUTTON_HEIGHT
 
     if pixels(best)[LAYOUT.X] <= maxWidth and pixels(best)[LAYOUT.Y] <= maxHeight:
-        return HeroLayout(**best, pixels=pixels(best))
+         return HeroLayout(**best, pixels=pixels(best))
 
     # ? Winner overflows: prefer the best layout that actually fits the screen.
     # ?   Constraining by width forces a taller layout; constraining by height
@@ -233,10 +234,10 @@ class Layout:
         Calculate the hero layout
         """
         self.__heroLayout = calculateOptimalHeroLayout(
-            availableWidth = windowWidth  - LAYOUT.NON_HERO_BUTTON_WIDTH,               # TODO: Maybe move these 
-            availableHeight= windowHeight - LAYOUT.NON_HERO_BUTTON_HEIGHT,              #     : subtractions
-            adjustedScreenWidth = self.__screen.width  - LAYOUT.NON_HERO_BUTTON_WIDTH,  #     : inside the function
-            adjustedScreenHeight= self.__screen.height - LAYOUT.NON_HERO_BUTTON_HEIGHT  #     : to prevent bugs...
+            availableWidth = windowWidth  - LAYOUT.NON_HERO_BUTTON_WIDTH,               # TODO: Maybe move these subtractions inside
+            availableHeight= windowHeight - LAYOUT.NON_HERO_BUTTON_HEIGHT,              #     : the function to prevent bugs...
+            screenWidth = self.__screen.width,
+            screenHeight= self.__screen.height
         )
 
     # * Calculation
@@ -246,8 +247,7 @@ class Layout:
 
         Steps:
         1. Calculate the hero layout budget using the fixed sized UI elements, and finding the optimal hero layout   
-        2. Calculate the non-const non-hero layout UI elements' sides based on the hero layout
-        3. Recalculate and update the window geometry to reflect the new layout size
+        2. Recalculate and update the window geometry to reflect the new layout size
 
         NOTE: The caller is responsible for actually resizing the window and flexing the UI elements!
 
@@ -262,9 +262,6 @@ class Layout:
 
         # Calculate the hero layout budget using the fixed sized UI elements, and finding the optimal hero layout
         self.__updateHeroLayout(windowWidth, windowHeight)
-
-        # Calculate the non-hero layout, non-const, UI elements based on the hero layout
-        # TODO: Implement
 
         # Update the window geometry
         self.__updateGeometry()
