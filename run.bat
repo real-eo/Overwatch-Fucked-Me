@@ -35,6 +35,9 @@ exit /b 0
 :dev
 echo Running in Python development mode...
 python main.py
+echo.
+echo Run finished.
+pause
 goto :done
 
 
@@ -45,9 +48,6 @@ goto :done
 
 
 :done
-echo.
-echo Run finished.
-pause
 exit /b 0
 
 

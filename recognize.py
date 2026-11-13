@@ -74,7 +74,7 @@ def _determine_leaderboard_x1() -> int:
 
 
 # * Public functions
-def capture_image(persistPortraits: bool = False):
+def capture_image(persistPortraitsDebug: bool = False):
     """
     Captures the enemy leaderboard in game
 
@@ -111,7 +111,7 @@ def capture_image(persistPortraits: bool = False):
     # Hero image size is: 64x64
     # Role icon image size is: 27x64
     # Border size is: 2x2
-    _crop_image(enemyLeaderboardImage, 93, 64, randomName=persistPortraits)
+    _crop_image(enemyLeaderboardImage, 93, 64, randomName=persistPortraitsDebug)
 
 
     # * 5) Save full leaderboard
@@ -120,7 +120,7 @@ def capture_image(persistPortraits: bool = False):
     return 0
  
  
-def recognize(extendedLimits: bool) -> tuple[tuple[str, float]]:
+def recognize(extendedLimits: bool, saveCapturedPortraits: bool = False) -> tuple[tuple[str, float]]:
     data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
     size = (224, 224)
 
@@ -128,8 +128,8 @@ def recognize(extendedLimits: bool) -> tuple[tuple[str, float]]:
     chosenHeroes = set()
 
     for enemyIndex in range(TOTAL_SLOTS_ALL):
-        image = Image.open(writable_path("out", "state", f"e{enemyIndex}.png")).convert('RGB')
-        image = ImageOps.fit(image, size, Image.Resampling.LANCZOS)
+        sourceImage = Image.open(writable_path("out", "state", f"e{enemyIndex}.png")).convert('RGB')
+        image = ImageOps.fit(sourceImage, size, Image.Resampling.LANCZOS)
 
         imageArray = np.asarray(image)
 
@@ -169,6 +169,12 @@ def recognize(extendedLimits: bool) -> tuple[tuple[str, float]]:
         print("[§] Confidence score:", confidenceScore)
 
         classesReturned.append((recognizedHeroId, confidenceScore))
+
+        if saveCapturedPortraits:
+            recognizedImageDirectory = writable_path("out", "recognized", recognizedHeroId)
+            os.makedirs(recognizedImageDirectory, exist_ok=True)
+            
+            sourceImage.save(os.path.join(recognizedImageDirectory, str(random.random())[2:] + ".png"))
     
     return tuple(classesReturned)
 

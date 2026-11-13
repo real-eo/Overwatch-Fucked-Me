@@ -479,7 +479,10 @@ class ui:
                 self.selectedHeroes = []
 
                 recognize.capture_image()
-                returnedClasses = recognize.recognize(extendedLimits=self.extendedLimits)
+                returnedClasses = recognize.recognize(
+                    extendedLimits=self.extendedLimits,
+                    saveCapturedPortraits=self.config.getboolean("output","saveCapturedPortraits")
+                )
 
                 for cls in returnedClasses:
                     recognizedHeroId, confidenceScore = cls
@@ -512,12 +515,12 @@ class ui:
             for key, value in self.config.items("keybinds", raw=True):
                 print(f"[¤]     {key}: {value}")
 
-        def savePortraits():
+        def savePortraitsDebug():
             # | Debug only function
             # Used when collecting images for portrait dataset
             if not DEBUG:   return 
 
-            recognize.capture_image(persistPortraits=True)
+            recognize.capture_image(persistPortraitsDebug=True)
 
 
         # Set up hotkeys
@@ -525,7 +528,7 @@ class ui:
                 self.config.get("keybinds", "capture"): startRecognition,
                 self.config.get("keybinds", "debug"): triggerDebug,
                 # | DISABLE THIS AS THIS IS DEBUG ONLY
-                # // "<ctrl>+s": savePortraits
+                # // "<ctrl>+s": savePortraitsDebug
         })
 
 
